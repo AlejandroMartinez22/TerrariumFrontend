@@ -1,0 +1,11 @@
+dependencies {
+  // Import the Firebase BoM
+  implementation platform('com.google.firebase:firebase-bom:33.11.0')
+  implementation "com.google.android.gms:play-services-auth:20.7.0"
+  implementation 'com.mapbox.maps:android-sdk:10.10.0'
+
+
+  // TODO: Add the dependencies for Firebase products you want to use
+  // When using the BoM, don't specify versions in Firebase dependencies
+  // https://firebase.google.com/docs/android/setup#available-libraries
+}

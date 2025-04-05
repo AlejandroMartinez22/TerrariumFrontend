@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "370711724259",
+    "project_id": "pruebaintegrador-33c81",
+    "storage_bucket": "pruebaintegrador-33c81.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:370711724259:android:d0bd05e908769cb29785d6",
+        "android_client_info": {
+          "package_name": "com.pruebaproyecto.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "370711724259-k38j90oglk8altg1qk97j3v0809dgsu5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pruebaproyecto.app",
+            "certificate_hash": "09868b95a3f201ebac1738b4e11282325ef49d4d"
+          }
+        },
+        {
+          "client_id": "370711724259-brvr2g40hg0kkndlb9tc9v1pdc0ujd0q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGUXGR7rMLHfnkakk9HR3oLzP7IG8zRIs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "370711724259-brvr2g40hg0kkndlb9tc9v1pdc0ujd0q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

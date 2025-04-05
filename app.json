@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "pru0eba-proyecto-app",
+    "slug": "prueba-proyecto-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "platforms": [
+      "android",
+      "web"
+    ],
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "android": {
+      "package": "com.pruebaproyecto.app",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsImpl": "mapbox",
+          "mapboxAccessToken": "pk.eyJ1IjoiZWR3aW5ndXRpZXJyZXoxMiIsImEiOiJjbTh6NmpvcXYwOG1uMmtxMHhpcWZpam03In0.D0coEozsNWTqOzGyDcmzHg"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "fb6356a0-2eaf-48ce-a819-49dfd6cea78c"
+      }
+    },
+    "owner": "edwingutierrez1"
+  }
+}
