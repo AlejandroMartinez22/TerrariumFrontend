@@ -78,6 +78,7 @@ export default function LoginScreen({ navigation }) {
 
         <View style={styles.logoContainer}>
           <Image source={LogoTerrarium} style={styles.logo} />
+          <Text style={styles.subtitulo}>Una herramienta del IDEAM</Text>
         </View>
       </View>
     </ImageBackground>
@@ -146,6 +147,12 @@ const styles = StyleSheet.create({
     width: 150,
     height: 50,
     resizeMode: "contain",
+  },
+
+  subtitulo:{
+    marginTop: 0,
+    color:'white',
+    fontSize:10,
   },
 
   messageContainer: {

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons'; //Importamos Iconos de Expo.
+
 import {
   View,
   Text,
@@ -6,6 +8,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  ImageBackground
 } from 'react-native';
 import { getInfoBrigada } from '../supabase/getInfoBrigadista';
 import { handleSignOut } from '../backend/signOut';
@@ -30,16 +33,16 @@ export default function WelcomeScreen({ navigation }) {
     };
 
     fetchBrigadaInfo();
-
-    const timer = setTimeout(() => {
-      navigation.replace('Home'); // replace evita que el usuario vuelva con el botón "atrás"
-    }, 5000);
-
-
-
   }, []);
 
   return (
+
+    <ImageBackground
+    source={require('../assets/FondoWelcome.png')}
+    style={styles.background}
+    resizeMode="cover"
+    imageStyle={{ opacity: 0.3}}>
+
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>
@@ -67,7 +70,7 @@ export default function WelcomeScreen({ navigation }) {
             <View style={styles.infoBlock}>
               <Image
                 source={require('../assets/IconoRol.png')}
-                style={styles.icon}
+                style={[styles.icon, styles.secondIcon]}
               />
               <Text style={styles.infoText}>
                 Rol: {brigadaInfo.rol}
@@ -87,8 +90,18 @@ export default function WelcomeScreen({ navigation }) {
         ) : (
           <Text style={styles.infoText}>No se encontró información del brigadista</Text>
         )}
+
       </View> 
+
+      <TouchableOpacity style={styles.continueButton} onPress={() => navigation.navigate('Home')}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.continueButtonText}>Continuar</Text>
+          <Ionicons name="arrow-forward" size={20} color="white" style={styles.iconoFlecha} />
+        </View>
+      </TouchableOpacity>
+
     </View>
+    </ImageBackground>
   );
 }
 
@@ -100,11 +113,12 @@ const styles = StyleSheet.create({
 
   header: {
     alignItems: 'center',
-    marginTop: 40,
+    marginTop: 60,
+    marginBottom: 20
   },
 
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
   },
 
@@ -117,12 +131,12 @@ const styles = StyleSheet.create({
 
   infoBlock: {
     alignItems: 'center',
-    marginVertical: 20
+    marginVertical: 10
   },
 
   icon: {
-    width: 150,
-    height: 150,
+    width: 130,
+    height: 130,
     marginBottom: 1,
     resizeMode: 'contain'
   },
@@ -130,6 +144,11 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 18,
     textAlign: 'center',
+    fontWeight: 'bold',
+  },
+
+  secondIcon: {
+    marginBottom: 10
   },
   
   errorText: {
@@ -143,13 +162,24 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 40,               // margen más pequeño desde abajo
     alignSelf: 'center',     // centra horizontalmente
-    backgroundColor: '#547A2E',
-    padding: 12,
+    backgroundColor: '#186A3B',
+    padding: 15,
     borderRadius: 8,
+    flexDirection: 'row',      // 🔹 Alínea hijos en fila
+    alignItems: 'center',      // 🔹 Centra verticalmente
+    gap: 8,      
+    elevation: 4,
   },
   
   continueButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    
   },
 });

@@ -20,11 +20,13 @@ export default function App() {
             component={LoginScreen} 
             options={{ headerShown: false }}
           />
+          
           <Stack.Screen 
             name="Welcome" 
             component={WelcomeScreen} 
             options={{ headerShown: false }}
           />
+
           <Stack.Screen
             name="Home"
             component={HomeScreen}
