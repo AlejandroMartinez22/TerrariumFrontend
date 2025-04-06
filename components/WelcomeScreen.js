@@ -165,8 +165,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#186A3B',
     padding: 15,
     borderRadius: 8,
-    flexDirection: 'row',      // 🔹 Alínea hijos en fila
-    alignItems: 'center',      // 🔹 Centra verticalmente
+    flexDirection: 'row',      //  Alínea hijos en fila
+    alignItems: 'center',      //  Centra verticalmente
     gap: 8,      
     elevation: 4,
   },
@@ -179,7 +179,10 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     width: '100%',
-    height: '100%',
-    
+    height: '100%', 
   },
+
+  iconoFlecha: {
+    marginLeft: 8
+  }
 });
