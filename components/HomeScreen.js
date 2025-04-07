@@ -5,7 +5,9 @@ export default function HomeScreen({navigation}) {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.button}><Image style={styles.image} source={require("../assets/IconoAnadir.png")}/></TouchableOpacity>
-      <TouchableOpacity style={styles.button}><Image style={styles.image} source={require("../assets/IconoMapa.png")} /></TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Map")}>
+        <Image style={styles.image} source={require("../assets/IconoMapa.png")} />
+        </TouchableOpacity>
       <TouchableOpacity style={styles.button}><Image style={styles.image} source={require("../assets/IconoReporte.png")}/></TouchableOpacity>
     </View>
   );

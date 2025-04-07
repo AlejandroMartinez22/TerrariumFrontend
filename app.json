@@ -22,20 +22,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAa1S21sXoPIOSnv1YSHgHT8RjLxiBj7fM"
+        }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      [
-        "@rnmapbox/maps",
-        {
-          "RNMapboxMapsImpl": "mapbox",
-          "mapboxAccessToken": "pk.eyJ1IjoiZWR3aW5ndXRpZXJyZXoxMiIsImEiOiJjbTh6NmpvcXYwOG1uMmtxMHhpcWZpam03In0.D0coEozsNWTqOzGyDcmzHg"
-        }
-      ]
-    ],
     "extra": {
       "eas": {
         "projectId": "fb6356a0-2eaf-48ce-a819-49dfd6cea78c"
