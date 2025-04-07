@@ -47,7 +47,8 @@ export const useLogin = (navigation) => {
           const nombre = await getUserNameByUID(uid);
           if (nombre) {
             setUserName(nombre);
-            navigation.replace("Welcome");
+            navigation.replace("Map");
+            navigation.navigate("Profile");
           } else {
             showMessage("Advertencia", "No se encontró el nombre del usuario", "error");
           }
