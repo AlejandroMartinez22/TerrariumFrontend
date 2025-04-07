@@ -1,5 +1,5 @@
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { Platform } from "react-native"; // ✅ ESTA LÍNEA FALTABA
+import { Platform } from "react-native"; 
 import { auth } from "../config/firebaseConfig";
 
 export const login = async (email, password) => {

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Ionicons } from '@expo/vector-icons'; //Importamos Iconos de Expo.
+import React, { useState, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons"; //Importamos Iconos de Expo.
 
 import {
   View,
@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
-  ImageBackground
-} from 'react-native';
-import { getInfoBrigada } from '../supabase/getInfoBrigadista';
-import { handleSignOut } from './signOut';
+  ImageBackground,
+} from "react-native";
+import { getInfoBrigada } from "../supabase/getInfoBrigadista";
+import { handleSignOut } from "../hooks/signOut";
 
 export default function WelcomeScreen({ navigation }) {
   const [brigadaInfo, setBrigadaInfo] = useState(null);
@@ -36,78 +36,79 @@ export default function WelcomeScreen({ navigation }) {
   }, []);
 
   return (
-
     <ImageBackground
-    source={require('../assets/FondoWelcome.png')}
-    style={styles.background}
-    resizeMode="cover"
-    imageStyle={{ opacity: 0.3}}>
+      source={require("../assets/FondoWelcome.png")}
+      style={styles.background}
+      resizeMode="cover"
+      imageStyle={{ opacity: 0.3 }}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>
+            {brigadaInfo
+              ? `¡Sesión iniciada como ${brigadaInfo.nombre}!`
+              : "¡Bienvenido a Terrarium!"}
+          </Text>
+        </View>
 
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>
-          {brigadaInfo ? `¡Bienvenido ${brigadaInfo.nombre}!` : '¡Bienvenido a Terrarium!'}
-        </Text>
+        <View style={styles.body}>
+          {loading ? (
+            <ActivityIndicator size="large" color="#4F7029" />
+          ) : error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : brigadaInfo ? (
+            <>
+              <View style={styles.infoBlock}>
+                <Image
+                  source={require("../assets/IconoBrigada.png")}
+                  style={styles.icon}
+                />
+                <Text style={styles.infoText}>
+                  Brigada asignada: #{brigadaInfo.brigada}
+                </Text>
+              </View>
+
+              <View style={styles.infoBlock}>
+                <Image
+                  source={require("../assets/IconoRol.png")}
+                  style={[styles.icon, styles.secondIcon]}
+                />
+                <Text style={styles.infoText}>Rol: {brigadaInfo.rol}</Text>
+              </View>
+
+              <View style={styles.infoBlock}>
+                <Image
+                  source={require("../assets/IconoConglomerado.png")}
+                  style={styles.icon}
+                />
+                <Text style={styles.infoText}>
+                  Conglomerado asignado:{" "}
+                  {brigadaInfo.idConglomerado || "No asignado"}
+                </Text>
+              </View>
+            </>
+          ) : (
+            <Text style={styles.infoText}>
+              No se encontró información del brigadista
+            </Text>
+          )}
+        </View>
+
+        <TouchableOpacity
+          style={styles.signOutButton}
+          onPress={() => handleSignOut(navigation)}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={styles.signOutButtonText}>Cerrar sesión</Text>
+            <Ionicons
+              name="log-out-outline"
+              size={20}
+              color="white"
+              style={styles.iconoSalir}
+            />
+          </View>
+        </TouchableOpacity>
       </View>
-    
-      <View style={styles.body}>
-        {loading ? (
-          <ActivityIndicator size="large" color="#4F7029" />
-        ) : error ? (
-          <Text style={styles.errorText}>{error}</Text>
-        ) : brigadaInfo ? (
-          <>
-            <View style={styles.infoBlock}>
-              <Image
-                source={require('../assets/IconoBrigada.png')}
-                style={styles.icon}
-              />
-              <Text style={styles.infoText}>
-                Brigada asignada: #{brigadaInfo.brigada}
-              </Text>
-            </View>
-
-            <View style={styles.infoBlock}>
-              <Image
-                source={require('../assets/IconoRol.png')}
-                style={[styles.icon, styles.secondIcon]}
-              />
-              <Text style={styles.infoText}>
-                Rol: {brigadaInfo.rol}
-              </Text>
-            </View>
-
-            <View style={styles.infoBlock}>
-              <Image
-                source={require('../assets/IconoConglomerado.png')}
-                style={styles.icon}
-              />
-              <Text style={styles.infoText}>
-                Conglomerado asignado: {brigadaInfo.idConglomerado || 'No asignado'}
-              </Text>
-            </View>
-          </>
-        ) : (
-          <Text style={styles.infoText}>No se encontró información del brigadista</Text>
-        )}
-
-      </View> 
-
-      <TouchableOpacity style={styles.continueButton} onPress={() => navigation.navigate('Home')}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.continueButtonText}>Continuar</Text>
-          <Ionicons name="arrow-forward" size={20} color="white" style={styles.iconoFlecha} />
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.signOutButton} onPress={() => handleSignOut(navigation)}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.signOutButtonText}>Cerrar sesión</Text>
-          <Ionicons name="arrow-forward" size={20} color="white" style={styles.iconoFlecha} />
-        </View>
-      </TouchableOpacity>
-
-    </View>
     </ImageBackground>
   );
 }
@@ -119,95 +120,81 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 60,
-    marginBottom: 20
+    marginBottom: 5,
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginLeft: 30,
+    marginRight: 30,
   },
 
   body: {
-    marginTop:5,
+    marginTop: 5,
     paddingTop: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   infoBlock: {
-    alignItems: 'center',
-    marginVertical: 10
+    alignItems: "center",
+    marginVertical: 18,
   },
 
   icon: {
-    width: 130,
-    height: 130,
-    marginBottom: 1,
-    resizeMode: 'contain'
+    width: 115,
+    height: 115,
+    marginBottom: 5,
+    resizeMode: "contain",
   },
 
   infoText: {
     fontSize: 18,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    textAlign: "center",
+    fontWeight: "bold",
   },
 
   secondIcon: {
-    marginBottom: 10
+    marginBottom: 10,
   },
-  
+
   errorText: {
-    color: 'red',
+    color: "red",
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginVertical: 20,
   },
 
-  continueButton: {
-    position: 'absolute',
-    bottom: 40,               // margen más pequeño desde abajo
-    right:30,     // centra horizontalmente
-    backgroundColor: '#186A3B',
-    padding: 15,
-    borderRadius: 8,
-    flexDirection: 'row',      //  Alínea hijos en fila
-    alignItems: 'center',      //  Centra verticalmente
-    gap: 8,      
-    elevation: 4,
-  },
-  
-  continueButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-
   signOutButton: {
-    position: 'absolute',
-    bottom: 40,               // margen más pequeño desde abajo
-    left: 30,     // centra horizontalmente
-    backgroundColor: '#D50030',
-    padding: 15,
+    position: "absolute",
+    alignSelf: "center",
+    bottom: 40, // margen más pequeño desde abajo
+    backgroundColor: "#AB0808",
+    padding: 12,
     borderRadius: 8,
-    flexDirection: 'row',      //  Alínea hijos en fila
-    alignItems: 'center',      //  Centra verticalmente
-    gap: 8,      
+    flexDirection: "row", //  Alínea hijos en fila
+    alignItems: "center", //  Centra verticalmente
+    gap: 8,
     elevation: 4,
   },
 
   signOutButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 14,
   },
 
   background: {
     flex: 1,
-    width: '100%',
-    height: '100%', 
+    width: "100%",
+    height: "100%",
   },
 
-  iconoFlecha: {
-    marginLeft: 8
+  iconoSalir: {
+    marginLeft: 8,
   }
 });

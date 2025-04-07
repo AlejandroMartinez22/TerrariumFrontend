@@ -1,5 +1,5 @@
 import supabase from "./supabaseClient";
-import { getCurrentUserUid } from "../backend/currentUser";
+import { getCurrentUserUid } from "../hooks/currentUser";
 
 export const getInfoBrigada = async () => {
     const uid = getCurrentUserUid();
@@ -11,7 +11,7 @@ export const getInfoBrigada = async () => {
         // Consulta la tabla "Brigadista"
         const { data, error } = await supabase
           .from("Brigadista")
-          .select("nombre, idBrigada, rol, cedula")
+          .select("nombre, id_brigada, rol, cedula")
           .eq("UID", uid);
   
         if (error) {
@@ -25,13 +25,15 @@ export const getInfoBrigada = async () => {
         }
   
         const brigadista = data[0];
+        console.log("Buscando brigada con ID:", brigadista.id_brigada);
         
+
         // Consulta a la tabla Brigada para obtener el idConglomerado
         // Utilizamos el id de la tabla Brigada que está almacenado como idBrigada en Brigadista
         const { data: brigadaData, error: brigadaError } = await supabase
           .from("Brigada")
-          .select("idConglomerado")
-          .eq("id", brigadista.idBrigada)
+          .select("id_conglomerado")
+          .eq("id", brigadista.id_brigada)
           .single();
         
         if (brigadaError) {
@@ -41,10 +43,10 @@ export const getInfoBrigada = async () => {
         
         return {
           nombre: brigadista.nombre,
-          brigada: brigadista.idBrigada,
+          brigada: brigadista.id_brigada,
           rol: brigadista.rol,
           cedula: brigadista.cedula,
-          idConglomerado: brigadaData.idConglomerado
+          idConglomerado: brigadaData.id_conglomerado
         };
       } catch (err) {
         console.error("Error inesperado en getInfoBrigada:", err);

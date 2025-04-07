@@ -7,11 +7,13 @@ import {
   Text,
   Image,
   ActivityIndicator,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 
 import LogoTerrarium from "../assets/LogoTerrarium.png";
-import { useLogin } from "./useLogin";
+import { useLogin } from "../hooks/useLogin";
+import { Ionicons } from '@expo/vector-icons';
+import {useState} from "react";
 
 export default function LoginScreen({ navigation }) {
   const {
@@ -26,6 +28,7 @@ export default function LoginScreen({ navigation }) {
     handleLogin,
   } = useLogin(navigation);
 
+  const [secureText, setSecureText] = useState(true); //Para que el usuario pueda visualizar la contraseña.
   return (
     <ImageBackground
       source={require("../assets/FondoLogin.jpg")}
@@ -56,14 +59,19 @@ export default function LoginScreen({ navigation }) {
             keyboardType="email-address"
             autoCapitalize="none"
           />
+          <View style={styles.passwordContainer}>
           <TextInput
             placeholder="Contraseña"
-            secureTextEntry
-            style={styles.input}
+            secureTextEntry={secureText}
+            style={styles.passwordInput}
             placeholderTextColor="gray"
             value={password}
             onChangeText={setPassword}
           />
+          <TouchableOpacity onPress={() => setSecureText(!secureText)} style={styles.eyeIcon}> 
+            <Ionicons Ionicons name={secureText ? "eye-off" : "eye"} size={22} color="gray" />
+          </TouchableOpacity>
+          </View>
 
           {loading ? (
             <ActivityIndicator size="small" color="#ffffff" />
@@ -126,8 +134,32 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 5,
     opacity: 1,
+    fontSize: 14,
+    color: 'black'
   },
 
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 5,
+    marginBottom: 20,
+    opacity: 1,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+  },
+  
+  passwordInput: {
+    padding:10,
+    flex: 1,
+    fontSize: 14,
+    color: 'black',
+  },
+  
+  eyeIcon: {
+    padding: 8,
+  },
+  
   welcomeText: {
     color: "white",
     fontSize: 24,
