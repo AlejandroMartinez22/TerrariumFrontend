@@ -11,7 +11,7 @@ import {
   ImageBackground
 } from 'react-native';
 import { getInfoBrigada } from '../supabase/getInfoBrigadista';
-import { handleSignOut } from '../backend/signOut';
+import { handleSignOut } from './signOut';
 
 export default function WelcomeScreen({ navigation }) {
   const [brigadaInfo, setBrigadaInfo] = useState(null);
@@ -100,6 +100,13 @@ export default function WelcomeScreen({ navigation }) {
         </View>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.signOutButton} onPress={() => handleSignOut(navigation)}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.signOutButtonText}>Cerrar sesión</Text>
+          <Ionicons name="arrow-forward" size={20} color="white" style={styles.iconoFlecha} />
+        </View>
+      </TouchableOpacity>
+
     </View>
     </ImageBackground>
   );
@@ -161,7 +168,7 @@ const styles = StyleSheet.create({
   continueButton: {
     position: 'absolute',
     bottom: 40,               // margen más pequeño desde abajo
-    alignSelf: 'center',     // centra horizontalmente
+    right:30,     // centra horizontalmente
     backgroundColor: '#186A3B',
     padding: 15,
     borderRadius: 8,
@@ -172,6 +179,24 @@ const styles = StyleSheet.create({
   },
   
   continueButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+
+  signOutButton: {
+    position: 'absolute',
+    bottom: 40,               // margen más pequeño desde abajo
+    left: 30,     // centra horizontalmente
+    backgroundColor: '#D50030',
+    padding: 15,
+    borderRadius: 8,
+    flexDirection: 'row',      //  Alínea hijos en fila
+    alignItems: 'center',      //  Centra verticalmente
+    gap: 8,      
+    elevation: 4,
+  },
+
+  signOutButtonText: {
     color: 'white',
     fontWeight: 'bold',
   },

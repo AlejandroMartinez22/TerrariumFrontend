@@ -10,9 +10,8 @@ import {
   TouchableOpacity
 } from "react-native";
 
-import Icon from 'react-native-vector-icons/FontAwesome';
 import LogoTerrarium from "../assets/LogoTerrarium.png";
-import { useLogin } from "../backend/useLogin";
+import { useLogin } from "./useLogin";
 
 export default function LoginScreen({ navigation }) {
   const {
