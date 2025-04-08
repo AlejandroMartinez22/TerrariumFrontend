@@ -1,21 +1,25 @@
 {
   "expo": {
-    "name": "pru0eba-proyecto-app",
-    "slug": "prueba-proyecto-app",
+    "name": "Terrarium",
+    "slug": "terarrium-app ",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/IconoAppTerrarium.jpg",
+
     "platforms": [
       "android",
       "web"
     ],
+
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
+    
     "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
+      "image": "./assets/IconoIdeam.png",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
+
     "android": {
       "package": "com.pruebaproyecto.app",
       "googleServicesFile": "./google-services.json",
@@ -23,6 +27,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
       "config": {
         "googleMaps": {
@@ -30,8 +35,9 @@
         }
       }
     },
+
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/IconoWebTerrarium.png"
     },
     "extra": {
       "eas": {
