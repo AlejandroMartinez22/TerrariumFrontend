@@ -1,14 +1,18 @@
-import React from "react";
+import React,{useState} from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Image, View, TouchableWithoutFeedback } from "react-native";
+import { Image, View, TouchableWithoutFeedback} from "react-native";
 
 import MapScreen from "./mapScreen";
 import AddScreen from "./addScreen";
+import ViewScreen from "./viewScreen";
 
 const Tab = createBottomTabNavigator();
 
+
 export default function NavigationTabs() {
+
 return (
+    <> 
     <Tab.Navigator
     screenOptions={({ route }) => ({
         headerShown: false,
@@ -18,8 +22,8 @@ return (
         backgroundColor: "#1E5A26",
         paddingTop: 10,
         paddingBottom: 10,
-        borderTopWidth: 4,
         height: 70,
+        borderTopWidth: 0,         
         },
 
         tabBarButton: (props) => (
@@ -43,6 +47,10 @@ return (
             iconSource = focused
             ? require("../assets/IconoAddActivo.png")
             : require("../assets/IconoAdd.png");
+        } else if (route.name === "View") {
+            iconSource = focused
+            ? require("../assets/IconoVerActivo.png")
+            : require("../assets/IconoVer.png"); 
         }
 
         return (
@@ -60,6 +68,9 @@ return (
     >
     <Tab.Screen name="Map" component={MapScreen} />
     <Tab.Screen name="Add" component={AddScreen} />
+    <Tab.Screen name="View" component={ViewScreen} />
+
     </Tab.Navigator>
+    </>
 );
 }

@@ -12,13 +12,6 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View>
-        <Text
-          style={ styles.header }
-        >
-          Conglomerado
-        </Text>
-      </View>
       <View style={styles.mapContainer}>
         <MapView
           provider={PROVIDER_GOOGLE} // Usa Google Maps como proveedor
@@ -46,13 +39,6 @@ export default function MapScreen() {
           />
         </MapView>
       </View>
-
-      <TouchableOpacity style={styles.button}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.buttonText}>Continuar</Text>
-          <Ionicons name="arrow-forward" size={20} color="white" style={styles.iconoFlecha} />
-        </View>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -74,8 +60,6 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     flex: 1,
-    margin: 10,
-    borderRadius: 15,
     overflow: "hidden",
     elevation: 5,
     backgroundColor: "#fff",
@@ -83,24 +67,5 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "100%",
-  },
-  button: {
-    position: 'absolute',
-    bottom: 40,               // margen más pequeño desde abajo
-    alignSelf: 'center',     // centra horizontalmente
-    backgroundColor: '#186A3B',
-    padding: 15,
-    borderRadius: 8,
-    flexDirection: 'row',      //  Alínea hijos en fila
-    alignItems: 'center',      //  Centra verticalmente
-    gap: 8,      
-    elevation: 4,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  iconoFlecha: {
-    marginLeft: 8
   }
 });

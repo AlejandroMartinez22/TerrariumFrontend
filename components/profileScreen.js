@@ -12,12 +12,12 @@ ImageBackground,
 import { handleSignOut } from "../hooks/signOut";
 import {InfoBrigada} from "../hooks/InfoBrigada";
 
-export default function ProfileScreen({ navigation }) {
-  const {
+export default function ProfileScreen({ navigation  }) {
+const {
     brigadaInfo,
     loading,
     error,
-  } = InfoBrigada();
+} = InfoBrigada();
 
 return (
     <ImageBackground
@@ -28,10 +28,10 @@ return (
     >
     <View style={styles.container}>
         <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => navigation.goBack()}
+            style={styles.closeButton}
+            onPress={() => navigation.goBack()}
         >
-          <Ionicons name="close" size={35} color="#757575" />
+            <Ionicons name="close" size={35} color="#757575" />
     </TouchableOpacity>
 
         <View style={styles.header}>
