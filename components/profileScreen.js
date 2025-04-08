@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons"; //Importamos Iconos de Expo.
 
 import {
@@ -10,30 +9,15 @@ TouchableOpacity,
 Image,
 ImageBackground,
 } from "react-native";
-import { getInfoBrigada } from "../supabase/getInfoBrigadista";
 import { handleSignOut } from "../hooks/signOut";
+import {InfoBrigada} from "../hooks/InfoBrigada";
 
 export default function ProfileScreen({ navigation }) {
-const [brigadaInfo, setBrigadaInfo] = useState(null);
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState(null);
-
-useEffect(() => {
-    const fetchBrigadaInfo = async () => {
-    try {
-        setLoading(true);
-        const info = await getInfoBrigada();
-        setBrigadaInfo(info);
-    } catch (err) {
-        console.error("Error al obtener información de brigada:", err);
-        setError("No se pudo cargar la información");
-    } finally {
-        setLoading(false);
-    }
-    };
-
-    fetchBrigadaInfo();
-}, []);
+  const {
+    brigadaInfo,
+    loading,
+    error,
+  } = InfoBrigada();
 
 return (
     <ImageBackground
@@ -42,11 +26,12 @@ return (
     resizeMode="cover"
     imageStyle={{ opacity: 0.3 }}
     >
-
     <View style={styles.container}>
-
-    <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
-    <Ionicons name="close" size={35} color="#757575"/>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="close" size={35} color="#757575" />
     </TouchableOpacity>
 
         <View style={styles.header}>
