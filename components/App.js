@@ -5,7 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Importar pantallas
 import LoginScreen from './LoginScreen';
-import ProfileScreen from './ProfileScreen';
+import ProfileScreen from './profileScreen';
 import MapScreen from './mapScreen';
 
 const Stack = createStackNavigator();
