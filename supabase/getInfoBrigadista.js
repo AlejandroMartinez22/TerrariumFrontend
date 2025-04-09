@@ -1,8 +1,8 @@
 import supabase from "./supabaseClient";
 import { getCurrentUserUid } from "../hooks/currentUser";
 
-export const getInfoBrigada = async () => {
-    const uid = getCurrentUserUid();
+export const getInfoBrigadista = async () => {
+    const uid = await getCurrentUserUid();
     if (!uid) {
       console.error("No hay usuario autenticado");
       return null;
@@ -49,7 +49,7 @@ export const getInfoBrigada = async () => {
           idConglomerado: brigadaData.id_conglomerado
         };
       } catch (err) {
-        console.error("Error inesperado en getInfoBrigada:", err);
+        console.error("Error inesperado en getInfoBrigadista:", err);
         return null;
       }
     }

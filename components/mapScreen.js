@@ -1,7 +1,7 @@
 import React from "react";
-import { StyleSheet, View, SafeAreaView, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, SafeAreaView} from "react-native";
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons } from '@expo/vector-icons'; //Importamos Iconos de Expo.
+import { getCoordenadas } from "../supabase/getCoordenadas";
 
 export default function MapScreen() {
   // Coordenadas del epicentro
@@ -10,6 +10,9 @@ export default function MapScreen() {
     longitude: -73.1198, // Longitud del epicentro
   };
 
+  const coordenadas = getCoordenadas();
+
+  console.log("Coordenadas:", coordenadas); // Imprime las coordenadas obtenidas
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mapContainer}>

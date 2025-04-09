@@ -1,12 +1,15 @@
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-export function getCurrentUserUid() {
-  const auth = getAuth();
-  const user = auth.currentUser;
-
-  if (user) {
-    return user.uid; // Usuario está autenticado, devuelve el UID del usuario
-  } else {
-    return null; // No hay usuario autenticado
-  }
-}
+export const getCurrentUserUid = () => {
+  return new Promise((resolve) => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe(); // Para que solo escuche una vez
+      if (user) {
+        resolve(user.uid);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+};

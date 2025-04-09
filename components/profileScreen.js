@@ -10,14 +10,10 @@ Image,
 ImageBackground,
 } from "react-native";
 import { handleSignOut } from "../hooks/signOut";
-import {InfoBrigada} from "../hooks/InfoBrigada";
+import { useBrigadista } from "../context/BrigadistaContext";
 
 export default function ProfileScreen({ navigation  }) {
-const {
-    brigadaInfo,
-    loading,
-    error,
-} = InfoBrigada();
+    const { brigadista, loading, error, setBrigadista, setError } = useBrigadista();
 
 return (
     <ImageBackground
@@ -36,8 +32,8 @@ return (
 
         <View style={styles.header}>
         <Text style={styles.title}>
-            {brigadaInfo
-            ? `¡Sesión iniciada como ${brigadaInfo.nombre}!`
+            {brigadista
+            ? `¡Sesión iniciada como ${brigadista?.nombre}!`
             : "¡Bienvenido a Terrarium!"}
         </Text>
         </View>
@@ -47,7 +43,7 @@ return (
             <ActivityIndicator size="large" color="#4F7029" />
         ) : error ? (
             <Text style={styles.errorText}>{error}</Text>
-        ) : brigadaInfo ? (
+        ) : brigadista ? (
             <>
             <View style={styles.infoBlock}>
                 <Image
@@ -55,7 +51,7 @@ return (
                 style={styles.icon}
                 />
                 <Text style={styles.infoText}>
-                Brigada asignada: #{brigadaInfo.brigada}
+                Brigada asignada: #{brigadista?.brigada}
                 </Text>
             </View>
 
@@ -64,7 +60,7 @@ return (
                 source={require("../assets/IconoRol.png")}
                 style={[styles.icon, styles.secondIcon]}
                 />
-                <Text style={styles.infoText}>Rol: {brigadaInfo.rol}</Text>
+                <Text style={styles.infoText}>Rol: {brigadista?.rol}</Text>
             </View>
 
             <View style={styles.infoBlock}>
@@ -74,7 +70,7 @@ return (
                 />
                 <Text style={styles.infoText}>
                 Conglomerado asignado:{" "}
-                {brigadaInfo.idConglomerado || "No asignado"}
+                {brigadista?.idConglomerado || "No asignado"}
                 </Text>
             </View>
             </>
@@ -87,7 +83,7 @@ return (
 
         <TouchableOpacity
         style={styles.signOutButton}
-        onPress={() => handleSignOut(navigation)}
+        onPress={() => handleSignOut(navigation, setBrigadista, setError)} //Linea cambiada
         >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={styles.signOutButtonText}>Cerrar sesión</Text>
