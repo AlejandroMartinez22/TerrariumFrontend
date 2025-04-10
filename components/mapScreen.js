@@ -1,45 +1,78 @@
-import React from "react";
-import { StyleSheet, View, SafeAreaView} from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { StyleSheet, View, SafeAreaView } from "react-native";
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
 import { getCoordenadas } from "../supabase/getCoordenadas";
+import { useBrigadista } from "../context/BrigadistaContext";
 
 export default function MapScreen() {
-  // Coordenadas del epicentro
-  const epicenterLocation = {
-    latitude: 7.12539, // Latitud del epicentro
-    longitude: -73.1198, // Longitud del epicentro
+  const { brigadista } = useBrigadista();
+  const [coordenadas, setCoordenadas] = useState([]);
+  const mapRef = useRef(null);
+
+  const defaultCenter = {
+    latitude: 7.12539,
+    longitude: -73.1198,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
   };
 
-  const coordenadas = getCoordenadas();
+  useEffect(() => {
+    const fetchCoordenadas = async () => {
+      if (brigadista && brigadista.idConglomerado) {
+        const data = await getCoordenadas(brigadista);
+        setCoordenadas(data);
 
-  console.log("Coordenadas:", coordenadas); // Imprime las coordenadas obtenidas
+        if (data.length > 0 && mapRef.current) {
+          // Centrar el mapa para mostrar todas las coordenadas
+          mapRef.current.fitToCoordinates(
+            data.map((coord) => ({
+              latitude: coord.latitud,
+              longitude: coord.longitud,
+            })),
+            {
+              edgePadding: { top: 50, bottom: 50, left: 50, right: 50 },
+              animated: true,
+            }
+          );
+        }
+      }
+    };
+
+    fetchCoordenadas();
+  }, [brigadista]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mapContainer}>
         <MapView
-          provider={PROVIDER_GOOGLE} // Usa Google Maps como proveedor
+          ref={mapRef}
+          provider={PROVIDER_GOOGLE}
           style={styles.map}
-          mapType="satellite" // Vista satelital
-          initialRegion={{
-            ...epicenterLocation,
-            latitudeDelta: 0.0020,
-            longitudeDelta: 0.0020,
-          }}
+          mapType="satellite"
+          initialRegion={defaultCenter}
         >
-          {/* Marcador en el epicentro */}
-          <Marker
-            coordinate={epicenterLocation}
-            title="Epicentro"
-            description="Este es el centro"
-          />
-
-          {/* Círculo alrededor del epicentro */}
-          <Circle
-            center={epicenterLocation} // Centro del círculo
-            radius={100} // Radio en metros (en este caso, 1 km)
-            strokeColor="rgba(255, 0, 0, 0.8)" // Color del borde (rojo con opacidad)
-            fillColor="rgba(255, 0, 0, 0.2)" // Color de relleno (rojo semitransparente)
-          />
+          {/* Marcadores y círculos para cada coordenada */}
+          {coordenadas.map((coordenada, index) => (
+            <React.Fragment key={index}>
+              <Marker
+                coordinate={{
+                  latitude: coordenada.latitud,
+                  longitude: coordenada.longitud,
+                }}
+                title={`Subparcela ${coordenada.id_subparcela}`}
+                description={`Coordenada: (${coordenada.latitud}, ${coordenada.longitud})`}
+              />
+              <Circle
+                center={{
+                  latitude: coordenada.latitud,
+                  longitude: coordenada.longitud,
+                }}
+                radius={15} // 🔵 15 metros de radio
+                strokeColor="rgba(0, 122, 255, 0.8)"
+                fillColor="rgba(0, 122, 255, 0.3)"
+              />
+            </React.Fragment>
+          ))}
         </MapView>
       </View>
     </SafeAreaView>
@@ -47,16 +80,6 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    fontSize: 20,
-    textAlign: "center",
-    margin: 10,
-    marginTop: 60,
-    marginBottom: 0,
-    backgroundColor: "green",
-    borderRadius: 10,
-    padding: 10,
-  },
   container: {
     flex: 1,
     backgroundColor: "#E9E9E9",
@@ -70,5 +93,5 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "100%",
-  }
+  },
 });

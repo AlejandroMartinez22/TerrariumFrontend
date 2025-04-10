@@ -1,32 +1,48 @@
+// getCoordenadas.js
 import supabase from "./supabaseClient";
 
-export const getCoordenadasByConglomerado = async (conglomeradoId) => {
-  try {
-    // Consulta para obtener las coordenadas de subparcelas relacionadas con el conglomerado
-    const { data, error } = await supabase
-      .from("Coordenada")
-      .select(`
-        latitud,
-        longitud,
-        Subparcela!Coordenada_id_subparcela_fkey(id_conglomerado)
-      `) // Usa la relación con Subparcela
-      .eq("Subparcela!Coordenada_id_subparcela_fkey.id_conglomerado", conglomeradoId);
+export const getCoordenadas = async (brigadista) => {
+  if (!brigadista || !brigadista.idConglomerado) {
+    console.error("El contexto del brigadista no está definido o no tiene un idConglomerado válido.");
+    return [];
+  }
 
-    if (error) {
-      console.error("Error al obtener las coordenadas:", error);
+  try {
+    const { data: subparcelas, error: subparcelasError } = await supabase
+      .from("Subparcela")
+      .select("id")
+      .eq("id_conglomerado", brigadista.idConglomerado);
+
+    if (subparcelasError) {
+      console.error("Error al obtener subparcelas:", subparcelasError);
       return [];
     }
 
-    // Mapea las coordenadas a un array más manejable
-    const coordenadasArray = data.map((coordenada) => ({
-      latitud: coordenada.latitud,
-      longitud: coordenada.longitud,
-    }));
+    if (!subparcelas || subparcelas.length === 0) {
+      console.warn("No se encontraron subparcelas para el conglomerado:", brigadista.idConglomerado);
+      return [];
+    }
 
-    console.log("Array de coordenadas:", coordenadasArray);
-    return coordenadasArray;
+    const subparcelaIds = subparcelas.map((subparcela) => subparcela.id);
+
+    const { data: coordenadas, error: coordenadasError } = await supabase
+      .from("Coordenada")
+      .select("latitud, longitud, id_subparcela")
+      .in("id_subparcela", subparcelaIds);
+
+    if (coordenadasError) {
+      console.error("Error al obtener coordenadas:", coordenadasError);
+      return [];
+    }
+
+    if (!coordenadas || coordenadas.length === 0) {
+      console.warn("No se encontraron coordenadas para las subparcelas proporcionadas.");
+      return [];
+    }
+
+    return coordenadas;
   } catch (err) {
-    console.error("Error inesperado en getCoordenadasByConglomerado:", err);
+    console.error("Error inesperado en getCoordenadas:", err);
     return [];
   }
 };
