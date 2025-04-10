@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, View, SafeAreaView } from "react-native";
-import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { getCoordenadas } from "../supabase/getCoordenadas";
 import { useBrigadista } from "../context/BrigadistaContext";
+import { useReferenciaHandler } from "../hooks/useReferenciaHandler";
 
 export default function MapScreen() {
   const { brigadista } = useBrigadista();
   const [coordenadas, setCoordenadas] = useState([]);
   const mapRef = useRef(null);
+
+  const { puntosReferencia, handleAgregarReferencia } = useReferenciaHandler();
 
   const defaultCenter = {
     latitude: 7.12539,
@@ -23,7 +26,6 @@ export default function MapScreen() {
         setCoordenadas(data);
 
         if (data.length > 0 && mapRef.current) {
-          // Centrar el mapa para mostrar todas las coordenadas
           mapRef.current.fitToCoordinates(
             data.map((coord) => ({
               latitude: coord.latitud,
@@ -50,28 +52,57 @@ export default function MapScreen() {
           style={styles.map}
           mapType="satellite"
           initialRegion={defaultCenter}
+          onLongPress={handleAgregarReferencia}
         >
-          {/* Marcadores y círculos para cada coordenada */}
+          {/* ✅ Círculo grande que encierra todos los círculos pequeños */}
+          {coordenadas.length > 0 && (
+            <Circle
+              center={{
+                latitude: coordenadas[0].latitud,
+                longitude: coordenadas[0].longitud,
+              }}
+              radius={100} // Ajusta el tamaño según distribución
+              strokeColor="rgba(0, 122, 255, 0.8)" // Amarillo
+              fillColor="rgba(0, 122, 255, 0.2)"
+              zIndex={1}
+            />
+          )}
+
+          {/* ✅ Círculos pequeños de subparcelas */}
           {coordenadas.map((coordenada, index) => (
             <React.Fragment key={index}>
-              <Marker
-                coordinate={{
-                  latitude: coordenada.latitud,
-                  longitude: coordenada.longitud,
-                }}
-                title={`Subparcela ${coordenada.id_subparcela}`}
-                description={`Coordenada: (${coordenada.latitud}, ${coordenada.longitud})`}
-              />
+              {/* Círculo blanco central */}
               <Circle
                 center={{
                   latitude: coordenada.latitud,
                   longitude: coordenada.longitud,
                 }}
-                radius={15} // 🔵 15 metros de radio
-                strokeColor="rgba(0, 122, 255, 0.8)"
-                fillColor="rgba(0, 122, 255, 0.3)"
+                radius={1}
+                strokeColor="rgba(255, 255, 255, 0.9)"
+                fillColor="rgba(255, 255, 255, 0.5)"
+              />
+              {/* Círculo azul secundario */}
+              <Circle
+                center={{
+                  latitude: coordenada.latitud,
+                  longitude: coordenada.longitud,
+                }}
+                radius={15}
+                strokeColor="rgba(255, 10, 10, 0.8)"
+                fillColor="rgba(255, 20, 20, 0.5)"
               />
             </React.Fragment>
+          ))}
+
+          {/* ✅ Puntos de referencia agregados manualmente */}
+          {puntosReferencia.map((punto, index) => (
+            <Marker
+              key={`ref-${index}`}
+              coordinate={punto}
+              pinColor="green"
+              title={`Punto de referencia ${index + 1}`}
+              description={`Lat: ${punto.latitude.toFixed(5)}, Lng: ${punto.longitude.toFixed(5)}`}
+            />
           ))}
         </MapView>
       </View>
