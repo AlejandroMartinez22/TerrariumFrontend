@@ -62,7 +62,7 @@ export default function MapScreen() {
                 longitude: coordenadas[0].longitud,
               }}
               radius={100} // Ajusta el tamaño según distribución
-              strokeColor="rgba(0, 122, 255, 0.8)" // Amarillo
+              strokeColor="rgba(0, 122, 255, 0.8)" // Azul
               fillColor="rgba(0, 122, 255, 0.2)"
               zIndex={1}
             />
