@@ -11,7 +11,7 @@ export const getInfoBrigadista = async () => {
         // Consulta la tabla "Brigadista"
         const { data, error } = await supabase
           .from("brigadista")
-          .select("nombre, id_brigada, rol, cedula")
+          .select("nombre, id_brigada, rol, cedula, tutorial_completado")
           .eq("UID", uid);
   
         if (error) {
@@ -23,9 +23,8 @@ export const getInfoBrigadista = async () => {
           console.error("No se encontró ningún brigadista con UID:", uid);
           return null;
         }
-  
         const brigadista = data[0];
-        console.log("Buscando brigada con ID:", brigadista.id_brigada);
+        console.log("Buscando brigadista con ID:", brigadista.id_brigada);
         
 
         // Consulta a la tabla Brigada para obtener el idConglomerado
@@ -46,7 +45,8 @@ export const getInfoBrigadista = async () => {
           brigada: brigadista.id_brigada,
           rol: brigadista.rol,
           cedula: brigadista.cedula,
-          idConglomerado: brigadaData.id_conglomerado
+          idConglomerado: brigadaData.id_conglomerado,
+          tutorial_completado: brigadista.tutorial_completado
         };
       } catch (err) {
         console.error("Error inesperado en getInfoBrigadista:", err);
