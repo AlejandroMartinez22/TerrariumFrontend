@@ -1,4 +1,3 @@
-    // components/TutorialOverlay.js
     import React, { useState } from 'react';
     import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
     import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +16,8 @@
         if (step < steps.length) {
         setStep(step + 1);
         } else {
+        // Al finalizar el tutorial, llamamos a onClose
+        // que a su vez llamará a completarTutorial
         onClose();
         }
     };
@@ -26,11 +27,10 @@
         <View style={styles.popup}>
             <Text style={styles.text}>{steps[step - 1]}</Text>
             <View style={styles.buttonContainer}>
-
             <TouchableOpacity onPress={handleNext} style={styles.button}>
-            <View style={{flexDirection: "row", alignItems: "center"}}> 
+                <View style={{flexDirection: "row", alignItems: "center"}}> 
                 <Text style={styles.buttonText}>
-                {step < steps.length ? 'Siguiente' : 'Cerrar'}
+                    {step < steps.length ? 'Siguiente' : 'Cerrar'}
                 </Text>
                 <Ionicons name="arrow-forward" size={14} color="white"/>
                 </View>

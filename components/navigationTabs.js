@@ -7,7 +7,7 @@
     import AddScreen from "./addScreen";
     import ViewScreen from "./viewScreen";
 
-    import TutorialOverlay from "./tutorialOverlay"; // Asegúrate de que esta ruta esté bien
+    import TutorialOverlay from "./tutorialOverlay";
     import { useBrigadista } from "../context/BrigadistaContext";
 
     const Tab = createBottomTabNavigator();
@@ -15,22 +15,30 @@
     export default function NavigationTabs() {
     const [showTutorial, setShowTutorial] = useState(false);
     const [timerStarted, setTimerStarted] = useState(false);
-    const { brigadista } = useBrigadista();
+    const { brigadista, localTutorialCompletado, completarTutorial } = useBrigadista();
     const isFocused = useIsFocused();
 
     useEffect(() => {
+        // Verificamos si es jefe de brigada para mostrar el tutorial
         if (
         isFocused &&
         brigadista &&
-        brigadista.tutorial_completado === false &&
+        !localTutorialCompletado &&
+        brigadista.rol === "Jefe de brigada" && // Solo mostrar tutorial a jefes de brigada
         !timerStarted
         ) {
         setTimerStarted(true);
         setTimeout(() => {
             setShowTutorial(true);
-        }, 10000); // 10 segundos
+        }, 6000); // 6 segundos
         }
-    }, [isFocused, brigadista]);
+    }, [isFocused, brigadista, localTutorialCompletado]);
+
+    // Función para cerrar el tutorial y marcarlo como completado
+    const handleCloseTutorial = () => {
+        setShowTutorial(false);
+        completarTutorial();
+    };
 
     return (
         <>
@@ -45,21 +53,29 @@
                 height: 70,
                 borderTopWidth: 0,
             },
-            tabBarButton: (props) => (
-                <View style={{ flex: 1 }}>
-                <TouchableWithoutFeedback onPress={props.onPress}>
+            tabBarButton: (props) => {
+                // Los botones están deshabilitados para todos los usuarios si no han completado el tutorial
+                const isDisabled = !localTutorialCompletado && route.name !== "Map";
+                
+                return (
+                <View style={{ flex: 1, opacity: isDisabled ? 0.5 : 1 }}>
+                    <TouchableWithoutFeedback 
+                    onPress={isDisabled ? null : props.onPress} 
+                    disabled={isDisabled}
+                    >
                     <View
-                    style={{
+                        style={{
                         flex: 1,
                         alignItems: "center",
                         justifyContent: "center",
-                    }}
+                        }}
                     >
-                    {props.children}
+                        {props.children}
                     </View>
-                </TouchableWithoutFeedback>
+                    </TouchableWithoutFeedback>
                 </View>
-            ),
+                );
+            },
             tabBarIcon: ({ focused }) => {
                 let iconSource;
 
@@ -81,8 +97,8 @@
                 <Image
                     source={iconSource}
                     style={{
-                    width: 28,
-                    height: 28,
+                    width: 35,
+                    height: 35,
                     }}
                     resizeMode="contain"
                 />
@@ -95,8 +111,8 @@
             <Tab.Screen name="View" component={ViewScreen} />
         </Tab.Navigator>
 
-        {/* Mostrar el tutorial */}
-        {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
+        {/* Mostrar el tutorial solo si es jefe de brigada */}
+        {showTutorial && <TutorialOverlay onClose={handleCloseTutorial} />}
         </>
     );
     }
