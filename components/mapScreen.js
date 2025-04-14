@@ -9,7 +9,6 @@ export default function MapScreen() {
   const { brigadista } = useBrigadista();
   const [coordenadas, setCoordenadas] = useState([]);
   const mapRef = useRef(null);
-
   const { puntosReferencia, handleAgregarReferencia } = useReferenciaHandler();
 
   const defaultCenter = {
@@ -54,24 +53,21 @@ export default function MapScreen() {
           initialRegion={defaultCenter}
           onLongPress={handleAgregarReferencia}
         >
-          {/* ✅ Círculo grande que encierra todos los círculos pequeños */}
           {coordenadas.length > 0 && (
             <Circle
               center={{
                 latitude: coordenadas[0].latitud,
                 longitude: coordenadas[0].longitud,
               }}
-              radius={100} // Ajusta el tamaño según distribución
-              strokeColor="rgba(0, 122, 255, 0.8)" // Azul
+              radius={100}
+              strokeColor="rgba(0, 122, 255, 0.8)" 
               fillColor="rgba(0, 122, 255, 0.2)"
               zIndex={1}
             />
           )}
 
-          {/* ✅ Círculos pequeños de subparcelas */}
           {coordenadas.map((coordenada, index) => (
             <React.Fragment key={index}>
-              {/* Círculo blanco central */}
               <Circle
                 center={{
                   latitude: coordenada.latitud,
@@ -81,7 +77,6 @@ export default function MapScreen() {
                 strokeColor="rgba(255, 255, 255, 0.9)"
                 fillColor="rgba(255, 255, 255, 0.5)"
               />
-              {/* Círculo azul secundario */}
               <Circle
                 center={{
                   latitude: coordenada.latitud,
@@ -94,7 +89,6 @@ export default function MapScreen() {
             </React.Fragment>
           ))}
 
-          {/* ✅ Puntos de referencia agregados manualmente */}
           {puntosReferencia.map((punto, index) => (
             <Marker
               key={`ref-${index}`}

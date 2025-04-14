@@ -5,7 +5,7 @@ export const getUserNameByUID = async (id) => {
 
     // Consulta la tabla "Usuarios" para encontrar el registro con el UID especificado
       const { data, error } = await supabase
-          .from('Brigadista')
+          .from('brigadista')
       .select('nombre')
       .eq('UID', id);
 

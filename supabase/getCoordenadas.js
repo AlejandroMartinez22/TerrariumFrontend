@@ -9,8 +9,8 @@ export const getCoordenadas = async (brigadista) => {
 
   try {
     const { data: subparcelas, error: subparcelasError } = await supabase
-      .from("Subparcela")
-      .select("id")
+      .from("subparcela")
+      .select("nombre_subparcela, latitud, longitud")
       .eq("id_conglomerado", brigadista.idConglomerado);
 
     if (subparcelasError) {
@@ -23,24 +23,11 @@ export const getCoordenadas = async (brigadista) => {
       return [];
     }
 
-    const subparcelaIds = subparcelas.map((subparcela) => subparcela.id);
-
-    const { data: coordenadas, error: coordenadasError } = await supabase
-      .from("Coordenada")
-      .select("latitud, longitud, id_subparcela")
-      .in("id_subparcela", subparcelaIds);
-
-    if (coordenadasError) {
-      console.error("Error al obtener coordenadas:", coordenadasError);
-      return [];
-    }
-
-    if (!coordenadas || coordenadas.length === 0) {
-      console.warn("No se encontraron coordenadas para las subparcelas proporcionadas.");
-      return [];
-    }
-
-    return coordenadas;
+    return subparcelas.map((subparcela) => ({
+      nombre_subparcela: subparcela.nombre_subparcela,
+      latitud: parseFloat(subparcela.latitud),
+      longitud: parseFloat(subparcela.longitud),
+    }));
   } catch (err) {
     console.error("Error inesperado en getCoordenadas:", err);
     return [];

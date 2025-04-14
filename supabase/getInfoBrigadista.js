@@ -10,7 +10,7 @@ export const getInfoBrigadista = async () => {
       try {
         // Consulta la tabla "Brigadista"
         const { data, error } = await supabase
-          .from("Brigadista")
+          .from("brigadista")
           .select("nombre, id_brigada, rol, cedula")
           .eq("UID", uid);
   
@@ -31,7 +31,7 @@ export const getInfoBrigadista = async () => {
         // Consulta a la tabla Brigada para obtener el idConglomerado
         // Utilizamos el id de la tabla Brigada que está almacenado como idBrigada en Brigadista
         const { data: brigadaData, error: brigadaError } = await supabase
-          .from("Brigada")
+          .from("brigada")
           .select("id_conglomerado")
           .eq("id", brigadista.id_brigada)
           .single();
