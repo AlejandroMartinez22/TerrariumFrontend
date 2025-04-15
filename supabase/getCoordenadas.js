@@ -10,7 +10,7 @@ export const getCoordenadas = async (brigadista) => {
   try {
     const { data: subparcelas, error: subparcelasError } = await supabase
       .from("subparcela")
-      .select("nombre_subparcela, latitud, longitud")
+      .select("*")
       .eq("id_conglomerado", brigadista.idConglomerado);
 
     if (subparcelasError) {
@@ -24,6 +24,8 @@ export const getCoordenadas = async (brigadista) => {
     }
 
     return subparcelas.map((subparcela) => ({
+      id: subparcela.id,
+      id_conglomerado: subparcela.id_conglomerado,
       nombre_subparcela: subparcela.nombre_subparcela,
       latitud: parseFloat(subparcela.latitud),
       longitud: parseFloat(subparcela.longitud),
