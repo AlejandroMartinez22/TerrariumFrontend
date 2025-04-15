@@ -1,4 +1,3 @@
-// hooks/useReferenciaHandler.js
 import { useState } from "react";
 
 export const useReferenciaHandler = () => {
@@ -11,6 +10,7 @@ export const useReferenciaHandler = () => {
 
   return {
     puntosReferencia,
+    setPuntosReferencia,
     handleAgregarReferencia,
   };
 };
