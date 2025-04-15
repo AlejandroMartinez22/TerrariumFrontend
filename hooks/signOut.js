@@ -1,5 +1,4 @@
 import { getAuth, signOut } from "firebase/auth";
-import {useBrigadista} from "../context/BrigadistaContext"
 
 export const handleSignOut = async (navigation, setBrigadista, setError) => {
   const auth = getAuth();

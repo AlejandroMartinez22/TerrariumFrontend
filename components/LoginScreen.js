@@ -68,6 +68,7 @@ export default function LoginScreen({ navigation }) {
             value={password}
             onChangeText={setPassword}
           />
+          
           <TouchableOpacity onPress={() => setSecureText(!secureText)} style={styles.eyeIcon}> 
             <Ionicons Ionicons name={secureText ? "eye-off" : "eye"} size={22} color="gray" />
           </TouchableOpacity>
