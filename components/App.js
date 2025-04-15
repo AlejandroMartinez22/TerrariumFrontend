@@ -6,27 +6,30 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { BrigadistaProvider } from '../context/BrigadistaContext';
 import { SubparcelaProvider } from '../context/SubparcelaContext'; 
+import { ReferenciaProvider } from '../context/ReferenciaContext'; // Asegúrate de que la ruta sea correcta
 
 // Pantallas
 import LoginScreen from './LoginScreen';
 import ProfileScreen from './profileScreen';
 import AppNavigator from './appNavigator';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator(); 
 
 export default function App() {
   return (
     <BrigadistaProvider>
       <SubparcelaProvider> 
-        <SafeAreaProvider>
-          <NavigationContainer>
-            <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="Login" component={LoginScreen} />
-              <Stack.Screen name="Profile" component={ProfileScreen} />
-              <Stack.Screen name="Main" component={AppNavigator} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </SafeAreaProvider>
+        <ReferenciaProvider>
+          <SafeAreaProvider>
+            <NavigationContainer>
+              <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="Main" component={AppNavigator} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </SafeAreaProvider>
+        </ReferenciaProvider>
       </SubparcelaProvider>
     </BrigadistaProvider>
   );

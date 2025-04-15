@@ -52,8 +52,8 @@ const ReferenciaModal = ({
                 <TextInput
                   style={styles.coordInput}
                   value={
-                    selectedPunto?.latitude
-                      ? selectedPunto.latitude.toFixed(5).toString()
+                    selectedPunto?.coordinate?.latitude
+                      ? selectedPunto.coordinate.latitude.toFixed(5).toString()
                       : ""
                   }
                   editable={false}
@@ -64,8 +64,8 @@ const ReferenciaModal = ({
                 <TextInput
                   style={styles.coordInput}
                   value={
-                    selectedPunto?.longitude
-                      ? selectedPunto.longitude.toFixed(5).toString()
+                    selectedPunto?.coordinate?.longitude
+                      ? selectedPunto.coordinate.longitude.toFixed(5).toString()
                       : ""
                   }
                   editable={false}

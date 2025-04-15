@@ -4,7 +4,7 @@ import MapView, { Circle, PROVIDER_GOOGLE } from "react-native-maps";
 
 import { useBrigadista } from "../context/BrigadistaContext";
 import { getCoordenadas } from "../supabase/getCoordenadas";
-import { useReferenciaHandler } from "../hooks/useReferenciaHandler";
+import { useReferencia } from "../context/ReferenciaContext";
 
 import ReferenciaModal from "./puntoReferenciaModal";
 import ReferenciaMarker from "./referenciaMarker";
@@ -15,8 +15,7 @@ export default function MapScreen() {
   const [coordenadas, setCoordenadas] = useState([]);
   const mapRef = useRef(null);
 
-  const { puntosReferencia, generarReferenciaInicial, setPuntosReferencia } =
-    useReferenciaHandler();
+  const { puntosReferencia, generarReferenciaInicial, setPuntosReferencia } = useReferencia();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [trayectoModalVisible, setTrayectoModalVisible] = useState(false); // Renombrado
@@ -199,6 +198,7 @@ export default function MapScreen() {
         errorMedicion={errorMedicion}
         setErrorMedicion={setErrorMedicion}
       />
+
       <TrayectoModal
         visible={trayectoModalVisible}
         onClose={() => setTrayectoModalVisible(false)}
@@ -206,6 +206,8 @@ export default function MapScreen() {
         puntoId={puntoId}
         selectedPunto={selectedPunto}
       />
+
+      
     </SafeAreaView>
   );
 }
