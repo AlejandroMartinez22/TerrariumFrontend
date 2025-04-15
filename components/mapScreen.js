@@ -25,7 +25,6 @@ export default function MapScreen() {
   const [errorMedicion, setErrorMedicion] = useState("");
   const [puntoId, setPuntoId] = useState("");
   const [tempPuntoData, setTempPuntoData] = useState(null);
-  const [nombrePositions, setNombrePositions] = useState([]);
 
   const defaultCenter = {
     latitude: 7.12539,
@@ -33,6 +32,12 @@ export default function MapScreen() {
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   };
+
+  // Cambiado el valor inicial a 0.01 para que coincida con el valor inicial del mapa
+  const [mapZoom, setMapZoom] = useState(defaultCenter.latitudeDelta);
+  
+  // Estado para forzar re-renderización cuando cambia el zoom
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
     const fetchCoordenadas = async () => {
@@ -102,7 +107,6 @@ export default function MapScreen() {
       trayecto: datosTrayecto,
     };
 
-    // Corregido para que no cambie el ID del punto al agregarlo
     let nuevosPuntos;
     if (puntoConTrayecto.index < puntosReferencia.length) {
       nuevosPuntos = puntosReferencia.map((punto, i) =>
@@ -140,6 +144,21 @@ export default function MapScreen() {
     setModalVisible(true);
   };
 
+  // Función para manejar el cambio de región del mapa
+  const handleRegionChange = (region) => {
+    const newZoom = region.latitudeDelta;
+    
+    // Solo actualiza el estado si el valor de zoom cambió significativamente
+    if (Math.abs(mapZoom - newZoom) > 0.0001) {
+      setMapZoom(newZoom);
+      // Forzar re-renderización
+      setForceUpdate(prev => prev + 1);
+    }
+  };
+
+  // Un mejor umbral para mostrar las etiquetas (ajusta este valor según necesites)
+  const shouldShowLabels = mapZoom < 0.005; // Muestra etiquetas cuando el zoom es cercano
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mapContainer}>
@@ -150,6 +169,7 @@ export default function MapScreen() {
           mapType="satellite"
           initialRegion={defaultCenter}
           onLongPress={handleLongPress}
+          onRegionChangeComplete={handleRegionChange}
         >
           {coordenadas.length > 0 && (
             <Circle
@@ -165,7 +185,7 @@ export default function MapScreen() {
           )}
 
           {coordenadas.map((coordenada, index) => (
-            <React.Fragment key={index}>
+            <React.Fragment key={`coord-${index}-${forceUpdate}`}>
               <Circle
                 center={{
                   latitude: coordenada.latitud,
@@ -185,33 +205,37 @@ export default function MapScreen() {
                 fillColor="rgba(255, 20, 20, 0.5)"
               />
 
-              {/* Texto con el nombre encima del círculo */}
-              <Marker
-                key={`label-${index}`}
-                coordinate={{
-                  latitude: coordenada.latitud,
-                  longitude: coordenada.longitud,
-                }}
-                anchor={{ x: 0.5, y: 1.5 }}
-              >
-                <View
-                  style={{
-                    backgroundColor: "transparent",
-                    padding: 4,
-                    borderRadius: 6,
+              {/* Mostramos las etiquetas cuando el zoom es suficiente */}
+              {shouldShowLabels && (
+                <Marker
+                  coordinate={{
+                    latitude: coordenada.latitud,
+                    longitude: coordenada.longitud,
                   }}
+                  anchor={{ x: 0.5, y: 1.5 }}
+                  tracksViewChanges={true} // Cambiado a true para que reaccione a los cambios
                 >
-                  <Text style={{ fontSize: 12, fontWeight: "bold", color: "white"}}>
-                    {coordenada.nombre_subparcela}
-                  </Text>
-                </View>
-              </Marker>
+                  <View
+                    style={{
+                      backgroundColor: "transparent",
+                      paddingHorizontal: 0,
+                      paddingVertical: 4,
+                      borderRadius: 4,
+                      fontSize: 100,
+                    }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                      {coordenada.nombre_subparcela}
+                    </Text>
+                  </View>
+                </Marker>
+              )}
             </React.Fragment>
           ))}
 
           {puntosReferencia.map((punto, index) => (
             <ReferenciaMarker
-              key={`ref-${index}`}
+              key={`ref-${index}-${forceUpdate}`}
               punto={punto}
               index={index}
               onPress={openModal}
