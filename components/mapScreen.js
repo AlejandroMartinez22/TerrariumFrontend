@@ -6,7 +6,8 @@ import {
   Modal,
   Text,
   TextInput,
-  Button,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { getCoordenadas } from "../supabase/getCoordenadas";
@@ -17,11 +18,8 @@ export default function MapScreen() {
   const { brigadista } = useBrigadista();
   const [coordenadas, setCoordenadas] = useState([]);
   const mapRef = useRef(null);
-  const {
-    puntosReferencia,
-    handleAgregarReferencia,
-    setPuntosReferencia,
-  } = useReferenciaHandler();
+  const { puntosReferencia, handleAgregarReferencia, setPuntosReferencia } =
+    useReferenciaHandler();
 
   const defaultCenter = {
     latitude: 7.12539,
@@ -34,6 +32,8 @@ export default function MapScreen() {
   const [selectedPunto, setSelectedPunto] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
+  const [errorMedicion, setErrorMedicion] = useState("");
+  const [puntoId, setPuntoId] = useState("PR001");
 
   useEffect(() => {
     const fetchCoordenadas = async () => {
@@ -63,9 +63,9 @@ export default function MapScreen() {
     setSelectedPunto({ ...punto, index });
     setEditedTitle(punto.title || `Punto de referencia ${index + 1}`);
     setEditedDescription(
-      punto.description ||
-        `Lat: ${punto.latitude.toFixed(5)}, Lng: ${punto.longitude.toFixed(5)}`
+      punto.description || ""
     );
+    setPuntoId(`PR00${index + 1}`);
     setModalVisible(true);
   };
 
@@ -75,6 +75,8 @@ export default function MapScreen() {
       ...selectedPunto,
       title: editedTitle,
       description: editedDescription,
+      errorMedicion: errorMedicion,
+      id: puntoId
     };
     setPuntosReferencia(nuevosPuntos);
     setModalVisible(false);
@@ -143,7 +145,9 @@ export default function MapScreen() {
               title={punto.title || `Punto de referencia ${index + 1}`}
               description={
                 punto.description ||
-                `Lat: ${punto.latitude.toFixed(5)}, Lng: ${punto.longitude.toFixed(5)}`
+                `Lat: ${punto.latitude.toFixed(
+                  5
+                )}, Lng: ${punto.longitude.toFixed(5)}`
               }
               onPress={() => openModal(punto, index)}
             />
@@ -151,7 +155,7 @@ export default function MapScreen() {
         </MapView>
       </View>
 
-      {/* MODAL DE EDICIÓN */}
+      {/* MODAL DE EDICIÓN - REDISEÑADO */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -160,28 +164,79 @@ export default function MapScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Editar Punto de Referencia</Text>
-            <TextInput
-              style={styles.input}
-              value={editedTitle}
-              onChangeText={setEditedTitle}
-              placeholder="Título"
-            />
-            <TextInput
-              style={styles.input}
-              value={editedDescription}
-              onChangeText={setEditedDescription}
-              placeholder="Descripción"
-              multiline
-            />
-            <View style={styles.buttonRow}>
-              <Button title="Guardar" onPress={guardarCambios} />
-              <Button title="Eliminar" onPress={eliminarPunto} color="red" />
-              <Button
-                title="Cancelar"
-                onPress={() => setModalVisible(false)}
-                color="gray"
-              />
+            {/* Botón de cerrar en la esquina */}
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>✕</Text>
+            </TouchableOpacity>
+            
+            {/* Encabezado */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Punto de Referencia</Text>
+            </View>
+
+            {/* Contenido del modal */}
+            <View style={styles.modalBody}>
+              {/* ID */}
+              <View style={styles.idContainer}>
+                <Text style={styles.idLabel}>ID: {puntoId}</Text>
+              </View>
+
+              {/* Coordenadas */}
+              <View style={styles.coordsContainer}>
+                <View style={styles.coordColumn}>
+                  <Text style={styles.coordLabel}>Latitud</Text>
+                  <TextInput
+                    style={styles.coordInput}
+                    value={selectedPunto ? selectedPunto.latitude.toFixed(5).toString() : ""}
+                    editable={false}
+                  />
+                </View>
+                <View style={styles.coordColumn}>
+                  <Text style={styles.coordLabel}>Longitud</Text>
+                  <TextInput
+                    style={styles.coordInput}
+                    value={selectedPunto ? selectedPunto.longitude.toFixed(5).toString() : ""}
+                    editable={false}
+                  />
+                </View>
+              </View>
+
+              {/* Error de medición */}
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorLabel}>Error en la medición (m)</Text>
+                <TextInput
+                  style={styles.errorInput}
+                  value={errorMedicion}
+                  onChangeText={setErrorMedicion}
+                  keyboardType="numeric"
+                  placeholder="+"
+                />
+              </View>
+
+              {/* Descripción */}
+              <View style={styles.descriptionContainer}>
+                <Text style={styles.descriptionLabel}>Descripción</Text>
+                <TextInput
+                  style={styles.descriptionInput}
+                  value={editedDescription}
+                  onChangeText={setEditedDescription}
+                  multiline
+                  numberOfLines={4}
+                  placeholder="Descripción del punto de referencia..."
+                />
+              </View>
+
+              {/* Botón de continuar */}
+              <TouchableOpacity 
+                style={styles.continueButton} 
+                onPress={guardarCambios}
+              >
+                <Text style={styles.continueButtonText}>Continuar</Text>
+                <Text style={styles.arrowIcon}>→</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -212,27 +267,114 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    width: "85%",
+    width: "90%",
     backgroundColor: "#fff",
-    padding: 20,
     borderRadius: 10,
+    overflow: "hidden",
     elevation: 10,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 1,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: "#000",
+    fontWeight: "bold",
+  },
+  modalHeader: {
+    padding: 15,
+    alignItems: "center",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    color: "#000",
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
+  modalBody: {
+    padding: 15,
   },
-  buttonRow: {
+  idContainer: {
+    marginBottom: 15,
+    alignItems: "center",
+  },
+  idLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  coordsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 15,
+    marginBottom: 15,
   },
+  coordColumn: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  coordLabel: {
+    fontSize: 14,
+    marginBottom: 5,
+    textAlign: "center",
+    color: selectedColor => selectedColor === "Latitud" ? "#000" : "#ff6f00", // Latitud en negro, Longitud en naranja
+  },
+  coordInput: {
+    backgroundColor: "#d3d3d3",
+    padding: 8,
+    borderRadius: 5,
+    textAlign: "center",
+  },
+  errorContainer: {
+    marginBottom: 15,
+  },
+  errorLabel: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  errorInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    borderRadius: 5,
+  },
+  descriptionContainer: {
+    marginBottom: 20,
+  },
+  descriptionLabel: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  descriptionInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    borderRadius: 5,
+    height: 100,
+    textAlignVertical: "top",
+  },
+  continueButton: {
+    backgroundColor: "#4169e1", // Color azul para el botón
+    padding: 12,
+    borderRadius: 5,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  continueButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginRight: 5,
+  },
+  arrowIcon: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+  }
 });
