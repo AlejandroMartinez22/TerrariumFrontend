@@ -42,7 +42,7 @@ const CaracteristicasModal = ({
           </TouchableOpacity>
 
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Punto de Referencia</Text>
+            <Text style={styles.modalTitle}>Caracteristicas de la subparcela </Text>
           </View>
 
           <View style={styles.modalBody}>
@@ -184,15 +184,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 15,
   },
+  
   coordColumn: {
     flex: 1,
     marginHorizontal: 5,
   },
+
   coordLabel: {
     fontSize: 14,
     marginBottom: 5,
     textAlign: "center",
   },
+
   coordInput: {
     backgroundColor: "#d3d3d3",
     padding: 8,

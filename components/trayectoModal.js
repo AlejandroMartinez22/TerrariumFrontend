@@ -7,45 +7,63 @@ import {
   StyleSheet,
   TextInput,
 } from "react-native";
-import { generarTrayectoId } from "../hooks/genIdTrayecto";
+import { generarTrayectoId } from "../hooks/genIdTrayecto"; // Importa la función para generar el ID si es necesario
 
 export default function TrayectoModal({
   visible,
   onClose,
   onConfirmar,
   trayectos = [],
+  selectedPunto,
+  trayectoEditado = null, // Este prop se usará para cargar un trayecto existente si estamos editando
 }) {
   const [medioTransporte, setMedioTransporte] = useState("Terrestre");
-  const [duracion, setDuracion] = useState("");  // Asegúrate de que este sea un string vacío
-  const [distancia, setDistancia] = useState(""); // Asegúrate de que este también sea un string vacío
+  const [duracion, setDuracion] = useState("");
+  const [distancia, setDistancia] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [idTrayecto, setIdTrayecto] = useState("");
+  const [idTrayecto, setIdTrayecto] = useState(""); // ID del trayecto
 
   const transportOptions = ["Terrestre", "Marítimo", "Aéreo"];
 
   // Limpiar campos y generar ID cuando se abre el modal
-
-  
   useEffect(() => {
-    if (visible) {
-      // Reiniciar valores solo cuando se abre el modal
+    if (!visible) return;
+
+    // Si estamos editando un trayecto, cargamos los valores del trayecto editado
+    if (trayectoEditado) {
+      setMedioTransporte(trayectoEditado.medioTransporte);
+      setDuracion(trayectoEditado.duracion);
+      setDistancia(trayectoEditado.distancia);
+      setIdTrayecto(trayectoEditado.idTrayecto);
+    } else {
+      // Si no estamos editando, creamos un nuevo ID si es necesario
       setMedioTransporte("Terrestre");
       setDuracion("");
       setDistancia("");
-      setShowDropdown(false);
-      setIdTrayecto(generarTrayectoId(trayectos));  // Generar nuevo ID al abrir
+      // Si no hay trayecto editado, generamos un ID único
+      setIdTrayecto(generarTrayectoId(trayectos)); 
     }
-  }, [visible, trayectos]);
 
-
+    setShowDropdown(false);
+  }, [visible, trayectos, trayectoEditado]);
 
   const handleGuardar = () => {
-    onConfirmar({
+    // Creamos un objeto con los datos del trayecto
+    const datosTrayecto = {
       idTrayecto,
       medioTransporte,
       duracion,
       distancia,
-    });
+      puntoReferencia: {
+        id: selectedPunto?.id,
+        coordinate: selectedPunto?.coordinate,
+      },
+    };
+
+    // Llamamos a la función para confirmar los cambios
+    onConfirmar(datosTrayecto);
+
+    // No cerramos el modal aquí, dejamos que el componente padre lo haga
   };
 
   const selectTransportOption = (option) => {
@@ -111,8 +129,8 @@ export default function TrayectoModal({
               <Text style={styles.label}>Duración (Horas y Minutos)</Text>
               <TextInput
                 style={styles.input}
-                value={duracion}  // Vinculado al estado correctamente
-                onChangeText={(text) => setDuracion(text)} // Control de estado correctamente
+                value={duracion}
+                onChangeText={(text) => setDuracion(text)}
                 placeholder="00:00"
                 keyboardType="numeric"
               />
@@ -123,8 +141,8 @@ export default function TrayectoModal({
               <Text style={styles.label}>Distancia del Trayecto (km)</Text>
               <TextInput
                 style={styles.input}
-                value={distancia}  // Vinculado al estado correctamente
-                onChangeText={(text) => setDistancia(text)} // Control de estado correctamente
+                value={distancia}
+                onChangeText={(text) => setDistancia(text)}
                 placeholder="0.0"
                 keyboardType="numeric"
               />

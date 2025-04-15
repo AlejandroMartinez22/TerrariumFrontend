@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, SafeAreaView, StyleSheet } from "react-native";
-import MapView, { Circle, PROVIDER_GOOGLE } from "react-native-maps";
+import { View, SafeAreaView, StyleSheet, Text } from "react-native";
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 
 import { useBrigadista } from "../context/BrigadistaContext";
 import { getCoordenadas } from "../supabase/getCoordenadas";
@@ -8,22 +8,24 @@ import { useReferencia } from "../context/ReferenciaContext";
 
 import ReferenciaModal from "./puntoReferenciaModal";
 import ReferenciaMarker from "./referenciaMarker";
-import TrayectoModal from "./trayectoModal"; // Cambiado el nombre del componente
+import TrayectoModal from "./trayectoModal";
 
 export default function MapScreen() {
   const { brigadista } = useBrigadista();
   const [coordenadas, setCoordenadas] = useState([]);
   const mapRef = useRef(null);
 
-  const { puntosReferencia, generarReferenciaInicial, setPuntosReferencia } = useReferencia();
+  const { puntosReferencia, generarReferenciaInicial, setPuntosReferencia } =
+    useReferencia();
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [trayectoModalVisible, setTrayectoModalVisible] = useState(false); // Renombrado
+  const [trayectoModalVisible, setTrayectoModalVisible] = useState(false);
   const [selectedPunto, setSelectedPunto] = useState(null);
   const [editedDescription, setEditedDescription] = useState("");
   const [errorMedicion, setErrorMedicion] = useState("");
   const [puntoId, setPuntoId] = useState("");
-  const [tutorialStep, setTutorialStep] = useState(1);
+  const [tempPuntoData, setTempPuntoData] = useState(null);
+  const [nombrePositions, setNombrePositions] = useState([]);
 
   const defaultCenter = {
     latitude: 7.12539,
@@ -64,48 +66,54 @@ export default function MapScreen() {
     setModalVisible(true);
   };
 
-  // Reemplazamos guardarCambios por continuar
+  const handleCloseModal = () => {
+    setTempPuntoData(null);
+    setModalVisible(false);
+  };
+
+  const handleCloseTrayectoModal = () => {
+    setTempPuntoData(null);
+    setTrayectoModalVisible(false);
+  };
+
   const continuar = () => {
-    // Guardamos los datos del punto actual en una variable temporal
-    const nuevoPunto = {
+    if (!selectedPunto) return;
+
+    const puntoActualizado = {
       ...selectedPunto,
       title:
         selectedPunto.title || `Punto de referencia ${selectedPunto.index + 1}`,
       description: editedDescription,
       errorMedicion: errorMedicion,
+      latitude: selectedPunto.latitude,
+      longitude: selectedPunto.longitude,
     };
 
-    // Cerramos el primer modal
+    setTempPuntoData(puntoActualizado);
     setModalVisible(false);
-
-    // Abrimos el modal de trayecto y pasamos los datos del punto
     setTrayectoModalVisible(true);
   };
 
-  // Esta función se llamará desde el modal de trayecto cuando se confirmen los cambios
-  const confirmarCambios = () => {
-    // Ahora realmente guardamos los cambios
-    const nuevoPunto = {
-      ...selectedPunto,
-      title:
-        selectedPunto.title || `Punto de referencia ${selectedPunto.index + 1}`,
-      description: editedDescription,
-      errorMedicion: errorMedicion,
+  const confirmarTrayecto = (datosTrayecto) => {
+    if (!tempPuntoData) return;
+
+    const puntoConTrayecto = {
+      ...tempPuntoData,
+      trayecto: datosTrayecto,
     };
 
+    // Corregido para que no cambie el ID del punto al agregarlo
     let nuevosPuntos;
-
-    if (selectedPunto.index < puntosReferencia.length) {
-      // Editando un punto existente
-      nuevosPuntos = [...puntosReferencia];
-      nuevosPuntos[selectedPunto.index] = nuevoPunto;
+    if (puntoConTrayecto.index < puntosReferencia.length) {
+      nuevosPuntos = puntosReferencia.map((punto, i) =>
+        i === puntoConTrayecto.index ? puntoConTrayecto : punto
+      );
     } else {
-      // Agregando nuevo punto
-      nuevosPuntos = [...puntosReferencia, nuevoPunto];
+      nuevosPuntos = [...puntosReferencia, puntoConTrayecto];
     }
 
     setPuntosReferencia(nuevosPuntos);
-    setTrayectoModalVisible(false); // Cerramos el modal de trayecto
+    setTrayectoModalVisible(false);
   };
 
   const eliminarPunto = () => {
@@ -114,13 +122,17 @@ export default function MapScreen() {
     );
     setPuntosReferencia(nuevosPuntos);
     setModalVisible(false);
+    setTempPuntoData(null);
   };
 
   const handleLongPress = (event) => {
     const coordinate = event.nativeEvent.coordinate;
-    const nuevoPunto = generarReferenciaInicial(coordinate);
+    const nuevoPunto = {
+      ...generarReferenciaInicial(coordinate),
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+    };
 
-    // Preparamos el nuevo punto pero NO lo agregamos aún
     setSelectedPunto({ ...nuevoPunto, index: puntosReferencia.length });
     setEditedDescription("");
     setErrorMedicion("");
@@ -172,6 +184,28 @@ export default function MapScreen() {
                 strokeColor="rgba(255, 10, 10, 0.8)"
                 fillColor="rgba(255, 20, 20, 0.5)"
               />
+
+              {/* Texto con el nombre encima del círculo */}
+              <Marker
+                key={`label-${index}`}
+                coordinate={{
+                  latitude: coordenada.latitud,
+                  longitude: coordenada.longitud,
+                }}
+                anchor={{ x: 0.5, y: 1.5 }}
+              >
+                <View
+                  style={{
+                    backgroundColor: "transparent",
+                    padding: 4,
+                    borderRadius: 6,
+                  }}
+                >
+                  <Text style={{ fontSize: 12, fontWeight: "bold", color: "white"}}>
+                    {coordenada.nombre_subparcela}
+                  </Text>
+                </View>
+              </Marker>
             </React.Fragment>
           ))}
 
@@ -188,7 +222,7 @@ export default function MapScreen() {
 
       <ReferenciaModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={handleCloseModal}
         onContinuar={continuar}
         onEliminar={eliminarPunto}
         puntoId={puntoId}
@@ -201,13 +235,14 @@ export default function MapScreen() {
 
       <TrayectoModal
         visible={trayectoModalVisible}
-        onClose={() => setTrayectoModalVisible(false)}
-        onConfirmar={confirmarCambios}
-        puntoId={puntoId}
-        selectedPunto={selectedPunto}
+        onClose={handleCloseTrayectoModal}
+        onConfirmar={confirmarTrayecto}
+        trayectos={puntosReferencia
+          .map((punto) => punto.trayecto)
+          .filter(Boolean)}
+        selectedPunto={tempPuntoData || selectedPunto}
+        trayectoEditado={(tempPuntoData || selectedPunto)?.trayecto}
       />
-
-      
     </SafeAreaView>
   );
 }
