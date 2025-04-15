@@ -5,16 +5,14 @@ import { crearPuntoReferencia } from "./puntoReferencia";
 export const useReferenciaHandler = () => {
   const [puntosReferencia, setPuntosReferencia] = useState([]);
 
-  const handleAgregarReferencia = (event) => {
-    const coordinate = event.nativeEvent.coordinate;
+  const generarReferenciaInicial = (coordinate) => {
     const nuevoId = generarSiguienteId(puntosReferencia);
-    const nuevoPunto = crearPuntoReferencia(nuevoId, coordinate);
-    setPuntosReferencia([...puntosReferencia, nuevoPunto]);
+    return crearPuntoReferencia(nuevoId, coordinate);
   };
 
   return {
     puntosReferencia,
     setPuntosReferencia,
-    handleAgregarReferencia,
+    generarReferenciaInicial,
   };
 };
