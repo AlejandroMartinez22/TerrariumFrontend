@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { generarSiguienteId } from "./genIdReferencia";
+import { generarReferenciaId } from "./genIdReferencia";
 import { crearPuntoReferencia } from "./puntoReferencia";
 
 export const useReferenciaHandler = () => {
   const [puntosReferencia, setPuntosReferencia] = useState([]);
 
   const generarReferenciaInicial = (coordinate) => {
-    const nuevoId = generarSiguienteId(puntosReferencia);
+    const nuevoId = generarReferenciaId(puntosReferencia);
     return crearPuntoReferencia(nuevoId, coordinate);
   };
 

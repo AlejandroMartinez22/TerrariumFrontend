@@ -24,6 +24,7 @@ export default function MapScreen() {
   const [editedDescription, setEditedDescription] = useState("");
   const [errorMedicion, setErrorMedicion] = useState("");
   const [puntoId, setPuntoId] = useState("");
+  const [tutorialStep, setTutorialStep] = useState(1);
 
   const defaultCenter = {
     latitude: 7.12539,
@@ -189,7 +190,7 @@ export default function MapScreen() {
       <ReferenciaModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onContinuar={continuar} 
+        onContinuar={continuar}
         onEliminar={eliminarPunto}
         puntoId={puntoId}
         selectedPunto={selectedPunto}
@@ -198,7 +199,6 @@ export default function MapScreen() {
         errorMedicion={errorMedicion}
         setErrorMedicion={setErrorMedicion}
       />
-
       <TrayectoModal
         visible={trayectoModalVisible}
         onClose={() => setTrayectoModalVisible(false)}

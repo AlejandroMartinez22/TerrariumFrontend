@@ -30,6 +30,7 @@ export const getCoordenadas = async (brigadista) => {
       latitud: parseFloat(subparcela.latitud),
       longitud: parseFloat(subparcela.longitud),
     }));
+
   } catch (err) {
     console.error("Error inesperado en getCoordenadas:", err);
     return [];
