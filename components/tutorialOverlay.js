@@ -26,9 +26,9 @@ const TutorialOverlay = ({ step, setStep, onClose }) => {
       <View style={styles.popup}>
         <Text style={styles.text}>{steps[step - 1]}</Text>
 
-        {/* Mostrar contador en el paso 4 */}
+        {/* Mostrar mensaje especial en el paso 4 */}
         {step === 4 && (
-          <Text style={{ marginTop: 10, textAlign: 'center', fontWeight: '600' }}>
+          <Text style={styles.waitingText}>
             Esperando los 4 puntos de referencia...
           </Text>
         )}
@@ -74,11 +74,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 10,
+    pointerEvents: 'auto',
   },
   text: {
     fontSize: 14,
     marginBottom: 12,
     textAlign: 'left',
+  },
+  waitingText: {
+    marginTop: 10,
+    textAlign: 'center',
+    fontWeight: '600',
+    fontSize: 13,
   },
   buttonContainer: {
     alignItems: 'flex-end',

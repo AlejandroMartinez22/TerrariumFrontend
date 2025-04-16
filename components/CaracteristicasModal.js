@@ -22,11 +22,15 @@ const CaracteristicasModal = ({
   setSelectedOption,
   selectedNumber,
   setSelectedNumber,
+  pickerAlteracion,
+  setPickerAlteracion,
+  pickerSeveridad,
+  setPickerSeveridad,
 }) => {
   const isFormValid =
     selectedOption !== "" &&
-    selectedNumber.trim() !== "" &&
-    errorMedicion.trim() !== "";
+    (selectedNumber ?? "").trim() !== "" &&
+    (errorMedicion ?? "").trim() !== "";
 
   return (
     <Modal
@@ -42,7 +46,9 @@ const CaracteristicasModal = ({
           </TouchableOpacity>
 
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Caracteristicas de la subparcela </Text>
+            <Text style={styles.modalTitle}>
+              Características de la subparcela
+            </Text>
           </View>
 
           <View style={styles.modalBody}>
@@ -80,34 +86,81 @@ const CaracteristicasModal = ({
               />
             </View>
 
-            {/* Selector + input numérico */}
+            {/* Picker cobertura + porcentaje */}
+
+            <Text>Hola</Text>
             <View style={styles.comboContainer}>
-              <View style={styles.pickerContainer}>
+              <View style={styles.pickercobertura}>
                 <Picker
                   selectedValue={selectedOption}
                   onValueChange={(itemValue) => setSelectedOption(itemValue)}
+                  style={[styles.picker]}
+                >
+                  <Picker.Item label="Afloramiento rocoso" value="Afloramiento rocoso" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Arbustal" value="Arbustal" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Bosque tierra firme" value="Bosque tierra firme" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Bosque inundable" value="Bosque inundable" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Cultivos" value="Cultivos" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Herbazal" value="Herbazal" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Matorral" value="Matorral" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Pastizal" value="Pastizal" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Pantano" value="Pantano" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Rastrojo" value="Rastrojo" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Suelo desnudo" value="Suelo desnudo" style={styles.pickercoberturatext}/>
+                  <Picker.Item label="Zona urbana" value="Zona urbana" style={styles.pickercoberturatext}/>
+                </Picker>
+              </View>
+              <View style={styles.porcentajeInputContainer}>
+                <TextInput
+                  style={styles.porcentajeInput}
+                  value={selectedNumber}
+                  onChangeText={(text) => {
+                    const numeric = text.replace(/[^0-9]/g, "");
+                    if (parseInt(numeric) <= 99 || numeric === "") {
+                      setSelectedNumber(numeric);
+                    }
+                  }}
+                  keyboardType="numeric"
+                  placeholder="1–99"
+                  maxLength={2}
+                />
+              </View>
+            </View>
+
+            {/* Nuevo picker de alteración + severidad */}
+            <View style={styles.comboContainer}>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={pickerAlteracion}
+                  onValueChange={setPickerAlteracion}
                   style={styles.picker}
                 >
-                  <Picker.Item label="Seleccione una opción" value="" />
-                  <Picker.Item label="Opción A" value="opcionA" />
-                  <Picker.Item label="Opción B" value="opcionB" />
-                  <Picker.Item label="Opción C" value="opcionC" />
+                  <Picker.Item label="Seleccione una alteración" value="" style={styles.pickertext} />
+                  <Picker.Item label="CL" value="CL" style={styles.pickertext} />
+                  <Picker.Item label="CN" value="CN" style={styles.pickertext} />
+                  <Picker.Item label="EA" value="EA" style={styles.pickertext} />
+                  <Picker.Item label="DS" value="DS" style={styles.pickertext} />
+                  <Picker.Item label="FU" value="FU" style={styles.pickertext} />
+                  <Picker.Item label="HV" value="HV" style={styles.pickertext} />
+                  <Picker.Item label="IN" value="IN" style={styles.pickertext} />
+                  <Picker.Item label="PA" value="PA" style={styles.pickertext} />
+                  <Picker.Item label="PE" value="PE" style={styles.pickertext} />
+                  <Picker.Item label="SA" value="SA" style={styles.pickertext} />
+                  <Picker.Item label="VI" value="VI" style={styles.pickertext} />
                 </Picker>
               </View>
 
-              <TextInput
-                style={styles.numberInput}
-                value={selectedNumber}
-                onChangeText={(text) => {
-                  const numeric = text.replace(/[^0-9]/g, "");
-                  if (parseInt(numeric) <= 99 || numeric === "") {
-                    setSelectedNumber(numeric);
-                  }
-                }}
-                keyboardType="numeric"
-                placeholder="0–99"
-                maxLength={2}
-              />
+              <View style={styles.pickerSeveridad}>
+                <Picker
+                  selectedValue={pickerSeveridad}
+                  onValueChange={setPickerSeveridad}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="FA" value="FA" style={styles.pickertext} />
+                  <Picker.Item label="MA" value="MA" style={styles.pickertext} />
+                  <Picker.Item label="NP" value="NP" style={styles.pickertext} />
+                </Picker>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -169,7 +222,8 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   modalBody: {
-    padding: 15,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   idContainer: {
     marginBottom: 15,
@@ -184,18 +238,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 15,
   },
-  
   coordColumn: {
     flex: 1,
     marginHorizontal: 5,
   },
-
   coordLabel: {
     fontSize: 14,
     marginBottom: 5,
     textAlign: "center",
   },
-
   coordInput: {
     backgroundColor: "#d3d3d3",
     padding: 8,
@@ -219,7 +270,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 15,
+  },
+  pickercobertura: {
+    flex: 2,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginRight: 10,
+    height: 50,
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  porcentajeInputContainer: {
+    flex: 1,
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    justifyContent: "center",
+  },
+  porcentajeInput: {
+    height: "100%",
+    textAlign: "center",
+    paddingVertical: 0,
+    fontSize: 16,
   },
   pickerContainer: {
     flex: 2,
@@ -227,20 +302,31 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 5,
     marginRight: 10,
+    height: 50,
+    justifyContent: "center",
     overflow: "hidden",
   },
-  picker: {
-    height: 40,
-    width: "100%",
-  },
-  numberInput: {
+  pickerSeveridad: {
     flex: 1,
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 8,
     borderRadius: 5,
-    textAlign: "center",
+    height: 50,
+    justifyContent: "center",
   },
+  picker: {
+    width: "100%",
+    height: "100%",
+  },
+
+  pickertext: {
+    fontSize: 14,
+  },
+
+  pickercoberturatext: {
+    fontSize: 13,
+  },
+
   continueButton: {
     backgroundColor: "#4169e1",
     paddingVertical: 10,
@@ -248,7 +334,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 8,
+    marginTop: 20,
     width: "60%",
     alignSelf: "center",
   },
@@ -260,4 +347,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ReferenciaModal;
+export default CaracteristicasModal;

@@ -8,6 +8,7 @@ import AddScreen from "./addScreen";
 import ViewScreen from "./viewScreen";
 
 import TutorialOverlay from "./tutorialOverlay";
+import CaracteristicasModal from "./CaracteristicasModal";
 import { useBrigadista } from "../context/BrigadistaContext";
 import { useReferencia } from "../context/ReferenciaContext";
 
@@ -17,11 +18,18 @@ export default function NavigationTabs() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [timerStarted, setTimerStarted] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(1);
+  const [showCaracteristicasModal, setShowCaracteristicasModal] = useState(false);
+  
+  // Inicializar estados para CaracteristicasModal
+  const [selectedOption, setSelectedOption] = useState("");
+  const [selectedNumber, setSelectedNumber] = useState("");
+  const [errorMedicion, setErrorMedicion] = useState("");
+  const [selectedPunto, setSelectedPunto] = useState({ latitude: 0, longitude: 0 });
+  
   const { brigadista, localTutorialCompletado, completarTutorial } = useBrigadista();
-  const { puntosReferencia } = useReferencia(); // para ver si ya agregaron los puntos
+  const { puntosReferencia } = useReferencia();
   const isFocused = useIsFocused();
 
-  // Mostrar tutorial si aplica
   useEffect(() => {
     if (
       isFocused &&
@@ -33,11 +41,10 @@ export default function NavigationTabs() {
       setTimerStarted(true);
       setTimeout(() => {
         setShowTutorial(true);
-      }, 6000); // mostrar luego de 6 seg
+      }, 6000);
     }
   }, [isFocused, brigadista, localTutorialCompletado]);
 
-  // Avanzar automáticamente al paso 5 si hay 4 puntos agregados
   useEffect(() => {
     if (tutorialStep === 4 && puntosReferencia.length >= 4) {
       setTutorialStep(5);
@@ -46,7 +53,29 @@ export default function NavigationTabs() {
 
   const handleCloseTutorial = () => {
     setShowTutorial(false);
-    completarTutorial(); // marcar como completado
+    
+    // Si estamos en el paso final (5), mostrar el modal de características
+    if (tutorialStep === 5) {
+      setShowCaracteristicasModal(true);
+    }
+    
+    completarTutorial();
+  };
+
+  const handleCloseCaracteristicasModal = () => {
+    setShowCaracteristicasModal(false);
+  };
+
+  const handleGuardarCaracteristicas = () => {
+    // Lógica para guardar los datos
+    console.log("Guardando características:", {
+      selectedOption,
+      selectedNumber,
+      errorMedicion
+    });
+    
+    // Cerrar el modal
+    handleCloseCaracteristicasModal();
   };
 
   return (
@@ -115,6 +144,20 @@ export default function NavigationTabs() {
           onClose={handleCloseTutorial}
         />
       )}
+
+      <CaracteristicasModal 
+        visible={showCaracteristicasModal} 
+        onClose={handleCloseCaracteristicasModal}
+        onGuardar={handleGuardarCaracteristicas}
+        puntoId="SP-01" // O el ID que corresponda
+        selectedPunto={selectedPunto}
+        errorMedicion={errorMedicion}
+        setErrorMedicion={setErrorMedicion}
+        selectedOption={selectedOption}
+        setSelectedOption={setSelectedOption}
+        selectedNumber={selectedNumber}
+        setSelectedNumber={setSelectedNumber}
+      />
     </>
   );
 }
