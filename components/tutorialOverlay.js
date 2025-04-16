@@ -26,13 +26,6 @@ const TutorialOverlay = ({ step, setStep, onClose }) => {
       <View style={styles.popup}>
         <Text style={styles.text}>{steps[step - 1]}</Text>
 
-        {/* Mostrar mensaje especial en el paso 4 */}
-        {step === 4 && (
-          <Text style={styles.waitingText}>
-            Esperando los 4 puntos de referencia...
-          </Text>
-        )}
-
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={handleNext}

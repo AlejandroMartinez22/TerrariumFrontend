@@ -11,6 +11,7 @@ import TutorialOverlay from "./tutorialOverlay";
 import CaracteristicasModal from "./CaracteristicasModal";
 import { useBrigadista } from "../context/BrigadistaContext";
 import { useReferencia } from "../context/ReferenciaContext";
+import { useSubparcelas } from "../context/SubparcelaContext";
 
 const Tab = createBottomTabNavigator();
 
@@ -20,15 +21,20 @@ export default function NavigationTabs() {
   const [tutorialStep, setTutorialStep] = useState(1);
   const [showCaracteristicasModal, setShowCaracteristicasModal] = useState(false);
   
+  // Estado para manejar el índice de la subparcela actual
+  const [currentSubparcelaIndex, setCurrentSubparcelaIndex] = useState(0);
+  
   // Inicializar estados para CaracteristicasModal
-  const [selectedOption, setSelectedOption] = useState("");
-  const [selectedNumber, setSelectedNumber] = useState("");
   const [errorMedicion, setErrorMedicion] = useState("");
   const [selectedPunto, setSelectedPunto] = useState({ latitude: 0, longitude: 0 });
   
   const { brigadista, localTutorialCompletado, completarTutorial } = useBrigadista();
   const { puntosReferencia } = useReferencia();
+  const { subparcelas, loading } = useSubparcelas(); // Obtener subparcelas del contexto
   const isFocused = useIsFocused();
+
+  // Estado para almacenar las características de todas las subparcelas
+  const [subparcelasCaracteristicas, setSubparcelasCaracteristicas] = useState({}); //Aqui se guardan las caracteristicas de las subparcelas de momento //
 
   useEffect(() => {
     if (
@@ -54,12 +60,30 @@ export default function NavigationTabs() {
   const handleCloseTutorial = () => {
     setShowTutorial(false);
     
-    // Si estamos en el paso final (5), mostrar el modal de características
-    if (tutorialStep === 5) {
-      setShowCaracteristicasModal(true);
+    // Si estamos en el paso final (5) y hay subparcelas, mostrar el modal para la primera subparcela
+    if (tutorialStep === 5 && subparcelas.length > 0) {
+      showNextSubparcelaModal();
     }
     
     completarTutorial();
+  };
+
+  // Función para mostrar el modal de características para la siguiente subparcela
+  const showNextSubparcelaModal = () => {
+    if (currentSubparcelaIndex < subparcelas.length) {
+      // Configurar el punto seleccionado con las coordenadas de la subparcela actual
+      const subparcela = subparcelas[currentSubparcelaIndex];
+      setSelectedPunto({
+        latitude: subparcela.latitud,
+        longitude: subparcela.longitud
+      });
+      
+      // Limpiar el error de medición para la nueva subparcela
+      setErrorMedicion("");
+      
+      // Mostrar el modal
+      setShowCaracteristicasModal(true);
+    }
   };
 
   const handleCloseCaracteristicasModal = () => {
@@ -67,16 +91,41 @@ export default function NavigationTabs() {
   };
 
   const handleGuardarCaracteristicas = () => {
-    // Lógica para guardar los datos
-    console.log("Guardando características:", {
-      selectedOption,
-      selectedNumber,
-      errorMedicion
-    });
+    // Obtener la subparcela actual
+    const subparcela = subparcelas[currentSubparcelaIndex];
     
-    // Cerrar el modal
+    // Guardar las características de la subparcela actual
+    setSubparcelasCaracteristicas(prev => ({
+      ...prev,
+      [subparcela.id]: {
+        id: subparcela.id,
+        errorMedicion: errorMedicion
+      }
+    }));
+    
+    // Cerrar el modal actual
     handleCloseCaracteristicasModal();
+    
+    // Incrementar el índice para la siguiente subparcela
+    const nextIndex = currentSubparcelaIndex + 1;
+    setCurrentSubparcelaIndex(nextIndex);
+    
+    // Si hay más subparcelas, mostrar el modal para la siguiente
+    if (nextIndex < subparcelas.length) {
+      setTimeout(() => {
+        showNextSubparcelaModal();
+      }, 500); // Pequeño retraso para mejor experiencia de usuario
+    } else {
+      // Todas las subparcelas han sido procesadas
+      console.log("Todas las subparcelas han sido procesadas:", subparcelasCaracteristicas);
+      
+      // Aquí podrías guardar todas las características en la base de datos
+      // o realizar cualquier otra acción necesaria
+    }
   };
+
+  // Obtener la subparcela actual si existe
+  const currentSubparcela = subparcelas[currentSubparcelaIndex] || null;
 
   return (
     <>
@@ -145,19 +194,18 @@ export default function NavigationTabs() {
         />
       )}
 
-      <CaracteristicasModal 
-        visible={showCaracteristicasModal} 
-        onClose={handleCloseCaracteristicasModal}
-        onGuardar={handleGuardarCaracteristicas}
-        puntoId="SP-01" // O el ID que corresponda
-        selectedPunto={selectedPunto}
-        errorMedicion={errorMedicion}
-        setErrorMedicion={setErrorMedicion}
-        selectedOption={selectedOption}
-        setSelectedOption={setSelectedOption}
-        selectedNumber={selectedNumber}
-        setSelectedNumber={setSelectedNumber}
-      />
+      {currentSubparcela && (
+        <CaracteristicasModal 
+          visible={showCaracteristicasModal} 
+          onClose={handleCloseCaracteristicasModal}
+          onGuardar={handleGuardarCaracteristicas}
+          puntoId={currentSubparcela.id}
+          nombreSubparcela={currentSubparcela.nombre_subparcela}
+          selectedPunto={selectedPunto}
+          errorMedicion={errorMedicion}
+          setErrorMedicion={setErrorMedicion}
+        />
+      )}
     </>
   );
 }
