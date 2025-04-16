@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Image, View, TouchableWithoutFeedback } from "react-native";
+import { Image, View, TouchableWithoutFeedback, Alert } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 
 import MapScreen from "./mapScreen";
@@ -12,6 +12,7 @@ import CaracteristicasModal from "./CaracteristicasModal";
 import { useBrigadista } from "../context/BrigadistaContext";
 import { useReferencia } from "../context/ReferenciaContext";
 import { useSubparcelas } from "../context/SubparcelaContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createBottomTabNavigator();
 
@@ -34,7 +35,7 @@ export default function NavigationTabs() {
   const isFocused = useIsFocused();
 
   // Estado para almacenar las características de todas las subparcelas
-  const [subparcelasCaracteristicas, setSubparcelasCaracteristicas] = useState({}); //Aqui se guardan las caracteristicas de las subparcelas de momento //
+  const [subparcelasCaracteristicas, setSubparcelasCaracteristicas] = useState({});
 
   useEffect(() => {
     if (
@@ -56,6 +57,27 @@ export default function NavigationTabs() {
       setTutorialStep(5);
     }
   }, [puntosReferencia, tutorialStep]);
+
+  // Cargar datos guardados del almacenamiento local al iniciar
+  useEffect(() => {
+    const cargarDatosGuardados = async () => {
+      try {
+        if (brigadista?.idConglomerado) {
+          const datosGuardados = await AsyncStorage.getItem(
+            `subparcelas_datos_${brigadista.idConglomerado}`
+          );
+          
+          if (datosGuardados) {
+            setSubparcelasCaracteristicas(JSON.parse(datosGuardados));
+          }
+        }
+      } catch (error) {
+        console.error("Error al cargar datos guardados:", error);
+      }
+    };
+    
+    cargarDatosGuardados();
+  }, [brigadista]);
 
   const handleCloseTutorial = () => {
     setShowTutorial(false);
@@ -90,18 +112,39 @@ export default function NavigationTabs() {
     setShowCaracteristicasModal(false);
   };
 
-  const handleGuardarCaracteristicas = () => {
+  const handleGuardarCaracteristicas = async (datosSubparcela) => {
     // Obtener la subparcela actual
     const subparcela = subparcelas[currentSubparcelaIndex];
     
     // Guardar las características de la subparcela actual
-    setSubparcelasCaracteristicas(prev => ({
-      ...prev,
+    const nuevosSubparcelasCaracteristicas = {
+      ...subparcelasCaracteristicas,
       [subparcela.id]: {
+        ...datosSubparcela,
         id: subparcela.id,
-        errorMedicion: errorMedicion
+        nombre: subparcela.nombre_subparcela,
+        latitud: subparcela.latitud,
+        longitud: subparcela.longitud
       }
-    }));
+    };
+    
+    setSubparcelasCaracteristicas(nuevosSubparcelasCaracteristicas);
+    
+    // Guardar en almacenamiento local
+    try {
+      if (brigadista?.idConglomerado) {
+        await AsyncStorage.setItem(
+          `subparcelas_datos_${brigadista.idConglomerado}`,
+          JSON.stringify(nuevosSubparcelasCaracteristicas)
+        );
+      }
+    } catch (error) {
+      console.error("Error al guardar datos:", error);
+      Alert.alert(
+        "Error",
+        "No se pudieron guardar los datos. Por favor intente nuevamente."
+      );
+    }
     
     // Cerrar el modal actual
     handleCloseCaracteristicasModal();
@@ -117,10 +160,14 @@ export default function NavigationTabs() {
       }, 500); // Pequeño retraso para mejor experiencia de usuario
     } else {
       // Todas las subparcelas han sido procesadas
-      console.log("Todas las subparcelas han sido procesadas:", subparcelasCaracteristicas);
+      console.log("Todas las subparcelas han sido procesadas:", nuevosSubparcelasCaracteristicas);
+      Alert.alert(
+        "¡Completado!",
+        "Has registrado con éxito las características de todas las subparcelas.",
+        [{ text: "OK" }]
+      );
       
-      // Aquí podrías guardar todas las características en la base de datos
-      // o realizar cualquier otra acción necesaria
+      // Aquí podrías realizar cualquier otra acción necesaria después de completar todas las subparcelas
     }
   };
 
