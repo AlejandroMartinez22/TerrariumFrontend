@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+//Es necesario eventualmente quitar el botón de cerrar, de momento se deja para probar pero ya después hay que quitarlo para evitar que el usuario se salga del flujo del tutorial.
+
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -7,30 +9,49 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  FlatList
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
+import useCaracteristicasValidation from "../hooks/useCaracteristicasValidation"; // Importar el hook
 
 // Opciones para los pickers
 const COBERTURAS = [
-  "Seleccionar cobertura...",
-  "Bosque",
+  "Seleccionar",
+  "Afloramiento rocoso",
+  "Arbustal",
+  "Bosque tierra firme",
+  "Bosque inundable",
+  "Cultivos",
+  "Herbazal",
   "Matorral",
   "Pastizal",
-  "Cultivo",
+  "Pantano",
+  "Rastrojo",
   "Suelo desnudo",
-  "Cuerpo de agua"
+  "Zona urbana"
 ];
 
 const AFECTACIONES = [
-  "Seleccionar afectación...",
-  "Incendio",
-  "Tala",
+  "Seleccionar",
+  "Corte de Lianas",
+  "Condición natural",
+  "Evidencia aprovechamientos",
+  "Deslizamientos",
+  "Fuego",
+  "Huracanes",
+  "Inundaciones",
+  "Pastoreo",
   "Plagas",
-  "Erosión",
-  "Contaminación",
-  "Sequía"
+  "Vegetación invasora",
+  "Sin Alteración"
+];
+
+// Opciones para severidad
+const SEVERIDADES = [
+  "Seleccionar",
+  "FA",
+  "MA",
+  "NP",
 ];
 
 const CaracteristicasModal = ({
@@ -43,42 +64,47 @@ const CaracteristicasModal = ({
   errorMedicion,
   setErrorMedicion,
 }) => {
-  // Estados para coberturas y afectaciones
-  const [selectedCobertura, setSelectedCobertura] = useState("Seleccionar cobertura...");
-  const [coberturas, setCoberturas] = useState([]);
-  const [selectedAfectacion, setSelectedAfectacion] = useState("Seleccionar afectación...");
-  const [afectaciones, setAfectaciones] = useState([]);
+  // Usar el hook de validación
+  const {
+    selectedCobertura,
+    setSelectedCobertura,
+    porcentajeCobertura,
+    setPorcentajeCobertura,
+    coberturas,
+    setCoberturas,
+    coberturasError,
+    
+    selectedAfectacion,
+    setSelectedAfectacion,
+    selectedSeveridad,
+    setSelectedSeveridad,
+    afectaciones,
+    setAfectaciones,
+    afectacionesError,
+    
+    agregarCobertura,
+    eliminarCobertura,
+    agregarAfectacion,
+    eliminarAfectacion,
+    limpiarEstados,
+    calcularSumaPorcentajes,
+    
+    botonCoberturasHabilitado,
+    botonAfectacionesHabilitado
+  } = useCaracteristicasValidation();
 
-  // Función para agregar una cobertura
-  const agregarCobertura = () => {
-    if (selectedCobertura !== "Seleccionar cobertura..." && 
-        !coberturas.includes(selectedCobertura)) {
-      setCoberturas([...coberturas, selectedCobertura]);
-      setSelectedCobertura("Seleccionar cobertura...");
+  // Limpiar estados al cerrar
+  useEffect(() => {
+    if (!visible) {
+      limpiarEstados();
     }
-  };
-
-  // Función para eliminar una cobertura
-  const eliminarCobertura = (cobertura) => {
-    setCoberturas(coberturas.filter(item => item !== cobertura));
-  };
-
-  // Función para agregar una afectación
-  const agregarAfectacion = () => {
-    if (selectedAfectacion !== "Seleccionar afectación..." && 
-        !afectaciones.includes(selectedAfectacion)) {
-      setAfectaciones([...afectaciones, selectedAfectacion]);
-      setSelectedAfectacion("Seleccionar afectación...");
-    }
-  };
-
-  // Función para eliminar una afectación
-  const eliminarAfectacion = (afectacion) => {
-    setAfectaciones(afectaciones.filter(item => item !== afectacion));
-  };
+  }, [visible]);
 
   // Validación del formulario
-  const isFormValid = (errorMedicion ?? "").trim() !== "";
+  const isFormValid = 
+    (errorMedicion ?? "").trim() !== "" && 
+    coberturas.length > 0 && 
+    afectaciones.length > 0;
 
   // Función para manejar el guardado de datos
   const handleGuardar = () => {
@@ -94,8 +120,7 @@ const CaracteristicasModal = ({
     onGuardar(datosSubparcela);
     
     // Limpiar estados
-    setCoberturas([]);
-    setAfectaciones([]);
+    limpiarEstados();
   };
 
   return (
@@ -119,75 +144,106 @@ const CaracteristicasModal = ({
             </View>
 
             <View style={styles.modalBody}>
-              <View style={styles.infoContainer}>
-                <Text style={styles.infoLabel}>ID: {puntoId}</Text>
-              </View>
+              {/* Sección de información principal */}
+              <View style={styles.mainSection}>
+                <View style={styles.infoContainer}>
+                  <Text style={styles.infoLabel}>ID: {puntoId}</Text>
+                </View>
 
-              <View style={styles.coordsContainer}>
-                <View style={styles.coordColumn}>
-                  <Text style={styles.coordLabel}>Latitud</Text>
+                <View style={styles.coordsContainer}>
+                  <View style={styles.coordColumn}>
+                    <Text style={styles.coordLabel}>Latitud</Text>
+                    <TextInput
+                      style={styles.coordInput}
+                      value={
+                        selectedPunto?.latitude.toFixed(5).toString() || ""
+                      }
+                      editable={false}
+                    />
+                  </View>
+                  <View style={styles.coordColumn}>
+                    <Text style={styles.coordLabel}>Longitud</Text>
+                    <TextInput
+                      style={styles.coordInput}
+                      value={
+                        selectedPunto?.longitude.toFixed(5).toString() || ""
+                      }
+                      editable={false}
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.errorContainer}>
+                  <Text style={styles.sectionLabel}>Error en la medición (m)</Text>
                   <TextInput
-                    style={styles.coordInput}
-                    value={
-                      selectedPunto?.latitude.toFixed(5).toString() || ""
-                    }
-                    editable={false}
+                    style={styles.errorInput}
+                    value={errorMedicion}
+                    onChangeText={setErrorMedicion}
+                    keyboardType="numeric"
+                    placeholder="Ingrese error"
                   />
                 </View>
-                <View style={styles.coordColumn}>
-                  <Text style={styles.coordLabel}>Longitud</Text>
-                  <TextInput
-                    style={styles.coordInput}
-                    value={
-                      selectedPunto?.longitude.toFixed(5).toString() || ""
-                    }
-                    editable={false}
-                  />
-                </View>
               </View>
 
-              <View style={styles.errorContainer}>
-                <Text style={styles.sectionLabel}>Error en la medición (m)</Text>
-                <TextInput
-                  style={styles.errorInput}
-                  value={errorMedicion}
-                  onChangeText={setErrorMedicion}
-                  keyboardType="numeric"
-                  placeholder="Ingrese error"
-                />
-              </View>
+              {/* Separador */}
+              <View style={styles.divider} />
 
               {/* Sección de Coberturas */}
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Coberturas</Text>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={selectedCobertura}
-                    style={styles.picker}
-                    onValueChange={(itemValue) => setSelectedCobertura(itemValue)}
-                  >
-                    {COBERTURAS.map((item, index) => (
-                      <Picker.Item key={index} label={item} value={item} />
-                    ))}
-                  </Picker>
+                <Text style={styles.sectionTitle}>Coberturas</Text>
+                
+                <View style={styles.rowContainer}>
+                  <View style={styles.columnLeft}>
+                    <Text style={styles.labelSecundario}>Tipo de cobertura</Text>
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={selectedCobertura}
+                        style={styles.picker}
+                        onValueChange={(itemValue) => setSelectedCobertura(itemValue)}
+                      >
+                        {COBERTURAS.map((item, index) => (
+                          <Picker.Item key={index} label={item} value={item} style={styles.pickerText}/>
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.columnRight}>
+                    <Text style={styles.labelSecundario}>%</Text>
+                    <TextInput
+                      style={styles.porcentajeInput}
+                      value={porcentajeCobertura}
+                      onChangeText={setPorcentajeCobertura}
+                      keyboardType="numeric"
+                      placeholder="1-99"
+                      maxLength={2}
+                    />
+                  </View>
+                </View>
+                
+                {coberturasError ? (
+                  <Text style={styles.errorText}>{coberturasError}</Text>
+                ) : null}
+                
+                <View style={styles.buttonContainer}>
                   <TouchableOpacity 
                     style={[
                       styles.addButton,
-                      selectedCobertura === "Seleccionar cobertura..." && { opacity: 0.5 }
+                      !botonCoberturasHabilitado && { opacity: 0.5 }
                     ]}
                     onPress={agregarCobertura}
-                    disabled={selectedCobertura === "Seleccionar cobertura..."}
+                    disabled={!botonCoberturasHabilitado}
                   >
                     <Text style={styles.addButtonText}>Agregar</Text>
                   </TouchableOpacity>
                 </View>
                 
                 {/* Lista de coberturas agregadas */}
-                {coberturas.length > 0 ? (
+                {coberturas.length > 0 && (
                   <View style={styles.listContainer}>
                     {coberturas.map((item, index) => (
                       <View key={index} style={styles.itemContainer}>
-                        <Text style={styles.itemText}>{item}</Text>
+                        <Text style={styles.itemText}>{item.tipo} - {item.porcentaje}%</Text>
                         <TouchableOpacity 
                           style={styles.removeButton}
                           onPress={() => eliminarCobertura(item)}
@@ -197,42 +253,75 @@ const CaracteristicasModal = ({
                       </View>
                     ))}
                   </View>
-                ) : (
-                  <Text style={styles.emptyText}>No hay coberturas agregadas</Text>
                 )}
+
+                <Text style={styles.counterText}>
+                  {coberturas.length}/4 coberturas
+                </Text>
               </View>
+
+              {/* Separador */}
+              <View style={styles.divider} />
 
               {/* Sección de Afectaciones */}
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Afectaciones</Text>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={selectedAfectacion}
-                    style={styles.picker}
-                    onValueChange={(itemValue) => setSelectedAfectacion(itemValue)}
-                  >
-                    {AFECTACIONES.map((item, index) => (
-                      <Picker.Item key={index} label={item} value={item} />
-                    ))}
-                  </Picker>
+                <Text style={styles.sectionTitle}>Afectaciones</Text>
+                
+                <View style={styles.rowContainer}>
+                  <View style={styles.columnLeft}>
+                    <Text style={styles.labelSecundario}>Tipo de afectación</Text>
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={selectedAfectacion}
+                        style={styles.picker}
+                        onValueChange={(itemValue) => setSelectedAfectacion(itemValue)}
+                      >
+                        {AFECTACIONES.map((item, index) => (
+                          <Picker.Item key={index} label={item} value={item} style={styles.pickerText}/>
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.columnRight}>
+                    <Text style={styles.labelSecundario}>Severidad</Text>
+                    <View style={styles.pickerContainerSeveridad}>
+                      <Picker
+                        selectedValue={selectedSeveridad}
+                        style={styles.picker}
+                        onValueChange={(itemValue) => setSelectedSeveridad(itemValue)}
+                      >
+                        {SEVERIDADES.map((item, index) => (
+                          <Picker.Item key={index} label={item} value={item} style={styles.pickerSeveridadText}/>
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                </View>
+                
+                {afectacionesError ? (
+                  <Text style={styles.errorText}>{afectacionesError}</Text>
+                ) : null}
+                
+                <View style={styles.buttonContainer}>
                   <TouchableOpacity 
                     style={[
                       styles.addButton,
-                      selectedAfectacion === "Seleccionar afectación..." && { opacity: 0.5 }
+                      !botonAfectacionesHabilitado && { opacity: 0.5 }
                     ]}
                     onPress={agregarAfectacion}
-                    disabled={selectedAfectacion === "Seleccionar afectación..."}
+                    disabled={!botonAfectacionesHabilitado}
                   >
                     <Text style={styles.addButtonText}>Agregar</Text>
                   </TouchableOpacity>
                 </View>
                 
                 {/* Lista de afectaciones agregadas */}
-                {afectaciones.length > 0 ? (
+                {afectaciones.length > 0 && (
                   <View style={styles.listContainer}>
                     {afectaciones.map((item, index) => (
                       <View key={index} style={styles.itemContainer}>
-                        <Text style={styles.itemText}>{item}</Text>
+                        <Text style={styles.itemText}>{item.tipo} - {item.severidad}</Text>
                         <TouchableOpacity 
                           style={styles.removeButton}
                           onPress={() => eliminarAfectacion(item)}
@@ -242,9 +331,11 @@ const CaracteristicasModal = ({
                       </View>
                     ))}
                   </View>
-                ) : (
-                  <Text style={styles.emptyText}>No hay afectaciones agregadas</Text>
                 )}
+
+                <Text style={styles.counterText}>
+                  {afectaciones.length}/4 afectaciones
+                </Text>
               </View>
 
               <TouchableOpacity
@@ -290,9 +381,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#666",
   },
-
   modalHeader: {
-    marginBottom: 5,
+    marginBottom: 10,
     paddingBottom: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
@@ -305,6 +395,11 @@ const styles = StyleSheet.create({
   modalBody: {
     marginTop: 10,
   },
+  // Nueva sección para mejorar la organización
+  mainSection: {
+    marginBottom: 20,
+    paddingHorizontal: 8,
+  },
   infoContainer: {
     marginBottom: 15,
   },
@@ -313,6 +408,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 5,
+    color: "#4F4D4D"
   },
   coordsContainer: {
     flexDirection: "row",
@@ -335,42 +431,99 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   errorContainer: {
-    marginBottom: 20,
-    marginHorizontal: 8,
+    marginTop: 5,
   },
   errorInput: {
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 5,
     padding: 8,
+    height: 40,
+  },
+  // Divider para separar secciones
+  divider: {
+    height: 1,
+    backgroundColor: "#eee",
+    marginVertical: 15,
+    width: "100%",
   },
   section: {
     marginBottom: 20,
-    marginHorizontal: 8,
+    paddingHorizontal: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 30,
+    color: "#4F4D4D",
+    textAlign: "center",
   },
   sectionLabel: {
     fontSize: 14,
     marginBottom: 8,
   },
-  pickerContainer: {
+  rowContainer: {
     flexDirection: "row",
-    marginBottom: 10,
+    justifyContent: "space-between",
+    marginBottom: 5,
+    marginTop: 0,
+    alignItems: "flex-end",
   },
-  picker: {
-    flex: 3,
-    height: 40,
+  columnLeft: {
+    flex: 2,
+    marginRight: 8,
+  },
+  columnRight: {
+    flex: 1,
+  },
+  pickerContainer: {
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 5,
+    overflow: 'hidden',
+    height: 48,
+  },
+  pickerContainerSeveridad: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    overflow: 'hidden',
+    height: 48,
+  },
+  picker: {
+    height: 48,
+    width: '100%',
+  },
+  pickerText: {
+    fontSize: 13,
+  },
+  pickerSeveridadText: {
+    fontSize: 9.8,
+  },
+  labelSecundario: {
+    fontSize: 13,
+    marginBottom: 5,
+  },
+  porcentajeInput: {
+    height: 48,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    padding: 8,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 8,
+    marginBottom: 10,
   },
   addButton: {
-    flex: 1,
     backgroundColor: "#28a745",
     borderRadius: 5,
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 10,
     padding: 8,
+    width: 100,
   },
   addButtonText: {
     color: "white",
@@ -392,8 +545,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   removeButton: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     backgroundColor: "#dc3545",
     borderRadius: 12,
     justifyContent: "center",
@@ -402,11 +555,19 @@ const styles = StyleSheet.create({
   removeButtonText: {
     color: "white",
     fontWeight: "bold",
+    fontSize: 10,
   },
-  emptyText: {
+  errorText: {
+    color: "#dc3545",
+    fontSize: 12,
+    marginTop: 5,
+    marginBottom: 5,
+  },
+  counterText: {
+    fontSize: 12,
+    color: "#555",
     fontStyle: "italic",
-    color: "#666",
-    textAlign: "center",
+    textAlign: "right",
     marginTop: 5,
   },
   continueButton: {
@@ -416,7 +577,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20,
+    width: "40%", 
+    alignSelf: "center",
   },
   continueButtonText: {
     color: "white",
