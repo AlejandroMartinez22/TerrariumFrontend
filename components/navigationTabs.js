@@ -12,6 +12,7 @@ import CaracteristicasModal from "./CaracteristicasModal";
 import { useBrigadista } from "../context/BrigadistaContext";
 import { useReferencia } from "../context/ReferenciaContext";
 import { useSubparcelas } from "../context/SubparcelaContext";
+import { useSincronizarSubparcelas } from "../hooks/useSincronizarSubparcelas";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createBottomTabNavigator();
@@ -34,8 +35,12 @@ export default function NavigationTabs() {
   const { subparcelas, loading } = useSubparcelas(); // Obtener subparcelas del contexto
   const isFocused = useIsFocused();
 
+  // Hook para sincronizar con Supabase
+  const { sincronizar, loading: sincronizandoData } = useSincronizarSubparcelas();
+
   // Estado para almacenar las características de todas las subparcelas
   const [subparcelasCaracteristicas, setSubparcelasCaracteristicas] = useState({});
+  const [sincronizando, setSincronizando] = useState(false);
 
   useEffect(() => {
     if (
@@ -82,8 +87,8 @@ export default function NavigationTabs() {
   const handleCloseTutorial = () => {
     setShowTutorial(false);
     
-    // Si estamos en el paso final (5) y hay subparcelas, mostrar el modal para la primera subparcela
-    if (tutorialStep === 5 && subparcelas.length > 0) {
+    // Si estamos en el paso final (6) y hay subparcelas, mostrar el modal para la primera subparcela
+    if (tutorialStep === 6 && subparcelas.length > 0) {
       showNextSubparcelaModal();
     }
     
@@ -161,13 +166,28 @@ export default function NavigationTabs() {
     } else {
       // Todas las subparcelas han sido procesadas
       console.log("Todas las subparcelas han sido procesadas:", nuevosSubparcelasCaracteristicas);
-      Alert.alert(
-        "¡Completado!",
-        "Has registrado con éxito las características de todas las subparcelas.",
-        [{ text: "OK" }]
-      );
       
-      // Aquí podrías realizar cualquier otra acción necesaria después de completar todas las subparcelas
+      // Intentar sincronizar con la base de datos
+      try {
+        setSincronizando(true);
+        await sincronizar(nuevosSubparcelasCaracteristicas);
+        setSincronizando(false);
+        
+        Alert.alert(
+          "¡Felicidades!",
+          "Has completado correctamente los pasos iniciales y los datos se han sincronizado con éxito. A partir de ahora, los colaboradores pueden comenzar con el registro de árboles.",
+          [{ text: "OK" }]
+        );
+      } catch (error) {
+        setSincronizando(false);
+        console.error("Error al sincronizar con la base de datos:", error);
+        
+        Alert.alert(
+          "¡Felicidades!",
+          "Has completado correctamente los pasos iniciales. Los datos se han guardado localmente pero no se pudieron sincronizar con la base de datos. Puedes intentar sincronizarlos más tarde desde la pantalla de visualización.",
+          [{ text: "OK" }]
+        );
+      }
     }
   };
 

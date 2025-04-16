@@ -128,14 +128,9 @@ const CaracteristicasModal = ({
       visible={visible}
       animationType="slide"
       transparent={true}
-      onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>✕</Text>
-          </TouchableOpacity>
-
           <ScrollView>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
@@ -370,16 +365,6 @@ const styles = StyleSheet.create({
     padding: 20,
     width: "90%",
     maxHeight: "80%",
-  },
-  closeButton: {
-    position: "absolute",
-    right: 12,
-    top: 6,
-    zIndex: 1,
-  },
-  closeButtonText: {
-    fontSize: 18,
-    color: "#666",
   },
   modalHeader: {
     marginBottom: 10,

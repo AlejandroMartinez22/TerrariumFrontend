@@ -8,7 +8,8 @@ const TutorialOverlay = ({ step, setStep, onClose }) => {
     'Para facilitar el recorrido, deberás marcar cuatro puntos de referencia en el camino que sirvan como guía durante el desplazamiento.',
     'Para añadir un punto de referencia, mantén pulsado en cualquier parte del mapa; se abrirá una ventana donde deberás ingresar la información solicitada.',
     'Añade los cuatro puntos de referencia en el mapa',
-    '¡Bien hecho! Has registrado con éxito los cuatro puntos de referencia. El siguiente paso es identificar las características de cada una de las subparcelas dentro del conglomerado.'
+    '¡Bien hecho! Has registrado con éxito los cuatro puntos de referencia. El siguiente paso es identificar las características de cada una de las subparcelas dentro del conglomerado.',
+    'Ingresa las características de las cinco subparcelas en las ventanas emergentes'
   ];
 
   const handleNext = () => {
