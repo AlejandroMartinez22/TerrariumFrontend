@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, SafeAreaView, StyleSheet, Text } from "react-native";
+import { View, SafeAreaView, StyleSheet, Text, Image } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 
 import { useBrigadista } from "../context/BrigadistaContext";
 import { getCoordenadas } from "../supabase/getCoordenadas";
 import { useReferencia } from "../context/ReferenciaContext";
-
+import { getCentrosPoblados } from "../supabase/getCentroPoblado";
 import ReferenciaModal from "./puntoReferenciaModal";
 import ReferenciaMarker from "./referenciaMarker";
 import TrayectoModal from "./trayectoModal";
@@ -25,6 +25,7 @@ export default function MapScreen() {
   const [errorMedicion, setErrorMedicion] = useState("");
   const [puntoId, setPuntoId] = useState("");
   const [tempPuntoData, setTempPuntoData] = useState(null);
+  const [centrosPoblados, setCentrosPoblados] = useState([]);
 
   const defaultCenter = {
     latitude: 7.12539,
@@ -35,7 +36,7 @@ export default function MapScreen() {
 
   // Cambiado el valor inicial a 0.01 para que coincida con el valor inicial del mapa
   const [mapZoom, setMapZoom] = useState(defaultCenter.latitudeDelta);
-  
+
   // Estado para forzar re-renderización cuando cambia el zoom
   const [forceUpdate, setForceUpdate] = useState(0);
 
@@ -61,6 +62,24 @@ export default function MapScreen() {
     };
 
     fetchCoordenadas();
+  }, [brigadista]);
+
+  // Corregido: Ahora la función se llama correctamente getCentrosPoblados
+  useEffect(() => {
+    const fetchCentrosPoblados = async () => {
+      if (brigadista) {
+        try {
+          console.log("Obteniendo centros poblados para:", brigadista);
+          const centros = await getCentrosPoblados(brigadista);
+          console.log("Centros poblados obtenidos:", centros);
+          setCentrosPoblados(centros);
+        } catch (error) {
+          console.error("Error al cargar centros poblados:", error);
+        }
+      }
+    };
+
+    fetchCentrosPoblados();
   }, [brigadista]);
 
   const openModal = (punto, index) => {
@@ -147,12 +166,12 @@ export default function MapScreen() {
   // Función para manejar el cambio de región del mapa
   const handleRegionChange = (region) => {
     const newZoom = region.latitudeDelta;
-    
+
     // Solo actualiza el estado si el valor de zoom cambió significativamente
     if (Math.abs(mapZoom - newZoom) > 0.0001) {
       setMapZoom(newZoom);
       // Forzar re-renderización
-      setForceUpdate(prev => prev + 1);
+      setForceUpdate((prev) => prev + 1);
     }
   };
 
@@ -204,7 +223,7 @@ export default function MapScreen() {
                 strokeColor="rgba(255, 10, 10, 0.8)"
                 fillColor="rgba(255, 20, 20, 0.5)"
               />
-
+              
               {/* Mostramos las etiquetas cuando el zoom es suficiente */}
               {shouldShowLabels && (
                 <Marker
@@ -224,7 +243,13 @@ export default function MapScreen() {
                       fontSize: 100,
                     }}
                   >
-                    <Text style={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "bold",
+                        color: "white",
+                      }}
+                    >
                       {coordenada.nombre_subparcela}
                     </Text>
                   </View>
@@ -232,6 +257,45 @@ export default function MapScreen() {
               )}
             </React.Fragment>
           ))}
+          
+          {/* Debug: Agregar log para verificar los datos */}
+          {console.log("Renderizando centros poblados:", centrosPoblados)}
+          
+          {/* Corregido: Bloque apropiadamente cerrado para centrosPoblados con verificación */}
+          {Array.isArray(centrosPoblados) && centrosPoblados.length > 0 ? (
+            centrosPoblados.map((centro, index) => (
+              <Marker
+                key={`centro-${index}-${forceUpdate}`}
+                coordinate={{
+                  latitude: parseFloat(centro.latitud),
+                  longitude: parseFloat(centro.longitud),
+                }}
+                title={centro.descripcion}
+              >
+                <Image
+                  source={require("../assets/poblado.png")}
+                  style={{ width: 28, height: 28 }}
+                  resizeMode="contain"
+                />
+              </Marker>
+            ))
+          ) : (
+            // Marcador de prueba opcional para depuración
+            <Marker
+              key="test-marker"
+              coordinate={{
+                latitude: defaultCenter.latitude + 0.001,
+                longitude: defaultCenter.longitude + 0.001,
+              }}
+              title="Marcador de prueba"
+            >
+              <Image
+                source={require("../assets/poblado.png")}
+                style={{ width: 28, height: 28 }}
+                resizeMode="contain"
+              />
+            </Marker>
+          )}
 
           {puntosReferencia.map((punto, index) => (
             <ReferenciaMarker
