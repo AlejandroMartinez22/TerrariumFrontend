@@ -7,7 +7,7 @@ const SubparcelaContext = createContext();
 
 export const SubparcelaProvider = ({ children }) => {
   const { brigadista } = useBrigadista();
-  const [subparcelas, setSubparcelas] = useState([]);
+  const [subparcelas, setSubparcelas] = useState([]); //La información de las subparcelas se está guardando en el estado subparcelas, que es un array. 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

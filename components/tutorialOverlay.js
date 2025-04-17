@@ -8,7 +8,8 @@ const TutorialOverlay = ({ step, setStep, onClose }) => {
     'Para facilitar el recorrido, deberás marcar cuatro puntos de referencia en el camino que sirvan como guía durante el desplazamiento.',
     'Para añadir un punto de referencia, mantén pulsado en cualquier parte del mapa; se abrirá una ventana donde deberás ingresar la información solicitada.',
     'Añade los cuatro puntos de referencia en el mapa',
-    '¡Bien hecho! Has registrado con éxito los cuatro puntos de referencia. El siguiente paso es identificar las características de cada una de las subparcelas dentro del conglomerado.'
+    '¡Bien hecho! Has registrado con éxito los cuatro puntos de referencia. El siguiente paso es identificar las características de cada una de las subparcelas dentro del conglomerado.',
+    'Ingresa las características de las cinco subparcelas en las ventanas emergentes'
   ];
 
   const handleNext = () => {
@@ -25,13 +26,6 @@ const TutorialOverlay = ({ step, setStep, onClose }) => {
     <View style={styles.overlay}>
       <View style={styles.popup}>
         <Text style={styles.text}>{steps[step - 1]}</Text>
-
-        {/* Mostrar contador en el paso 4 */}
-        {step === 4 && (
-          <Text style={{ marginTop: 10, textAlign: 'center', fontWeight: '600' }}>
-            Esperando los 4 puntos de referencia...
-          </Text>
-        )}
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -74,11 +68,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 10,
+    pointerEvents: 'auto',
   },
   text: {
     fontSize: 14,
     marginBottom: 12,
     textAlign: 'left',
+  },
+  waitingText: {
+    marginTop: 10,
+    textAlign: 'center',
+    fontWeight: '600',
+    fontSize: 13,
   },
   buttonContainer: {
     alignItems: 'flex-end',
