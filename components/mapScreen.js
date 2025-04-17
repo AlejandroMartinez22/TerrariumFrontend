@@ -2,27 +2,29 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, SafeAreaView, StyleSheet, Text, Image } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useBrigadista } from "../context/BrigadistaContext";
-import { getCoordenadas } from "../supabase/getCoordenadas";
 import { useReferencia } from "../context/ReferenciaContext";
-import { getCentrosPoblados } from "../supabase/getCentroPoblado";
 import ReferenciaModal from "./puntoReferenciaModal";
 import ReferenciaMarker from "./referenciaMarker";
 import TrayectoModal from "./trayectoModal";
-import { obtenerSiguienteId } from "../supabase/getUltimoIdReferencia"; // Importamos la función para obtener el siguiente ID
-import { insertarReferencia } from "../supabase/saveReferencia"; // Función para insertar el punto de referencia
-import { insertarTrayecto } from "../supabase/saveTrayecto"; // Función para insertar el trayecto
-import { actualizarTrayecto } from "../supabase/updateTrayecto";
-import { actualizarReferencia } from "../supabase/updateReferencia";
-import { eliminarReferencia } from "../supabase/deleteReferencia";
 
+// Importar los hooks personalizados
+import { useCoordenadas } from "../hooks/useCoordenadas";
+import { useCentrosPoblados } from "../hooks/useCentrosPoblados";
+import { useReferencias } from "../hooks/usePuntoReferencia";
+import { useTrayectos } from "../hooks/useTrayecto";
 
 export default function MapScreen() {
   const { brigadista } = useBrigadista();
-  const [coordenadas, setCoordenadas] = useState([]);
   const mapRef = useRef(null);
-  const { puntosReferencia, generarReferenciaInicial, setPuntosReferencia } =
-    useReferencia();
+  const { puntosReferencia, generarReferenciaInicial, setPuntosReferencia } = useReferencia();
 
+  // Custom hooks
+  const { coordenadas, fetchCoordenadas } = useCoordenadas(brigadista);
+  const { centrosPoblados } = useCentrosPoblados(brigadista);
+  const { getSiguienteId, guardarReferencia, actualizarPuntoReferencia, borrarReferencia } = useReferencias();
+  const { guardarTrayecto, actualizarDatosTrayecto } = useTrayectos();
+
+  // Estado local
   const [modalVisible, setModalVisible] = useState(false);
   const [trayectoModalVisible, setTrayectoModalVisible] = useState(false);
   const [selectedPunto, setSelectedPunto] = useState(null);
@@ -30,7 +32,7 @@ export default function MapScreen() {
   const [errorMedicion, setErrorMedicion] = useState("");
   const [puntoId, setPuntoId] = useState("");
   const [tempPuntoData, setTempPuntoData] = useState(null);
-  const [centrosPoblados, setCentrosPoblados] = useState([]);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   const defaultCenter = {
     latitude: 7.12539,
@@ -40,52 +42,27 @@ export default function MapScreen() {
   };
 
   const [mapZoom, setMapZoom] = useState(defaultCenter.latitudeDelta);
-  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
-    const fetchCoordenadas = async () => {
-      if (brigadista?.idConglomerado) {
-        const data = await getCoordenadas(brigadista);
-        setCoordenadas(data);
-
-        if (data.length > 0 && mapRef.current) {
-          mapRef.current.fitToCoordinates(
-            data.map((coord) => ({
-              latitude: coord.latitud,
-              longitude: coord.longitud,
-            })),
-            {
-              edgePadding: { top: 50, bottom: 50, left: 50, right: 50 },
-              animated: true,
-            }
-          );
+    if (coordenadas.length > 0 && mapRef.current) {
+      mapRef.current.fitToCoordinates(
+        coordenadas.map((coord) => ({
+          latitude: coord.latitud,
+          longitude: coord.longitud,
+        })),
+        {
+          edgePadding: { top: 50, bottom: 50, left: 50, right: 50 },
+          animated: true,
         }
-      }
-    };
-
-    fetchCoordenadas();
-  }, [brigadista]);
-
-  useEffect(() => {
-    const fetchCentrosPoblados = async () => {
-      if (brigadista) {
-        try {
-          const centros = await getCentrosPoblados(brigadista);
-          setCentrosPoblados(centros);
-        } catch (error) {
-          console.error("Error al cargar centros poblados:", error);
-        }
-      }
-    };
-
-    fetchCentrosPoblados();
-  }, [brigadista]);
+      );
+    }
+  }, [coordenadas]);
 
   const openModal = (punto, index) => {
     setSelectedPunto({ ...punto, index });
     setEditedDescription(punto.description || "");
     setErrorMedicion(punto.errorMedicion || "");
-    setPuntoId(punto.id); // Usamos el ID real asignado
+    setPuntoId(punto.id);
     setModalVisible(true);
   };
 
@@ -104,8 +81,7 @@ export default function MapScreen() {
 
     const puntoActualizado = {
       ...selectedPunto,
-      title:
-        selectedPunto.title || `Punto de referencia ${selectedPunto.index + 1}`,
+      title: selectedPunto.title || `Punto de referencia ${selectedPunto.index + 1}`,
       description: editedDescription,
       errorMedicion: errorMedicion,
       latitude: selectedPunto.latitude,
@@ -115,12 +91,9 @@ export default function MapScreen() {
     setTempPuntoData(puntoActualizado);
     setModalVisible(false);
 
-    // Aquí llamas a la función para actualizar el punto en la base de datos
     try {
-      // Llamada para actualizar el punto de referencia
-      await actualizarReferencia(puntoActualizado, brigadista.cedula);
-
-      // Luego abres el modal del trayecto
+      // Actualiza el punto de referencia usando el hook personalizado
+      await actualizarPuntoReferencia(puntoActualizado, brigadista.cedula);
       setTrayectoModalVisible(true);
     } catch (error) {
       console.error("❌ Error al actualizar el punto de referencia:", error);
@@ -152,16 +125,13 @@ export default function MapScreen() {
 
     try {
       if (!esEdicion) {
-        // Inserta el nuevo trayecto
-        const puntoId = await insertarReferencia(
-          puntoConTrayecto,
-          brigadista.cedula
-        );
-        await insertarTrayecto(datosTrayecto, puntoId);
+        // Inserta el nuevo punto y trayecto usando hooks personalizados
+        const puntoId = await guardarReferencia(puntoConTrayecto, brigadista.cedula);
+        await guardarTrayecto(datosTrayecto, puntoId);
         console.log("✅ Punto y trayecto guardados");
       } else {
-        // Actualiza el trayecto existente
-        await actualizarTrayecto(datosTrayecto, puntoBase.id);
+        // Actualiza el trayecto existente usando hook personalizado
+        await actualizarDatosTrayecto(datosTrayecto, puntoBase.id);
         console.log("✏️ Trayecto actualizado correctamente");
       }
     } catch (error) {
@@ -170,11 +140,10 @@ export default function MapScreen() {
   };
 
   const handleLongPress = async (event) => {
-    console.log(selectedPunto);
     const coordinate = event.nativeEvent.coordinate;
 
-    // Obtén el siguiente ID utilizando la función asincrónica
-    const siguienteId = await obtenerSiguienteId();
+    // Obtén el siguiente ID utilizando el hook personalizado
+    const siguienteId = await getSiguienteId();
 
     if (siguienteId) {
       const nuevoPunto = {
@@ -183,7 +152,6 @@ export default function MapScreen() {
         longitude: coordinate.longitude,
       };
 
-      // Asigna los valores correspondientes
       setSelectedPunto({ ...nuevoPunto, index: puntosReferencia.length });
       setEditedDescription("");
       setErrorMedicion("");
@@ -194,29 +162,22 @@ export default function MapScreen() {
     }
   };
 
-
-  // Luego, modifica tu función eliminarPunto para usar el nuevo método:
   const eliminarPunto = async (puntoId) => {
     try {
-      // Llamar a la función para eliminar de la base de datos
-      const resultado = await eliminarReferencia(puntoId);
+      // Eliminar usando el hook personalizado
+      const resultado = await borrarReferencia(puntoId);
 
       if (resultado.success) {
-        // Si la eliminación en la base de datos fue exitosa, actualiza el estado local
-        const nuevosPuntos = puntosReferencia.filter(
-          (punto) => punto.id !== puntoId
-        );
+        const nuevosPuntos = puntosReferencia.filter((punto) => punto.id !== puntoId);
         setPuntosReferencia(nuevosPuntos);
         console.log(`Punto con ID ${puntoId} eliminado correctamente`);
       } else {
         console.error("Error al eliminar el punto:", resultado.error);
-        // Opcionalmente, puedes mostrar un mensaje de error al usuario
       }
     } catch (error) {
       console.error("Error al procesar la eliminación:", error);
     }
 
-    // Cerrar el modal después de intentar eliminar el punto
     setModalVisible(false);
   };
 
@@ -337,7 +298,7 @@ export default function MapScreen() {
         errorMedicion={errorMedicion}
         setErrorMedicion={setErrorMedicion}
         puntoId={puntoId}
-        selectedPunto={selectedPunto} // Añade esta línea
+        selectedPunto={selectedPunto}
       />
 
       <TrayectoModal
