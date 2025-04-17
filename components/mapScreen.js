@@ -13,6 +13,8 @@ import { insertarReferencia } from "../supabase/saveReferencia"; // Función par
 import { insertarTrayecto } from "../supabase/saveTrayecto"; // Función para insertar el trayecto
 import { actualizarTrayecto } from "../supabase/updateTrayecto";
 import { actualizarReferencia } from "../supabase/updateReferencia";
+import { eliminarReferencia } from "../supabase/deleteReferencia";
+
 
 export default function MapScreen() {
   const { brigadista } = useBrigadista();
@@ -179,7 +181,7 @@ export default function MapScreen() {
         ...generarReferenciaInicial(siguienteId, coordinate),
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
-      }
+      };
 
       // Asigna los valores correspondientes
       setSelectedPunto({ ...nuevoPunto, index: puntosReferencia.length });
@@ -192,20 +194,29 @@ export default function MapScreen() {
     }
   };
 
-  const eliminarPunto = (puntoId) => {
-    // Filtramos el punto por su ID para eliminarlo de la lista de puntos
-    const nuevosPuntos = puntosReferencia.filter(
-      (punto) => punto.id !== puntoId
-    );
-    setPuntosReferencia(nuevosPuntos);
 
-    // Opcionalmente, puedes agregar la lógica para eliminar el punto de la base de datos aquí
-    console.log(`Punto con ID ${puntoId} eliminado de la lista`);
+  // Luego, modifica tu función eliminarPunto para usar el nuevo método:
+  const eliminarPunto = async (puntoId) => {
+    try {
+      // Llamar a la función para eliminar de la base de datos
+      const resultado = await eliminarReferencia(puntoId);
 
-    // Si necesitas eliminar el punto en la base de datos también, puedes hacerlo aquí:
-    // await supabase.from('punto_referencia').delete().match({ id: puntoId });
+      if (resultado.success) {
+        // Si la eliminación en la base de datos fue exitosa, actualiza el estado local
+        const nuevosPuntos = puntosReferencia.filter(
+          (punto) => punto.id !== puntoId
+        );
+        setPuntosReferencia(nuevosPuntos);
+        console.log(`Punto con ID ${puntoId} eliminado correctamente`);
+      } else {
+        console.error("Error al eliminar el punto:", resultado.error);
+        // Opcionalmente, puedes mostrar un mensaje de error al usuario
+      }
+    } catch (error) {
+      console.error("Error al procesar la eliminación:", error);
+    }
 
-    // Cerrar el modal después de eliminar el punto
+    // Cerrar el modal después de intentar eliminar el punto
     setModalVisible(false);
   };
 
