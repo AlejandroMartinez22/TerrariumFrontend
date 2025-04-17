@@ -11,7 +11,7 @@ import {
 const ReferenciaModal = ({
   visible,
   onClose,
-  onContinuar, // Cambiado de onGuardar a onContinuar
+  onContinuar,
   onEliminar,
   puntoId,
   selectedPunto,
@@ -51,8 +51,8 @@ const ReferenciaModal = ({
                 <TextInput
                   style={styles.coordInput}
                   value={
-                    selectedPunto?.coordinate?.latitude
-                      ? selectedPunto.coordinate.latitude.toFixed(5).toString()
+                    selectedPunto?.latitude
+                      ? selectedPunto.latitude.toFixed(5).toString()
                       : ""
                   }
                   editable={false}
@@ -63,8 +63,8 @@ const ReferenciaModal = ({
                 <TextInput
                   style={styles.coordInput}
                   value={
-                    selectedPunto?.coordinate?.longitude
-                      ? selectedPunto.coordinate.longitude.toFixed(5).toString()
+                    selectedPunto?.longitude
+                      ? selectedPunto.longitude.toFixed(5).toString()
                       : ""
                   }
                   editable={false}
@@ -101,10 +101,10 @@ const ReferenciaModal = ({
                   styles.saveButton,
                   !isFormValid && { backgroundColor: "#ccc" },
                 ]}
-                onPress={onContinuar} 
+                onPress={onContinuar}
                 disabled={!isFormValid}
               >
-                <Text style={styles.buttonText}>Continuar</Text> 
+                <Text style={styles.buttonText}>Continuar</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -112,10 +112,6 @@ const ReferenciaModal = ({
                 onPress={onEliminar}
               >
                 <Text style={styles.buttonText}>Eliminar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-                <Text style={styles.buttonText}>Cancelar</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -239,14 +235,6 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  cancelButton: {
-    backgroundColor: "#999",
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,

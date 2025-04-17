@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, SafeAreaView, StyleSheet, Text, Image } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { useReferenciaRealtime } from "../hooks/useReferenciaRealtime";
 import { useBrigadista } from "../context/BrigadistaContext";
 import { getCoordenadas } from "../supabase/getCoordenadas";
 import { useReferencia } from "../context/ReferenciaContext";
@@ -12,12 +11,13 @@ import TrayectoModal from "./trayectoModal";
 import { obtenerSiguienteId } from "../supabase/getUltimoIdReferencia"; // Importamos la función para obtener el siguiente ID
 import { insertarReferencia } from "../supabase/saveReferencia"; // Función para insertar el punto de referencia
 import { insertarTrayecto } from "../supabase/saveTrayecto"; // Función para insertar el trayecto
+import { actualizarTrayecto } from "../supabase/updateTrayecto";
+import { actualizarReferencia } from "../supabase/updateReferencia";
 
 export default function MapScreen() {
   const { brigadista } = useBrigadista();
   const [coordenadas, setCoordenadas] = useState([]);
   const mapRef = useRef(null);
-  const { siguienteId } = useReferenciaRealtime();
   const { puntosReferencia, generarReferenciaInicial, setPuntosReferencia } =
     useReferencia();
 
@@ -83,7 +83,7 @@ export default function MapScreen() {
     setSelectedPunto({ ...punto, index });
     setEditedDescription(punto.description || "");
     setErrorMedicion(punto.errorMedicion || "");
-    setPuntoId(`PR00${index + 1}`);
+    setPuntoId(punto.id); // Usamos el ID real asignado
     setModalVisible(true);
   };
 
@@ -97,7 +97,7 @@ export default function MapScreen() {
     setTrayectoModalVisible(false);
   };
 
-  const continuar = () => {
+  const continuar = async () => {
     if (!selectedPunto) return;
 
     const puntoActualizado = {
@@ -112,47 +112,63 @@ export default function MapScreen() {
 
     setTempPuntoData(puntoActualizado);
     setModalVisible(false);
-    setTrayectoModalVisible(true);
+
+    // Aquí llamas a la función para actualizar el punto en la base de datos
+    try {
+      // Llamada para actualizar el punto de referencia
+      await actualizarReferencia(puntoActualizado, brigadista.cedula);
+
+      // Luego abres el modal del trayecto
+      setTrayectoModalVisible(true);
+    } catch (error) {
+      console.error("❌ Error al actualizar el punto de referencia:", error);
+    }
   };
 
   const confirmarTrayecto = async (datosTrayecto) => {
-    if (!tempPuntoData) return;
+    if (!tempPuntoData && !selectedPunto) return;
 
-    // Combinamos los datos del punto de referencia y del trayecto
+    const puntoBase = tempPuntoData || selectedPunto;
     const puntoConTrayecto = {
-      ...tempPuntoData,
+      ...puntoBase,
       trayecto: datosTrayecto,
     };
 
-    let nuevosPuntos;
-    if (puntoConTrayecto.index < puntosReferencia.length) {
-      nuevosPuntos = puntosReferencia.map((punto, i) =>
-        i === puntoConTrayecto.index ? puntoConTrayecto : punto
-      );
-    } else {
-      nuevosPuntos = [...puntosReferencia, puntoConTrayecto];
+    const esEdicion = puntoBase?.trayecto !== undefined;
+
+    const nuevosPuntos = puntosReferencia.map((punto, i) =>
+      i === puntoConTrayecto.index ? puntoConTrayecto : punto
+    );
+
+    // Si es un punto nuevo (no existe en el array), lo añadimos
+    if (puntoConTrayecto.index >= puntosReferencia.length) {
+      nuevosPuntos.push(puntoConTrayecto);
     }
 
     setPuntosReferencia(nuevosPuntos);
     setTrayectoModalVisible(false);
 
-    // Guardamos el punto de referencia y el trayecto en la base de datos
     try {
-      const puntoId = await insertarReferencia(
-        puntoConTrayecto,
-        brigadista.cedula
-      ); // Guarda el punto de referencia
-
-      // Ahora guardamos el trayecto asociado
-      await insertarTrayecto(datosTrayecto, puntoId); // Guarda el trayecto en la base de datos
-
-      console.log("Punto de referencia y trayecto insertados correctamente");
+      if (!esEdicion) {
+        // Inserta el nuevo trayecto
+        const puntoId = await insertarReferencia(
+          puntoConTrayecto,
+          brigadista.cedula
+        );
+        await insertarTrayecto(datosTrayecto, puntoId);
+        console.log("✅ Punto y trayecto guardados");
+      } else {
+        // Actualiza el trayecto existente
+        await actualizarTrayecto(datosTrayecto, puntoBase.id);
+        console.log("✏️ Trayecto actualizado correctamente");
+      }
     } catch (error) {
-      console.error("Error al insertar punto de referencia o trayecto:", error);
+      console.error("❌ Error al guardar o editar:", error);
     }
   };
 
   const handleLongPress = async (event) => {
+    console.log(selectedPunto);
     const coordinate = event.nativeEvent.coordinate;
 
     // Obtén el siguiente ID utilizando la función asincrónica
@@ -160,11 +176,10 @@ export default function MapScreen() {
 
     if (siguienteId) {
       const nuevoPunto = {
-        ...generarReferenciaInicial(coordinate),
+        ...generarReferenciaInicial(siguienteId, coordinate),
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
-        id: siguienteId, // Asigna el siguiente ID generado
-      };
+      }
 
       // Asigna los valores correspondientes
       setSelectedPunto({ ...nuevoPunto, index: puntosReferencia.length });
@@ -305,21 +320,20 @@ export default function MapScreen() {
         visible={modalVisible}
         onClose={handleCloseModal}
         onContinuar={continuar}
-        onEliminar={() => eliminarPunto(selectedPunto?.id)} // Pasa la función de eliminar con el ID del punto
+        onEliminar={() => eliminarPunto(selectedPunto?.id)}
         editedDescription={editedDescription}
         setEditedDescription={setEditedDescription}
         errorMedicion={errorMedicion}
         setErrorMedicion={setErrorMedicion}
         puntoId={puntoId}
+        selectedPunto={selectedPunto} // Añade esta línea
       />
 
       <TrayectoModal
         visible={trayectoModalVisible}
         onClose={handleCloseTrayectoModal}
         onConfirmar={confirmarTrayecto}
-        trayectos={puntosReferencia
-          .map((punto) => punto.trayecto)
-          .filter(Boolean)}
+        trayectos={puntosReferencia.map((p) => p.trayecto).filter(Boolean)}
         selectedPunto={tempPuntoData || selectedPunto}
         trayectoEditado={(tempPuntoData || selectedPunto)?.trayecto}
       />

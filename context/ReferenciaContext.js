@@ -1,4 +1,3 @@
-// context/ReferenciaContext.js
 import React, { createContext, useContext, useState } from "react";
 
 const ReferenciaContext = createContext();
@@ -6,8 +5,8 @@ const ReferenciaContext = createContext();
 export const ReferenciaProvider = ({ children }) => {
   const [puntosReferencia, setPuntosReferencia] = useState([]);
 
-  const generarReferenciaInicial = (coordinate) => {
-    const id = `PR00${puntosReferencia.length + 1}`;
+  // 🔧 Esta función ahora recibe el ID como argumento
+  const generarReferenciaInicial = (id, coordinate) => {
     return {
       id,
       title: "",
@@ -17,9 +16,18 @@ export const ReferenciaProvider = ({ children }) => {
     };
   };
 
+  const resetReferencias = () => {
+    setPuntosReferencia([]);
+  };
+
   return (
     <ReferenciaContext.Provider
-      value={{ puntosReferencia, setPuntosReferencia, generarReferenciaInicial }}
+      value={{
+        puntosReferencia,
+        setPuntosReferencia,
+        generarReferenciaInicial,
+        resetReferencias,
+      }}
     >
       {children}
     </ReferenciaContext.Provider>

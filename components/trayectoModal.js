@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TextInput,
 } from "react-native";
-import { generarTrayectoId } from "../hooks/genIdTrayecto"; // Importa la función para generar el ID si es necesario
+import { generarTrayectoId } from "../hooks/genIdTrayecto";
 
 export default function TrayectoModal({
   visible,
@@ -15,32 +15,28 @@ export default function TrayectoModal({
   onConfirmar,
   trayectos = [],
   selectedPunto,
-  trayectoEditado = null, // Este prop se usará para cargar un trayecto existente si estamos editando
+  trayectoEditado = null,
 }) {
   const [medioTransporte, setMedioTransporte] = useState("Terrestre");
   const [duracion, setDuracion] = useState("");
   const [distancia, setDistancia] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [idTrayecto, setIdTrayecto] = useState(""); // ID del trayecto
+  const [idTrayecto, setIdTrayecto] = useState("");
 
   const transportOptions = ["Terrestre", "Marítimo", "Aéreo"];
 
-  // Limpiar campos y generar ID cuando se abre el modal
   useEffect(() => {
     if (!visible) return;
 
-    // Si estamos editando un trayecto, cargamos los valores del trayecto editado
     if (trayectoEditado) {
       setMedioTransporte(trayectoEditado.medioTransporte);
       setDuracion(trayectoEditado.duracion);
       setDistancia(trayectoEditado.distancia);
       setIdTrayecto(trayectoEditado.idTrayecto);
     } else {
-      // Si no estamos editando, creamos un nuevo ID si es necesario
       setMedioTransporte("Terrestre");
       setDuracion("");
       setDistancia("");
-      // Si no hay trayecto editado, generamos un ID único
       setIdTrayecto(generarTrayectoId(trayectos));
     }
 
@@ -48,10 +44,6 @@ export default function TrayectoModal({
   }, [visible, trayectos, trayectoEditado]);
 
   const handleGuardar = () => {
-    // Asegúrate de imprimir el valor de 'medioTransporte'
-    console.log("Valor de medio_transporte antes de insertar:", medioTransporte);
-  
-    // Crear objeto con los datos del trayecto
     const datosTrayecto = {
       idTrayecto,
       medioTransporte,
@@ -62,13 +54,10 @@ export default function TrayectoModal({
         coordinate: selectedPunto?.coordinate,
       },
     };
-  
-    // Llamar a la función para confirmar los cambios
-    onConfirmar(datosTrayecto);
-  
-    // No cerrar el modal aquí, dejar que el componente padre lo haga
+
+    const esEdicion = !!trayectoEditado;
+    onConfirmar(datosTrayecto, esEdicion);
   };
-  
 
   const selectTransportOption = (option) => {
     setMedioTransporte(option);
@@ -76,15 +65,9 @@ export default function TrayectoModal({
   };
 
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
+    <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          {/* Header */}
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Trayecto Realizado</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -92,10 +75,8 @@ export default function TrayectoModal({
             </TouchableOpacity>
           </View>
 
-          {/* Mostrar ID */}
           <Text style={styles.idText}>ID: {idTrayecto}</Text>
 
-          {/* Formulario */}
           <View style={styles.formContainer}>
             <View style={styles.formRow}>
               <Text style={styles.label}>Medio de transporte</Text>
@@ -115,9 +96,9 @@ export default function TrayectoModal({
                       onPress={() => selectTransportOption(option)}
                     >
                       <Text
-                        style={[ 
-                          styles.dropdownItemText, 
-                          medioTransporte === option && styles.selectedOption
+                        style={[
+                          styles.dropdownItemText,
+                          medioTransporte === option && styles.selectedOption,
                         ]}
                       >
                         {option}
@@ -128,7 +109,6 @@ export default function TrayectoModal({
               )}
             </View>
 
-            {/* Duración */}
             <View style={styles.formRow}>
               <Text style={styles.label}>Duración (Horas y Minutos)</Text>
               <TextInput
@@ -140,7 +120,6 @@ export default function TrayectoModal({
               />
             </View>
 
-            {/* Distancia */}
             <View style={styles.formRow}>
               <Text style={styles.label}>Distancia del Trayecto (km)</Text>
               <TextInput
@@ -153,11 +132,10 @@ export default function TrayectoModal({
             </View>
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.guardarButton}
-                onPress={handleGuardar}
-              >
-                <Text style={styles.guardarButtonText}>✓ Guardar</Text>
+              <TouchableOpacity style={styles.guardarButton} onPress={handleGuardar}>
+                <Text style={styles.guardarButtonText}>
+                  {trayectoEditado ? "✎ Actualizar" : "✓ Guardar"}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -188,7 +166,7 @@ const styles = StyleSheet.create({
   },
   modalHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     padding: 15,
     borderBottomWidth: 1,
@@ -198,6 +176,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#000",
+    textAlign: "center", 
+    flex: 1,
   },
   closeButton: {
     padding: 5,
