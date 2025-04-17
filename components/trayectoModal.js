@@ -41,14 +41,17 @@ export default function TrayectoModal({
       setDuracion("");
       setDistancia("");
       // Si no hay trayecto editado, generamos un ID único
-      setIdTrayecto(generarTrayectoId(trayectos)); 
+      setIdTrayecto(generarTrayectoId(trayectos));
     }
 
     setShowDropdown(false);
   }, [visible, trayectos, trayectoEditado]);
 
   const handleGuardar = () => {
-    // Creamos un objeto con los datos del trayecto
+    // Asegúrate de imprimir el valor de 'medioTransporte'
+    console.log("Valor de medio_transporte antes de insertar:", medioTransporte);
+  
+    // Crear objeto con los datos del trayecto
     const datosTrayecto = {
       idTrayecto,
       medioTransporte,
@@ -59,12 +62,13 @@ export default function TrayectoModal({
         coordinate: selectedPunto?.coordinate,
       },
     };
-
-    // Llamamos a la función para confirmar los cambios
+  
+    // Llamar a la función para confirmar los cambios
     onConfirmar(datosTrayecto);
-
-    // No cerramos el modal aquí, dejamos que el componente padre lo haga
+  
+    // No cerrar el modal aquí, dejar que el componente padre lo haga
   };
+  
 
   const selectTransportOption = (option) => {
     setMedioTransporte(option);
@@ -111,9 +115,9 @@ export default function TrayectoModal({
                       onPress={() => selectTransportOption(option)}
                     >
                       <Text
-                        style={[
-                          styles.dropdownItemText,
-                          medioTransporte === option && styles.selectedOption,
+                        style={[ 
+                          styles.dropdownItemText, 
+                          medioTransporte === option && styles.selectedOption
                         ]}
                       >
                         {option}

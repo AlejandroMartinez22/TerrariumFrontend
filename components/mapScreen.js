@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, SafeAreaView, StyleSheet, Text, Image } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-
+import { useReferenciaRealtime } from "../hooks/useReferenciaRealtime";
 import { useBrigadista } from "../context/BrigadistaContext";
 import { getCoordenadas } from "../supabase/getCoordenadas";
 import { useReferencia } from "../context/ReferenciaContext";
@@ -9,12 +9,15 @@ import { getCentrosPoblados } from "../supabase/getCentroPoblado";
 import ReferenciaModal from "./puntoReferenciaModal";
 import ReferenciaMarker from "./referenciaMarker";
 import TrayectoModal from "./trayectoModal";
+import { obtenerSiguienteId } from "../supabase/getUltimoIdReferencia"; // Importamos la función para obtener el siguiente ID
+import { insertarReferencia } from "../supabase/saveReferencia"; // Función para insertar el punto de referencia
+import { insertarTrayecto } from "../supabase/saveTrayecto"; // Función para insertar el trayecto
 
 export default function MapScreen() {
   const { brigadista } = useBrigadista();
   const [coordenadas, setCoordenadas] = useState([]);
   const mapRef = useRef(null);
-
+  const { siguienteId } = useReferenciaRealtime();
   const { puntosReferencia, generarReferenciaInicial, setPuntosReferencia } =
     useReferencia();
 
@@ -34,10 +37,7 @@ export default function MapScreen() {
     longitudeDelta: 0.01,
   };
 
-  // Cambiado el valor inicial a 0.01 para que coincida con el valor inicial del mapa
   const [mapZoom, setMapZoom] = useState(defaultCenter.latitudeDelta);
-
-  // Estado para forzar re-renderización cuando cambia el zoom
   const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
@@ -64,14 +64,11 @@ export default function MapScreen() {
     fetchCoordenadas();
   }, [brigadista]);
 
-  // Corregido: Ahora la función se llama correctamente getCentrosPoblados
   useEffect(() => {
     const fetchCentrosPoblados = async () => {
       if (brigadista) {
         try {
-          console.log("Obteniendo centros poblados para:", brigadista);
           const centros = await getCentrosPoblados(brigadista);
-          console.log("Centros poblados obtenidos:", centros);
           setCentrosPoblados(centros);
         } catch (error) {
           console.error("Error al cargar centros poblados:", error);
@@ -118,9 +115,10 @@ export default function MapScreen() {
     setTrayectoModalVisible(true);
   };
 
-  const confirmarTrayecto = (datosTrayecto) => {
+  const confirmarTrayecto = async (datosTrayecto) => {
     if (!tempPuntoData) return;
 
+    // Combinamos los datos del punto de referencia y del trayecto
     const puntoConTrayecto = {
       ...tempPuntoData,
       trayecto: datosTrayecto,
@@ -137,46 +135,75 @@ export default function MapScreen() {
 
     setPuntosReferencia(nuevosPuntos);
     setTrayectoModalVisible(false);
+
+    // Guardamos el punto de referencia y el trayecto en la base de datos
+    try {
+      const puntoId = await insertarReferencia(
+        puntoConTrayecto,
+        brigadista.cedula
+      ); // Guarda el punto de referencia
+
+      // Ahora guardamos el trayecto asociado
+      await insertarTrayecto(datosTrayecto, puntoId); // Guarda el trayecto en la base de datos
+
+      console.log("Punto de referencia y trayecto insertados correctamente");
+    } catch (error) {
+      console.error("Error al insertar punto de referencia o trayecto:", error);
+    }
   };
 
-  const eliminarPunto = () => {
+  const handleLongPress = async (event) => {
+    const coordinate = event.nativeEvent.coordinate;
+
+    // Obtén el siguiente ID utilizando la función asincrónica
+    const siguienteId = await obtenerSiguienteId();
+
+    if (siguienteId) {
+      const nuevoPunto = {
+        ...generarReferenciaInicial(coordinate),
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+        id: siguienteId, // Asigna el siguiente ID generado
+      };
+
+      // Asigna los valores correspondientes
+      setSelectedPunto({ ...nuevoPunto, index: puntosReferencia.length });
+      setEditedDescription("");
+      setErrorMedicion("");
+      setPuntoId(nuevoPunto.id);
+      setModalVisible(true);
+    } else {
+      console.error("No se pudo generar un nuevo ID.");
+    }
+  };
+
+  const eliminarPunto = (puntoId) => {
+    // Filtramos el punto por su ID para eliminarlo de la lista de puntos
     const nuevosPuntos = puntosReferencia.filter(
-      (_, i) => i !== selectedPunto.index
+      (punto) => punto.id !== puntoId
     );
     setPuntosReferencia(nuevosPuntos);
+
+    // Opcionalmente, puedes agregar la lógica para eliminar el punto de la base de datos aquí
+    console.log(`Punto con ID ${puntoId} eliminado de la lista`);
+
+    // Si necesitas eliminar el punto en la base de datos también, puedes hacerlo aquí:
+    // await supabase.from('punto_referencia').delete().match({ id: puntoId });
+
+    // Cerrar el modal después de eliminar el punto
     setModalVisible(false);
-    setTempPuntoData(null);
   };
 
-  const handleLongPress = (event) => {
-    const coordinate = event.nativeEvent.coordinate;
-    const nuevoPunto = {
-      ...generarReferenciaInicial(coordinate),
-      latitude: coordinate.latitude,
-      longitude: coordinate.longitude,
-    };
-
-    setSelectedPunto({ ...nuevoPunto, index: puntosReferencia.length });
-    setEditedDescription("");
-    setErrorMedicion("");
-    setPuntoId(nuevoPunto.id);
-    setModalVisible(true);
-  };
-
-  // Función para manejar el cambio de región del mapa
   const handleRegionChange = (region) => {
     const newZoom = region.latitudeDelta;
 
-    // Solo actualiza el estado si el valor de zoom cambió significativamente
     if (Math.abs(mapZoom - newZoom) > 0.0001) {
       setMapZoom(newZoom);
-      // Forzar re-renderización
       setForceUpdate((prev) => prev + 1);
     }
   };
 
-  // Un mejor umbral para mostrar las etiquetas (ajusta este valor según necesites)
-  const shouldShowLabels = mapZoom < 0.005; // Muestra etiquetas cuando el zoom es cercano
+  const shouldShowLabels = mapZoom < 0.005;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -223,26 +250,14 @@ export default function MapScreen() {
                 strokeColor="rgba(255, 10, 10, 0.8)"
                 fillColor="rgba(255, 20, 20, 0.5)"
               />
-              
-              {/* Mostramos las etiquetas cuando el zoom es suficiente */}
               {shouldShowLabels && (
                 <Marker
                   coordinate={{
                     latitude: coordenada.latitud,
                     longitude: coordenada.longitud,
                   }}
-                  anchor={{ x: 0.5, y: 1.5 }}
-                  tracksViewChanges={true} // Cambiado a true para que reaccione a los cambios
                 >
-                  <View
-                    style={{
-                      backgroundColor: "transparent",
-                      paddingHorizontal: 0,
-                      paddingVertical: 4,
-                      borderRadius: 4,
-                      fontSize: 100,
-                    }}
-                  >
+                  <View style={{ backgroundColor: "transparent", padding: 4 }}>
                     <Text
                       style={{
                         fontSize: 12,
@@ -257,37 +272,15 @@ export default function MapScreen() {
               )}
             </React.Fragment>
           ))}
-          
-          {/* Debug: Agregar log para verificar los datos */}
-          {console.log("Renderizando centros poblados:", centrosPoblados)}
-          
-          {/* Corregido: Bloque apropiadamente cerrado para centrosPoblados con verificación */}
-          {Array.isArray(centrosPoblados) && centrosPoblados.length > 0 ? (
-            centrosPoblados.map((centro, index) => (
-              <Marker
-                key={`centro-${index}-${forceUpdate}`}
-                coordinate={{
-                  latitude: parseFloat(centro.latitud),
-                  longitude: parseFloat(centro.longitud),
-                }}
-                title={centro.descripcion}
-              >
-                <Image
-                  source={require("../assets/poblado.png")}
-                  style={{ width: 28, height: 28 }}
-                  resizeMode="contain"
-                />
-              </Marker>
-            ))
-          ) : (
-            // Marcador de prueba opcional para depuración
+
+          {centrosPoblados.map((centro, index) => (
             <Marker
-              key="test-marker"
+              key={`centro-${index}-${forceUpdate}`}
               coordinate={{
-                latitude: defaultCenter.latitude + 0.001,
-                longitude: defaultCenter.longitude + 0.001,
+                latitude: parseFloat(centro.latitud),
+                longitude: parseFloat(centro.longitud),
               }}
-              title="Marcador de prueba"
+              title={centro.descripcion}
             >
               <Image
                 source={require("../assets/poblado.png")}
@@ -295,7 +288,7 @@ export default function MapScreen() {
                 resizeMode="contain"
               />
             </Marker>
-          )}
+          ))}
 
           {puntosReferencia.map((punto, index) => (
             <ReferenciaMarker
@@ -312,13 +305,12 @@ export default function MapScreen() {
         visible={modalVisible}
         onClose={handleCloseModal}
         onContinuar={continuar}
-        onEliminar={eliminarPunto}
-        puntoId={puntoId}
-        selectedPunto={selectedPunto}
+        onEliminar={() => eliminarPunto(selectedPunto?.id)} // Pasa la función de eliminar con el ID del punto
         editedDescription={editedDescription}
         setEditedDescription={setEditedDescription}
         errorMedicion={errorMedicion}
         setErrorMedicion={setErrorMedicion}
+        puntoId={puntoId}
       />
 
       <TrayectoModal
@@ -343,6 +335,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
   },
 });

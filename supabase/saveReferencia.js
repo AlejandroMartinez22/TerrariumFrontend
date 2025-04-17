@@ -1,25 +1,23 @@
-import { supabase } from "./supabaseClient";
+import supabase from './supabaseClient';
 
-export const guardarReferencia = async ({ id, latitude, longitude, description, error }) => {
-  const data = {
-    latitude,
-    longitude,
-    description,
-    error,
-  };
+export const insertarReferencia = async (punto, cedulaBrigadista) => {
+  const { id, latitude, longitude, description, errorMedicion } = punto;
 
-  if (id) {
-    const { error: updateError } = await supabase
-      .from('referencias')
-      .update(data)
-      .eq('id', id);
+  const { error } = await supabase
+    .from('punto_referencia')
+    .insert([
+      {
+        id,
+        latitud: latitude.toString(),
+        longitud: longitude.toString(),
+        tipo: 'punto referencia', // ajusta según el tipo real si lo tienes
+        descripcion: description,
+        error: errorMedicion,
+        cedula_brigadista: cedulaBrigadista,
+      },
+    ]);
 
-    if (updateError) throw updateError;
-  } else {
-    const { error: insertError } = await supabase
-      .from('referencias')
-      .insert([data]);
+  if (error) throw error;
 
-    if (insertError) throw insertError;
-  }
+  return id;
 };
