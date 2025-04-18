@@ -14,6 +14,7 @@ import { useReferencia } from "../context/ReferenciaContext";
 import { useSubparcelas } from "../context/SubparcelaContext";
 import { useSincronizarSubparcelas } from "../hooks/useSincronizarSubparcelas";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { verificarPuntosReferencia } from "../supabase/verificarPuntosReferencia"; // Asegúrate de ajustar la ruta
 
 const Tab = createBottomTabNavigator();
 
@@ -31,9 +32,12 @@ export default function NavigationTabs() {
   const [selectedPunto, setSelectedPunto] = useState({ latitude: 0, longitude: 0 });
   
   const { brigadista, localTutorialCompletado, completarTutorial } = useBrigadista();
-  const { puntosReferencia } = useReferencia();
+  const { puntosReferencia, cargarPuntosReferencia } = useReferencia();
   const { subparcelas, loading } = useSubparcelas(); // Obtener subparcelas del contexto
   const isFocused = useIsFocused();
+
+  // Estado para almacenar la cantidad de puntos de referencia verificados directamente de la BD
+  const [cantidadPuntos, setCantidadPuntos] = useState(0);
 
   // Hook para sincronizar con Supabase
   const { sincronizar, loading: sincronizandoData } = useSincronizarSubparcelas();
@@ -41,6 +45,38 @@ export default function NavigationTabs() {
   // Estado para almacenar las características de todas las subparcelas
   const [subparcelasCaracteristicas, setSubparcelasCaracteristicas] = useState({});
   const [sincronizando, setSincronizando] = useState(false);
+
+  // Función para verificar puntos de referencia directamente en la base de datos
+  const verificarPuntosDirectamente = async () => {
+    if (brigadista?.cedula) {
+      try {
+        console.log("Verificando puntos directamente para:", brigadista.cedula);
+        const cantidad = await verificarPuntosReferencia(brigadista.cedula);
+        console.log("Cantidad de puntos verificados en BD:", cantidad);
+        setCantidadPuntos(cantidad);
+        
+        // Si estamos en el paso 4 y hay suficientes puntos, avanzar
+        if (tutorialStep === 4 && cantidad >= 4) {
+          console.log(`Avanzando al paso 5 con ${cantidad} puntos verificados en BD`);
+          setTutorialStep(5);
+        }
+        
+        return cantidad;
+      } catch (error) {
+        console.error("Error al verificar puntos:", error);
+      }
+    }
+    return 0;
+  };
+
+  // Cargar puntos de referencia cuando el brigadista está disponible
+  useEffect(() => {
+    if (brigadista && brigadista.cedula) {
+      console.log("Cargando puntos para brigadista:", brigadista.cedula);
+      cargarPuntosReferencia(brigadista.cedula);
+      verificarPuntosDirectamente(); // Verificar cantidad directamente en BD
+    }
+  }, [brigadista]);
 
   useEffect(() => {
     if (
@@ -57,11 +93,39 @@ export default function NavigationTabs() {
     }
   }, [isFocused, brigadista, localTutorialCompletado]);
 
+  // Verificación periódica mientras estamos en el paso 4
   useEffect(() => {
-    if (tutorialStep === 4 && puntosReferencia.length >= 4) {
-      setTutorialStep(5);
+    let intervalId;
+    
+    if (tutorialStep === 4 && brigadista?.cedula) {
+      // Verificar puntos inmediatamente
+      verificarPuntosDirectamente();
+      
+      // Y luego cada 3 segundos mientras estemos en el paso 4
+      intervalId = setInterval(() => {
+        verificarPuntosDirectamente();
+      }, 3000);
     }
-  }, [puntosReferencia, tutorialStep]);
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [tutorialStep, brigadista]);
+
+  // Verificar cantidad de puntos para avanzar en el tutorial
+  useEffect(() => {
+    if (tutorialStep === 4) {
+      console.log("Verificando puntos para tutorial:");
+      console.log("- Puntos en estado local:", puntosReferencia.length);
+      console.log("- Puntos verificados en BD:", cantidadPuntos);
+      
+      // Usar la cantidad verificada de la base de datos
+      if (cantidadPuntos >= 4) {
+        console.log("¡Suficientes puntos verificados en BD! Avanzando al paso 5");
+        setTutorialStep(5);
+      }
+    }
+  }, [puntosReferencia, cantidadPuntos, tutorialStep]);
 
   // Cargar datos guardados del almacenamiento local al iniciar
   useEffect(() => {
@@ -93,6 +157,10 @@ export default function NavigationTabs() {
     }
     
     completarTutorial();
+  };
+
+  const handleVerificarPuntos = () => {
+    verificarPuntosDirectamente();
   };
 
   // Función para mostrar el modal de características para la siguiente subparcela
@@ -258,6 +326,8 @@ export default function NavigationTabs() {
           step={tutorialStep}
           setStep={setTutorialStep}
           onClose={handleCloseTutorial}
+          onVerificarPuntos={handleVerificarPuntos}
+          cantidadPuntos={cantidadPuntos}
         />
       )}
 

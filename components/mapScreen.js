@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, SafeAreaView, StyleSheet, Text, Image } from "react-native";
+import { View, SafeAreaView, StyleSheet, Text, Image, ActivityIndicator } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useBrigadista } from "../context/BrigadistaContext";
-import { useReferencia } from "../context/ReferenciaContext";
 import ReferenciaModal from "./puntoReferenciaModal";
 import ReferenciaMarker from "./referenciaMarker";
 import TrayectoModal from "./trayectoModal";
@@ -10,19 +9,27 @@ import TrayectoModal from "./trayectoModal";
 // Importar los hooks personalizados
 import { useCoordenadas } from "../hooks/useCoordenadas";
 import { useCentrosPoblados } from "../hooks/useCentrosPoblados";
-import { useReferencias } from "../hooks/usePuntoReferencia";
+import { useReferencias } from "../hooks/useReferencia";
 import { useTrayectos } from "../hooks/useTrayecto";
+import { usePuntosReferencia } from "../hooks/usePuntosReferencia";
 
 export default function MapScreen() {
   const { brigadista } = useBrigadista();
   const mapRef = useRef(null);
-  const { puntosReferencia, generarReferenciaInicial, setPuntosReferencia } = useReferencia();
-
+  
   // Custom hooks
-  const { coordenadas, fetchCoordenadas } = useCoordenadas(brigadista);
-  const { centrosPoblados } = useCentrosPoblados(brigadista);
+  const { coordenadas, fetchCoordenadas, isLoading: loadingCoordenadas } = useCoordenadas(brigadista);
+  const { centrosPoblados, isLoading: loadingCentros } = useCentrosPoblados(brigadista);
   const { getSiguienteId, guardarReferencia, actualizarPuntoReferencia, borrarReferencia } = useReferencias();
   const { guardarTrayecto, actualizarDatosTrayecto } = useTrayectos();
+  
+  // Usar el hook para gestionar puntos de referencia desde la base de datos
+  const { 
+    puntosReferencia, 
+    setPuntosReferencia, 
+    fetchPuntosReferencia,
+    isLoading: loadingPuntosReferencia 
+  } = usePuntosReferencia(brigadista);
 
   // Estado local
   const [modalVisible, setModalVisible] = useState(false);
@@ -34,6 +41,7 @@ export default function MapScreen() {
   const [tempPuntoData, setTempPuntoData] = useState(null);
   const [forceUpdate, setForceUpdate] = useState(0);
 
+  // Coordenadas por defecto (Bucaramanga)
   const defaultCenter = {
     latitude: 7.12539,
     longitude: -73.1198,
@@ -42,7 +50,28 @@ export default function MapScreen() {
   };
 
   const [mapZoom, setMapZoom] = useState(defaultCenter.latitudeDelta);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Función para generar puntos de referencia
+  const generarReferenciaInicial = (id, coordinate) => {
+    return {
+      id,
+      title: `Punto de referencia ${puntosReferencia.length + 1}`,
+      description: "",
+      errorMedicion: "",
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+    };
+  };
+
+  // Verificar si todos los datos están cargados
+  useEffect(() => {
+    if (!loadingCoordenadas && !loadingCentros && !loadingPuntosReferencia) {
+      setIsLoading(false);
+    }
+  }, [loadingCoordenadas, loadingCentros, loadingPuntosReferencia]);
+
+  // Ajustar el mapa a las coordenadas si están disponibles
   useEffect(() => {
     if (coordenadas.length > 0 && mapRef.current) {
       mapRef.current.fitToCoordinates(
@@ -57,6 +86,11 @@ export default function MapScreen() {
       );
     }
   }, [coordenadas]);
+
+  // Refrescar puntos cuando sea necesario
+  const refreshPuntos = async () => {
+    await fetchPuntosReferencia();
+  };
 
   const openModal = (punto, index) => {
     setSelectedPunto({ ...punto, index });
@@ -111,12 +145,13 @@ export default function MapScreen() {
 
     const esEdicion = puntoBase?.trayecto !== undefined;
 
+    // Actualiza el estado local
     const nuevosPuntos = puntosReferencia.map((punto, i) =>
-      i === puntoConTrayecto.index ? puntoConTrayecto : punto
+      punto.id === puntoConTrayecto.id ? puntoConTrayecto : punto
     );
 
-    // Si es un punto nuevo (no existe en el array), lo añadimos
-    if (puntoConTrayecto.index >= puntosReferencia.length) {
+    // Si es un punto nuevo (no existe en el array), agrégalo
+    if (!puntosReferencia.some(p => p.id === puntoConTrayecto.id)) {
       nuevosPuntos.push(puntoConTrayecto);
     }
 
@@ -130,10 +165,13 @@ export default function MapScreen() {
         await guardarTrayecto(datosTrayecto, puntoId);
         console.log("✅ Punto y trayecto guardados");
       } else {
-        // Actualiza el trayecto existente usando hook personalizado
+        // Actualiza el trayecto existente usando un hook personalizado
         await actualizarDatosTrayecto(datosTrayecto, puntoBase.id);
         console.log("✏️ Trayecto actualizado correctamente");
       }
+      
+      // Refresca los puntos de la base de datos para asegurar que tengamos los datos más actualizados
+      await refreshPuntos();
     } catch (error) {
       console.error("❌ Error al guardar o editar:", error);
     }
@@ -142,7 +180,7 @@ export default function MapScreen() {
   const handleLongPress = async (event) => {
     const coordinate = event.nativeEvent.coordinate;
 
-    // Obtén el siguiente ID utilizando el hook personalizado
+    // Obtén el siguiente ID usando el hook personalizado
     const siguienteId = await getSiguienteId();
 
     if (siguienteId) {
@@ -192,6 +230,16 @@ export default function MapScreen() {
 
   const shouldShowLabels = mapZoom < 0.005;
 
+  // Mostrar indicador de carga mientras se obtienen los datos
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#0066cc" />
+        <Text style={styles.loadingText}>Cargando mapa...</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mapContainer}>
@@ -204,11 +252,11 @@ export default function MapScreen() {
           onLongPress={handleLongPress}
           onRegionChangeComplete={handleRegionChange}
         >
-          {coordenadas.length > 0 && (
+          {coordenadas.length > 0 && coordenadas[0].latitud && coordenadas[0].longitud && (
             <Circle
               center={{
-                latitude: coordenadas[0].latitud,
-                longitude: coordenadas[0].longitud,
+                latitude: typeof coordenadas[0].latitud === 'string' ? parseFloat(coordenadas[0].latitud) : coordenadas[0].latitud,
+                longitude: typeof coordenadas[0].longitud === 'string' ? parseFloat(coordenadas[0].longitud) : coordenadas[0].longitud,
               }}
               radius={100}
               strokeColor="rgba(0, 122, 255, 0.8)"
@@ -217,69 +265,93 @@ export default function MapScreen() {
             />
           )}
 
-          {coordenadas.map((coordenada, index) => (
-            <React.Fragment key={`coord-${index}-${forceUpdate}`}>
-              <Circle
-                center={{
-                  latitude: coordenada.latitud,
-                  longitude: coordenada.longitud,
-                }}
-                radius={1}
-                strokeColor="rgba(255, 255, 255, 0.9)"
-                fillColor="rgba(255, 255, 255, 0.5)"
-              />
-              <Circle
-                center={{
-                  latitude: coordenada.latitud,
-                  longitude: coordenada.longitud,
-                }}
-                radius={15}
-                strokeColor="rgba(255, 10, 10, 0.8)"
-                fillColor="rgba(255, 20, 20, 0.5)"
-              />
-              {shouldShowLabels && (
-                <Marker
-                  coordinate={{
-                    latitude: coordenada.latitud,
-                    longitude: coordenada.longitud,
+          {coordenadas.map((coordenada, index) => {
+            // Omitir coordenadas inválidas
+            if (!coordenada.latitud || !coordenada.longitud) return null;
+            
+            // Asegurar que las coordenadas sean números
+            const lat = typeof coordenada.latitud === 'string' ? parseFloat(coordenada.latitud) : coordenada.latitud;
+            const lng = typeof coordenada.longitud === 'string' ? parseFloat(coordenada.longitud) : coordenada.longitud;
+            
+            // Omitir si son números inválidos
+            if (isNaN(lat) || isNaN(lng)) return null;
+            
+            return (
+              <React.Fragment key={`coord-${index}-${forceUpdate}`}>
+                <Circle
+                  center={{
+                    latitude: lat,
+                    longitude: lng,
                   }}
-                >
-                  <View style={{ backgroundColor: "transparent", padding: 4 }}>
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        fontWeight: "bold",
-                        color: "white",
-                      }}
-                    >
-                      {coordenada.nombre_subparcela}
-                    </Text>
-                  </View>
-                </Marker>
-              )}
-            </React.Fragment>
-          ))}
+                  radius={1}
+                  strokeColor="rgba(255, 255, 255, 0.9)"
+                  fillColor="rgba(255, 255, 255, 0.5)"
+                />
+                <Circle
+                  center={{
+                    latitude: lat,
+                    longitude: lng,
+                  }}
+                  radius={15}
+                  strokeColor="rgba(255, 10, 10, 0.8)"
+                  fillColor="rgba(255, 20, 20, 0.5)"
+                />
+                {shouldShowLabels && (
+                  <Marker
+                    coordinate={{
+                      latitude: lat,
+                      longitude: lng,
+                    }}
+                  >
+                    <View style={{ backgroundColor: "transparent", padding: 4 }}>
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          fontWeight: "bold",
+                          color: "white",
+                        }}
+                      >
+                        {coordenada.nombre_subparcela}
+                      </Text>
+                    </View>
+                  </Marker>
+                )}
+              </React.Fragment>
+            );
+          })}
 
-          {centrosPoblados.map((centro, index) => (
-            <Marker
-              key={`centro-${index}-${forceUpdate}`}
-              coordinate={{
-                latitude: parseFloat(centro.latitud),
-                longitude: parseFloat(centro.longitud),
-              }}
-              title={centro.descripcion}
-            >
-              <Image
-                source={require("../assets/poblado.png")}
-                style={{ width: 28, height: 28 }}
-                resizeMode="contain"
-              />
-            </Marker>
-          ))}
+          {centrosPoblados.map((centro, index) => {
+            // Omitir coordenadas inválidas
+            if (!centro.latitud || !centro.longitud) return null;
+            
+            // Asegurar que las coordenadas sean números
+            const lat = parseFloat(centro.latitud);
+            const lng = parseFloat(centro.longitud);
+            
+            // Omitir si el parsing resultó en NaN
+            if (isNaN(lat) || isNaN(lng)) return null;
+            
+            return (
+              <Marker
+                key={`centro-${index}-${forceUpdate}`}
+                coordinate={{
+                  latitude: lat,
+                  longitude: lng,
+                }}
+                title={centro.descripcion}
+              >
+                <Image
+                  source={require("../assets/poblado.png")}
+                  style={{ width: 28, height: 28 }}
+                  resizeMode="contain"
+                />
+              </Marker>
+            );
+          })}
 
           {puntosReferencia.map((punto, index) => (
             <ReferenciaMarker
-              key={`ref-${index}-${forceUpdate}`}
+              key={`ref-${punto.id}-${forceUpdate}`}
               punto={punto}
               index={index}
               onPress={openModal}
@@ -323,4 +395,13 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#333',
+  }
 });

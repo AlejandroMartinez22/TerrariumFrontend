@@ -4,7 +4,6 @@ import { insertarReferencia } from "../supabase/saveReferencia";
 import { actualizarReferencia } from "../supabase/updateReferencia";
 import { eliminarReferencia } from "../supabase/deleteReferencia";
 
-
 export function useReferencias() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -28,7 +27,13 @@ export function useReferencias() {
     setIsLoading(true);
     setError(null);
     try {
-      const id = await insertarReferencia(puntoReferencia, cedulaBrigadista);
+      // Pass the object with cedula_brigadista instead of id_brigadista
+      const savedPuntoData = {
+        ...puntoReferencia,
+        cedula_brigadista: cedulaBrigadista
+      };
+      
+      const id = await insertarReferencia(savedPuntoData, cedulaBrigadista);
       setIsLoading(false);
       return id;
     } catch (err) {
@@ -39,17 +44,17 @@ export function useReferencias() {
     }
   };
 
-  const actualizarPuntoReferencia = async (
-    puntoReferencia,
-    cedulaBrigadista
-  ) => {
+  const actualizarPuntoReferencia = async (puntoReferencia, cedulaBrigadista) => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await actualizarReferencia(
-        puntoReferencia,
-        cedulaBrigadista
-      );
+      // Update with cedula_brigadista instead of id_brigadista
+      const updatedPuntoData = {
+        ...puntoReferencia,
+        cedula_brigadista: cedulaBrigadista
+      };
+      
+      const result = await actualizarReferencia(updatedPuntoData, cedulaBrigadista);
       setIsLoading(false);
       return result;
     } catch (err) {
@@ -81,6 +86,6 @@ export function useReferencias() {
     actualizarPuntoReferencia,
     borrarReferencia,
     isLoading,
-    error,
+    error
   };
 }

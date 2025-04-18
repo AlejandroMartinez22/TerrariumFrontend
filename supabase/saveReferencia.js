@@ -1,23 +1,31 @@
+// saveReferencia.js
 import supabase from './supabaseClient';
 
-export const insertarReferencia = async (punto, cedulaBrigadista) => {
-  const { id, latitude, longitude, description, errorMedicion } = punto;
+export const insertarReferencia = async (puntoReferencia, cedulaBrigadista) => {
+  try {
+    // Prepare the data object for insertion with correct column names
+    const puntoData = {
+      id: puntoReferencia.id,
+      latitud: puntoReferencia.latitude,
+      longitud: puntoReferencia.longitude,
+      descripcion: puntoReferencia.description,
+      error: puntoReferencia.errorMedicion,  // Cambiado de error_medicion a error
+      cedula_brigadista: cedulaBrigadista,
+      tipo: puntoReferencia.tipo || 'Referencia'  // Añadido el campo tipo que está en tu tabla
+    };
 
-  const { error } = await supabase
-    .from('punto_referencia')
-    .insert([
-      {
-        id,
-        latitud: latitude.toString(),
-        longitud: longitude.toString(),
-        tipo: 'punto referencia', // ajusta según el tipo real si lo tienes
-        descripcion: description,
-        error: errorMedicion,
-        cedula_brigadista: cedulaBrigadista,
-      },
-    ]);
+    // Insert into database
+    const { data, error } = await supabase
+      .from('punto_referencia')
+      .insert(puntoData)
+      .select();
 
-  if (error) throw error;
-
-  return id;
+    if (error) throw error;
+    
+    // Return the ID of the inserted record
+    return data[0].id;
+  } catch (error) {
+    console.error("Error al insertar punto de referencia:", error);
+    throw error;
+  }
 };

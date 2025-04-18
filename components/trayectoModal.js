@@ -29,7 +29,7 @@ export default function TrayectoModal({
     if (!visible) return;
 
     if (trayectoEditado) {
-      setMedioTransporte(trayectoEditado.medioTransporte);
+      setMedioTransporte(trayectoEditado.medioTransporte || "Terrestre");
       setDuracion(trayectoEditado.duracion);
       setDistancia(trayectoEditado.distancia);
       setIdTrayecto(trayectoEditado.idTrayecto);

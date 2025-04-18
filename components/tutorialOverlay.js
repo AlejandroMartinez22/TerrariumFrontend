@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
 
-const TutorialOverlay = ({ step, setStep, onClose }) => {
+const TutorialOverlay = ({ step, setStep, onClose, onVerificarPuntos, cantidadPuntos }) => {
   const steps = [
     'Como Jefe de Brigada, tu primer paso es dirigir a tu equipo hacia el conglomerado asignado.',
     'Para facilitar el recorrido, deberás marcar cuatro puntos de referencia en el camino que sirvan como guía durante el desplazamiento.',
@@ -20,12 +20,44 @@ const TutorialOverlay = ({ step, setStep, onClose }) => {
     }
   };
 
-  const isNextDisabled = step === 4; // En el paso 4, no se puede avanzar manualmente
+  const handleVerificarPuntos = () => {
+    if (onVerificarPuntos) {
+      onVerificarPuntos();
+    }
+  };
+
+  const isNextDisabled = step === 4 && cantidadPuntos < 4; // En el paso 4, solo avanzar si hay 4+ puntos
+  
+  // Renderizado especial para el paso 4 - verificación de puntos
+  const renderStep4Content = () => {
+    return (
+      <>
+        <Text style={styles.text}>{steps[step - 1]}</Text>
+        
+        <View style={styles.pointsContainer}>
+          <Text style={styles.waitingText}>
+            {cantidadPuntos >= 4 
+              ? '¡Puntos verificados correctamente!' 
+              : `Puntos de referencia verificados: ${cantidadPuntos}/4`}
+          </Text>
+          
+          {cantidadPuntos < 4 && (
+            <TouchableOpacity 
+              style={styles.verifyButton}
+              onPress={handleVerificarPuntos}
+            >
+              <Text style={styles.verifyButtonText}>Verificar puntos</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </>
+    );
+  };
 
   return (
     <View style={styles.overlay}>
       <View style={styles.popup}>
-        <Text style={styles.text}>{steps[step - 1]}</Text>
+        {step === 4 ? renderStep4Content() : <Text style={styles.text}>{steps[step - 1]}</Text>}
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -75,9 +107,25 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textAlign: 'left',
   },
-  waitingText: {
+  pointsContainer: {
     marginTop: 10,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  waitingText: {
     textAlign: 'center',
+    fontWeight: '600',
+    fontSize: 13,
+    marginBottom: 10,
+  },
+  verifyButton: {
+    backgroundColor: '#1E5A26',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  verifyButtonText: {
+    color: 'white',
     fontWeight: '600',
     fontSize: 13,
   },

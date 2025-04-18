@@ -25,6 +25,7 @@ export function useTrayectos() {
     setIsLoading(true);
     setError(null);
     try {
+      console.log("Datos a actualizar:", datosTrayecto, puntoId);
       const result = await actualizarTrayecto(datosTrayecto, puntoId);
       setIsLoading(false);
       return result;
