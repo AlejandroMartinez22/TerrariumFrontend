@@ -341,7 +341,7 @@ export default function MapScreen() {
                 title={centro.descripcion}
               >
                 <Image
-                  source={require("../assets/poblado.png")}
+                  source={require("../assets/IconoCentroPoblado.png")}
                   style={{ width: 28, height: 28 }}
                   resizeMode="contain"
                 />
