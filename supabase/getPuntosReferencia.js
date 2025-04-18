@@ -7,7 +7,6 @@ export const getPuntosReferencia = async (cedulaBrigadista) => {
     const { data: puntosData, error: puntosError } = await supabase
       .from('punto_referencia')
       .select('*')
-      .eq('cedula_brigadista', cedulaBrigadista)
       .eq('tipo', 'Referencia');
     
     if (puntosError) throw puntosError;
