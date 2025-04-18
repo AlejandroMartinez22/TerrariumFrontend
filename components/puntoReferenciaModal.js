@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -20,8 +20,31 @@ const ReferenciaModal = ({
   errorMedicion,
   setErrorMedicion,
 }) => {
+  const [descriptionError, setDescriptionError] = useState("");
+  
+  // Función para contar palabras en un texto
+  const countWords = (text) => {
+    if (!text || text.trim() === "") return 0;
+    return text.trim().split(/\s+/).length;
+  };
+  
+  // Validar la descripción cuando cambie
+  useEffect(() => {
+    const wordCount = countWords(editedDescription);
+    if (editedDescription.trim() === "") {
+      setDescriptionError("");
+    } else if (wordCount < 5) {
+      setDescriptionError("La descripción debe tener al menos 5 palabras");
+    } else {
+      setDescriptionError("");
+    }
+  }, [editedDescription]);
+  
+  // Actualizar validación del formulario incluyendo la condición de 5 palabras
   const isFormValid =
-    editedDescription.trim() !== "" && errorMedicion.trim() !== "";
+    editedDescription.trim() !== "" && 
+    errorMedicion.trim() !== "" &&
+    countWords(editedDescription) >= 5;
 
   return (
     <Modal
@@ -86,13 +109,22 @@ const ReferenciaModal = ({
             <View style={styles.descriptionContainer}>
               <Text style={styles.descriptionLabel}>Descripción</Text>
               <TextInput
-                style={styles.descriptionInput}
+                style={[
+                  styles.descriptionInput,
+                  descriptionError ? styles.inputError : null
+                ]}
                 value={editedDescription}
                 onChangeText={setEditedDescription}
                 multiline
                 numberOfLines={4}
                 placeholder="Descripción del punto de referencia..."
               />
+              {descriptionError ? (
+                <Text style={styles.errorText}>{descriptionError}</Text>
+              ) : null}
+              <Text style={styles.wordCount}>
+                Palabras: {countWords(editedDescription)}/5
+              </Text>
             </View>
 
             <View style={styles.buttonRow}>
@@ -219,6 +251,20 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 100,
     textAlignVertical: "top",
+  },
+  inputError: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 5,
+  },
+  wordCount: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 5,
+    textAlign: "right",
   },
   buttonRow: {
     flexDirection: "column",

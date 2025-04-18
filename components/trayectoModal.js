@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  Alert,
 } from "react-native";
-import { generarTrayectoId } from "../hooks/genIdTrayecto";
+import { obtenerSiguienteIdTrayecto } from "../supabase/getUltimoIdTrayecto"; // Importa la función
 
 export default function TrayectoModal({
   visible,
@@ -22,28 +23,94 @@ export default function TrayectoModal({
   const [distancia, setDistancia] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [idTrayecto, setIdTrayecto] = useState("");
+  const [errors, setErrors] = useState({
+    duracion: false,
+    distancia: false,
+  });
 
   const transportOptions = ["Terrestre", "Marítimo", "Aéreo"];
+
+  // Determinar si el formulario está completo para habilitar/deshabilitar el botón
+  const isFormValid = duracion.trim() !== "" && distancia.trim() !== "";
 
   useEffect(() => {
     if (!visible) return;
 
-    if (trayectoEditado) {
-      setMedioTransporte(trayectoEditado.medioTransporte || "Terrestre");
-      setDuracion(trayectoEditado.duracion);
-      setDistancia(trayectoEditado.distancia);
-      setIdTrayecto(trayectoEditado.idTrayecto);
-    } else {
-      setMedioTransporte("Terrestre");
-      setDuracion("");
-      setDistancia("");
-      setIdTrayecto(generarTrayectoId(trayectos));
+    const inicializarDatos = async () => {
+      if (trayectoEditado) {
+        // Si estamos editando, usamos los valores del trayecto editado
+        setMedioTransporte(trayectoEditado.medioTransporte || "Terrestre");
+        setDuracion(trayectoEditado.duracion);
+        setDistancia(trayectoEditado.distancia);
+        setIdTrayecto(trayectoEditado.idTrayecto || trayectoEditado.id);
+      } else {
+        // Si estamos creando uno nuevo, generamos un nuevo ID desde la base de datos
+        try {
+          const nuevoId = await obtenerSiguienteIdTrayecto();
+          console.log("Nuevo ID generado desde Supabase:", nuevoId);
+          
+          if (nuevoId) {
+            setIdTrayecto(nuevoId);
+          } else {
+            // Si hay un error, usar un ID predeterminado
+            setIdTrayecto("TR001");
+            console.warn("No se pudo obtener un ID de la base de datos, usando ID predeterminado");
+          }
+        } catch (error) {
+          console.error("Error al obtener el siguiente ID:", error);
+          setIdTrayecto("TR001"); // ID por defecto en caso de error
+        }
+        
+        setMedioTransporte("Terrestre");
+        setDuracion("");
+        setDistancia("");
+      }
+
+      // Reset errors when modal opens
+      setErrors({
+        duracion: false,
+        distancia: false,
+      });
+      
+      setShowDropdown(false);
+    };
+
+    inicializarDatos();
+  }, [visible, trayectoEditado]);
+
+  const validateFields = () => {
+    let isValid = true;
+    const newErrors = {
+      duracion: false,
+      distancia: false,
+    };
+
+    // Validate duration
+    if (!duracion.trim()) {
+      newErrors.duracion = true;
+      isValid = false;
     }
 
-    setShowDropdown(false);
-  }, [visible, trayectos, trayectoEditado]);
+    // Validate distance
+    if (!distancia.trim()) {
+      newErrors.distancia = true;
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleGuardar = () => {
+    if (!validateFields()) {
+      Alert.alert(
+        "Campos incompletos",
+        "Por favor completa todos los campos antes de guardar.",
+        [{ text: "Entendido", style: "default" }]
+      );
+      return;
+    }
+
     const datosTrayecto = {
       idTrayecto,
       medioTransporte,
@@ -112,28 +179,56 @@ export default function TrayectoModal({
             <View style={styles.formRow}>
               <Text style={styles.label}>Duración (Horas y Minutos)</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, errors.duracion && styles.inputError]}
                 value={duracion}
-                onChangeText={(text) => setDuracion(text)}
+                onChangeText={(text) => {
+                  setDuracion(text);
+                  if (text.trim()) {
+                    setErrors(prev => ({...prev, duracion: false}));
+                  }
+                }}
                 placeholder="00:00"
                 keyboardType="numeric"
               />
+              {errors.duracion && (
+                <Text style={styles.errorText}>Este campo es obligatorio</Text>
+              )}
             </View>
 
             <View style={styles.formRow}>
               <Text style={styles.label}>Distancia del Trayecto (km)</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, errors.distancia && styles.inputError]}
                 value={distancia}
-                onChangeText={(text) => setDistancia(text)}
+                onChangeText={(text) => {
+                  setDistancia(text);
+                  if (text.trim()) {
+                    setErrors(prev => ({...prev, distancia: false}));
+                  }
+                }}
                 placeholder="0.0"
                 keyboardType="numeric"
               />
+              {errors.distancia && (
+                <Text style={styles.errorText}>Este campo es obligatorio</Text>
+              )}
             </View>
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.guardarButton} onPress={handleGuardar}>
-                <Text style={styles.guardarButtonText}>
+              <TouchableOpacity 
+                style={[
+                  styles.guardarButton, 
+                  !isFormValid && styles.guardarButtonDisabled
+                ]}
+                onPress={handleGuardar}
+                disabled={!isFormValid}
+              >
+                <Text 
+                  style={[
+                    styles.guardarButtonText,
+                    !isFormValid && styles.guardarButtonTextDisabled
+                  ]}
+                >
                   {trayectoEditado ? "✎ Actualizar" : "✓ Guardar"}
                 </Text>
               </TouchableOpacity>
@@ -219,6 +314,16 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#fff",
   },
+  inputError: {
+    borderColor: "#FF6B6B",
+    backgroundColor: "#FFEEEE",
+  },
+  errorText: {
+    color: "#FF6B6B",
+    fontSize: 12,
+    marginTop: 3,
+    alignSelf: "flex-start",
+  },
   customSelect: {
     borderWidth: 1,
     borderColor: "#ddd",
@@ -270,9 +375,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     borderRadius: 5,
   },
+  guardarButtonDisabled: {
+    backgroundColor: "#cccccc",
+  },
   guardarButtonText: {
     color: "white",
     fontWeight: "bold",
     fontSize: 14,
+  },
+  guardarButtonTextDisabled: {
+    color: "#888888",
   },
 });

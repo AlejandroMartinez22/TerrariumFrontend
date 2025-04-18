@@ -1,7 +1,7 @@
 // getPuntosReferencia.js
 import supabase from './supabaseClient';
 
-export const getPuntosReferencia = async (cedulaBrigadista) => {
+export const getPuntosReferencia = async (idConglomerado) => {
   try {
     // First get the reference points using cedula instead of id
     const { data: puntosData, error: puntosError } = await supabase

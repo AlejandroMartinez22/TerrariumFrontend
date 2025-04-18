@@ -3,6 +3,7 @@ import { obtenerSiguienteId } from "../supabase/getUltimoIdReferencia";
 import { insertarReferencia } from "../supabase/saveReferencia";
 import { actualizarReferencia } from "../supabase/updateReferencia";
 import { eliminarReferencia } from "../supabase/deleteReferencia";
+import { obtenerReferenciaPorId } from "../supabase/getReferenciaPorId"; // Necesitarás crear esta función
 
 export function useReferencias() {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +28,6 @@ export function useReferencias() {
     setIsLoading(true);
     setError(null);
     try {
-      // Pass the object with cedula_brigadista instead of id_brigadista
       const savedPuntoData = {
         ...puntoReferencia,
         cedula_brigadista: cedulaBrigadista
@@ -48,7 +48,18 @@ export function useReferencias() {
     setIsLoading(true);
     setError(null);
     try {
-      // Update with cedula_brigadista instead of id_brigadista
+      // Primero verificamos que el punto pertenezca al brigadista
+      const referenciaExistente = await obtenerReferenciaPorId(puntoReferencia.id);
+      
+      if (!referenciaExistente) {
+        throw new Error("El punto de referencia no existe");
+      }
+      
+      // Validar que el brigadista sea el propietario del punto
+      if (referenciaExistente.cedula_brigadista !== cedulaBrigadista) {
+        throw new Error("No tienes permisos para modificar este punto de referencia");
+      }
+      
       const updatedPuntoData = {
         ...puntoReferencia,
         cedula_brigadista: cedulaBrigadista
@@ -61,14 +72,26 @@ export function useReferencias() {
       setError(err);
       setIsLoading(false);
       console.error("Error al actualizar referencia:", err);
-      return { success: false, error: err };
+      return { success: false, error: err.message };
     }
   };
 
-  const borrarReferencia = async (referenciaId) => {
+  const borrarReferencia = async (referenciaId, cedulaBrigadista) => {
     setIsLoading(true);
     setError(null);
     try {
+      // Primero verificamos que el punto pertenezca al brigadista
+      const referenciaExistente = await obtenerReferenciaPorId(referenciaId);
+      
+      if (!referenciaExistente) {
+        throw new Error("El punto de referencia no existe");
+      }
+      
+      // Validar que el brigadista sea el propietario del punto
+      if (referenciaExistente.cedula_brigadista !== cedulaBrigadista) {
+        throw new Error("No tienes permisos para eliminar este punto de referencia");
+      }
+      
       const result = await eliminarReferencia(referenciaId);
       setIsLoading(false);
       return result;
@@ -76,7 +99,7 @@ export function useReferencias() {
       setError(err);
       setIsLoading(false);
       console.error("Error al eliminar referencia:", err);
-      return { success: false, error: err };
+      return { success: false, error: err.message };
     }
   };
 

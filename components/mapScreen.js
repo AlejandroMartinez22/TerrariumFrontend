@@ -40,6 +40,7 @@ export default function MapScreen() {
   const [puntoId, setPuntoId] = useState("");
   const [tempPuntoData, setTempPuntoData] = useState(null);
   const [forceUpdate, setForceUpdate] = useState(0);
+  const [isNewPoint, setIsNewPoint] = useState(false); // Nuevo estado para controlar si es un punto nuevo
 
   // Coordenadas por defecto (Bucaramanga)
   const defaultCenter = {
@@ -97,6 +98,7 @@ export default function MapScreen() {
     setEditedDescription(punto.description || "");
     setErrorMedicion(punto.errorMedicion || "");
     setPuntoId(punto.id);
+    setIsNewPoint(false); // Es un punto existente
     setModalVisible(true);
   };
 
@@ -110,9 +112,10 @@ export default function MapScreen() {
     setTrayectoModalVisible(false);
   };
 
-  const continuar = async () => {
+  const continuar = () => {
     if (!selectedPunto) return;
 
+    // Preparamos los datos pero NO los guardamos en la base de datos todavía
     const puntoActualizado = {
       ...selectedPunto,
       title: selectedPunto.title || `Punto de referencia ${selectedPunto.index + 1}`,
@@ -122,16 +125,12 @@ export default function MapScreen() {
       longitude: selectedPunto.longitude,
     };
 
+    // Almacenamos temporalmente el punto actualizado para usar en el próximo modal
     setTempPuntoData(puntoActualizado);
     setModalVisible(false);
-
-    try {
-      // Actualiza el punto de referencia usando el hook personalizado
-      await actualizarPuntoReferencia(puntoActualizado, brigadista.cedula);
-      setTrayectoModalVisible(true);
-    } catch (error) {
-      console.error("❌ Error al actualizar el punto de referencia:", error);
-    }
+    
+    // Mostramos el modal de trayecto
+    setTrayectoModalVisible(true);
   };
 
   const confirmarTrayecto = async (datosTrayecto) => {
@@ -143,65 +142,78 @@ export default function MapScreen() {
       trayecto: datosTrayecto,
     };
 
-    const esEdicion = puntoBase?.trayecto !== undefined;
-
-    // Actualiza el estado local
-    const nuevosPuntos = puntosReferencia.map((punto, i) =>
-      punto.id === puntoConTrayecto.id ? puntoConTrayecto : punto
-    );
-
-    // Si es un punto nuevo (no existe en el array), agrégalo
-    if (!puntosReferencia.some(p => p.id === puntoConTrayecto.id)) {
-      nuevosPuntos.push(puntoConTrayecto);
-    }
-
-    setPuntosReferencia(nuevosPuntos);
-    setTrayectoModalVisible(false);
-
     try {
-      if (!esEdicion) {
-        // Inserta el nuevo punto y trayecto usando hooks personalizados
+      // Ahora guardaremos tanto la referencia como el trayecto
+      if (isNewPoint) {
+        // Punto nuevo: guardar referencia primero, luego el trayecto
+        console.log("🆕 Guardando nuevo punto y trayecto");
         const puntoId = await guardarReferencia(puntoConTrayecto, brigadista.cedula);
         await guardarTrayecto(datosTrayecto, puntoId);
-        console.log("✅ Punto y trayecto guardados");
+        console.log("✅ Punto y trayecto nuevos guardados");
       } else {
-        // Actualiza el trayecto existente usando un hook personalizado
+        // Punto existente: actualizar referencia y trayecto
+        console.log("🔄 Actualizando punto y trayecto existentes");
+        await actualizarPuntoReferencia(puntoConTrayecto, brigadista.cedula);
         await actualizarDatosTrayecto(datosTrayecto, puntoBase.id);
-        console.log("✏️ Trayecto actualizado correctamente");
+        console.log("✏️ Punto y trayecto actualizados correctamente");
       }
       
-      // Refresca los puntos de la base de datos para asegurar que tengamos los datos más actualizados
+      // Refresca los puntos de la base de datos
       await refreshPuntos();
+      
+      // Actualizar la interfaz con el nuevo punto
+      if (isNewPoint) {
+        setPuntosReferencia([...puntosReferencia, puntoConTrayecto]);
+      } else {
+        const updatedPuntos = puntosReferencia.map(p => 
+          p.id === puntoConTrayecto.id ? puntoConTrayecto : p
+        );
+        setPuntosReferencia(updatedPuntos);
+      }
     } catch (error) {
-      console.error("❌ Error al guardar o editar:", error);
+      console.error("❌ Error al guardar punto y trayecto:", error);
     }
+    
+    setTrayectoModalVisible(false);
+    setTempPuntoData(null); // Limpiamos el punto temporal
   };
 
   const handleLongPress = async (event) => {
     const coordinate = event.nativeEvent.coordinate;
 
-    // Obtén el siguiente ID usando el hook personalizado
-    const siguienteId = await getSiguienteId();
+    try {
+      // Obtén el siguiente ID usando el hook personalizado
+      const siguienteId = await getSiguienteId();
 
-    if (siguienteId) {
-      const nuevoPunto = {
-        ...generarReferenciaInicial(siguienteId, coordinate),
-        latitude: coordinate.latitude,
-        longitude: coordinate.longitude,
-      };
+      if (siguienteId) {
+        const nuevoPunto = {
+          ...generarReferenciaInicial(siguienteId, coordinate),
+          latitude: coordinate.latitude,
+          longitude: coordinate.longitude,
+        };
 
-      setSelectedPunto({ ...nuevoPunto, index: puntosReferencia.length });
-      setEditedDescription("");
-      setErrorMedicion("");
-      setPuntoId(nuevoPunto.id);
-      setModalVisible(true);
-    } else {
-      console.error("No se pudo generar un nuevo ID.");
+        setSelectedPunto({ ...nuevoPunto, index: puntosReferencia.length });
+        setEditedDescription("");
+        setErrorMedicion("");
+        setPuntoId(nuevoPunto.id);
+        setIsNewPoint(true); // Marcamos como punto nuevo
+        setModalVisible(true);
+      } else {
+        console.error("No se pudo generar un nuevo ID.");
+      }
+    } catch (error) {
+      console.error("Error al generar nuevo punto:", error);
     }
   };
 
   const eliminarPunto = async (puntoId) => {
     try {
+      // Si es un punto nuevo que aún no se ha guardado, simplemente cerramos el modal
+      if (isNewPoint) {
+        setModalVisible(false);
+        return;
+      }
+      
       // Eliminar usando el hook personalizado
       const resultado = await borrarReferencia(puntoId);
 
@@ -371,6 +383,7 @@ export default function MapScreen() {
         setErrorMedicion={setErrorMedicion}
         puntoId={puntoId}
         selectedPunto={selectedPunto}
+        isNewPoint={isNewPoint}
       />
 
       <TrayectoModal

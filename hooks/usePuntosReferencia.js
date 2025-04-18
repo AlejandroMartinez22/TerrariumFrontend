@@ -45,7 +45,7 @@ export function usePuntosReferencia(brigadista) {
     setError(null);
 
     try {
-      const data = await getPuntosReferencia(brigadista.cedula);
+      const data = await getPuntosReferencia(brigadista.idConglomerado);
       // Procesar los datos para asegurar que las coordenadas son números
       setPuntosReferencia(processPuntos(data));
     } catch (err) {
