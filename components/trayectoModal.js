@@ -8,7 +8,7 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import { obtenerSiguienteIdTrayecto } from "../supabase/getUltimoIdTrayecto"; // Importa la función
+import { obtenerSiguienteIdTrayecto } from "../supabase/getUltimoIdTrayecto";
 
 export default function TrayectoModal({
   visible,
@@ -31,18 +31,36 @@ export default function TrayectoModal({
   const transportOptions = ["Terrestre", "Marítimo", "Aéreo"];
 
   // Determinar si el formulario está completo para habilitar/deshabilitar el botón
-  const isFormValid = duracion.trim() !== "" && distancia.trim() !== "";
+  const isFormValid = duracion && duracion.trim() !== "" && distancia && distancia.trim() !== "";
 
   useEffect(() => {
+    // Verificamos si el modal está visible
     if (!visible) return;
 
     const inicializarDatos = async () => {
+      // Reiniciamos los errores cuando se abre el modal
+      setErrors({
+        duracion: false,
+        distancia: false,
+      });
+      
+      // Ocultamos el dropdown
+      setShowDropdown(false);
+      
       if (trayectoEditado) {
+        console.log("Cargando datos del trayecto existente:", trayectoEditado);
+        
         // Si estamos editando, usamos los valores del trayecto editado
+        // Asegúrate de que todas las propiedades existan o proporciona valores predeterminados
         setMedioTransporte(trayectoEditado.medioTransporte || "Terrestre");
-        setDuracion(trayectoEditado.duracion);
-        setDistancia(trayectoEditado.distancia);
-        setIdTrayecto(trayectoEditado.idTrayecto || trayectoEditado.id);
+        
+        // Convertimos a string los valores en caso de que sean números
+        const duracionStr = trayectoEditado.duracion != null ? String(trayectoEditado.duracion) : "";
+        const distanciaStr = trayectoEditado.distancia != null ? String(trayectoEditado.distancia) : "";
+        
+        setDuracion(duracionStr);
+        setDistancia(distanciaStr);
+        setIdTrayecto(trayectoEditado.idTrayecto || trayectoEditado.id || "");
       } else {
         // Si estamos creando uno nuevo, generamos un nuevo ID desde la base de datos
         try {
@@ -61,22 +79,26 @@ export default function TrayectoModal({
           setIdTrayecto("TR001"); // ID por defecto en caso de error
         }
         
+        // Reiniciar valores para un nuevo trayecto
         setMedioTransporte("Terrestre");
         setDuracion("");
         setDistancia("");
       }
-
-      // Reset errors when modal opens
-      setErrors({
-        duracion: false,
-        distancia: false,
-      });
-      
-      setShowDropdown(false);
     };
 
     inicializarDatos();
   }, [visible, trayectoEditado]);
+
+  // Para debugging - registrar los cambios en las variables principales
+  useEffect(() => {
+    console.log("Estado actual:", {
+      medioTransporte,
+      duracion,
+      distancia,
+      idTrayecto,
+      trayectoEditadoPresente: !!trayectoEditado
+    });
+  }, [medioTransporte, duracion, distancia, idTrayecto, trayectoEditado]);
 
   const validateFields = () => {
     let isValid = true;
@@ -85,14 +107,14 @@ export default function TrayectoModal({
       distancia: false,
     };
 
-    // Validate duration
-    if (!duracion.trim()) {
+    // Validate duration - Protección contra valores undefined
+    if (!duracion || !duracion.trim()) {
       newErrors.duracion = true;
       isValid = false;
     }
 
-    // Validate distance
-    if (!distancia.trim()) {
+    // Validate distance - Protección contra valores undefined
+    if (!distancia || !distancia.trim()) {
       newErrors.distancia = true;
       isValid = false;
     }
@@ -123,6 +145,7 @@ export default function TrayectoModal({
     };
 
     const esEdicion = !!trayectoEditado;
+    console.log("Guardando trayecto:", datosTrayecto, "Es edición:", esEdicion);
     onConfirmar(datosTrayecto, esEdicion);
   };
 
@@ -136,7 +159,9 @@ export default function TrayectoModal({
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Trayecto Realizado</Text>
+            <Text style={styles.modalTitle}>
+              {trayectoEditado ? "Editar Trayecto" : "Nuevo Trayecto"}
+            </Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>✕</Text>
             </TouchableOpacity>
@@ -177,17 +202,17 @@ export default function TrayectoModal({
             </View>
 
             <View style={styles.formRow}>
-              <Text style={styles.label}>Duración (Horas y Minutos)</Text>
+              <Text style={styles.label}>Duración (Minutos)</Text>
               <TextInput
                 style={[styles.input, errors.duracion && styles.inputError]}
                 value={duracion}
                 onChangeText={(text) => {
                   setDuracion(text);
-                  if (text.trim()) {
+                  if (text && text.trim()) {
                     setErrors(prev => ({...prev, duracion: false}));
                   }
                 }}
-                placeholder="00:00"
+                placeholder="00"
                 keyboardType="numeric"
               />
               {errors.duracion && (
@@ -202,7 +227,7 @@ export default function TrayectoModal({
                 value={distancia}
                 onChangeText={(text) => {
                   setDistancia(text);
-                  if (text.trim()) {
+                  if (text && text.trim()) {
                     setErrors(prev => ({...prev, distancia: false}));
                   }
                 }}

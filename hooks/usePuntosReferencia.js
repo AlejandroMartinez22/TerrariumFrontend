@@ -1,3 +1,4 @@
+// usePuntosReferencia.js
 import { useState, useEffect } from "react";
 import { getPuntosReferencia } from "../supabase/getPuntosReferencia";
 
@@ -36,7 +37,7 @@ export function usePuntosReferencia(brigadista) {
   };
 
   const fetchPuntosReferencia = async () => {
-    if (!brigadista || !brigadista.cedula) {
+    if (!brigadista || !brigadista.idConglomerado) {
       setIsLoading(false);
       return;
     }
