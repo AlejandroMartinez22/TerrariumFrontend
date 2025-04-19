@@ -40,15 +40,6 @@ const TutorialOverlay = ({ step, setStep, onClose, onVerificarPuntos, cantidadPu
               ? '¡Puntos verificados correctamente!' 
               : `Puntos de referencia verificados: ${cantidadPuntos}/4`}
           </Text>
-          
-          {cantidadPuntos < 4 && (
-            <TouchableOpacity 
-              style={styles.verifyButton}
-              onPress={handleVerificarPuntos}
-            >
-              <Text style={styles.verifyButtonText}>Verificar puntos</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </>
     );
@@ -59,7 +50,21 @@ const TutorialOverlay = ({ step, setStep, onClose, onVerificarPuntos, cantidadPu
       <View style={styles.popup}>
         {step === 4 ? renderStep4Content() : <Text style={styles.text}>{steps[step - 1]}</Text>}
 
-        <View style={styles.buttonContainer}>
+        <View style={styles.buttonsRow}>
+          {/* Espacio vacío a la izquierda cuando no hay botón de verificar, que mantiene la alineación */}
+          {step !== 4 || cantidadPuntos >= 4 ? <View style={styles.spacer} /> : null}
+          
+          {/* Botón de verificar puntos */}
+          {step === 4 && cantidadPuntos < 4 && (
+            <TouchableOpacity 
+              style={styles.verifyButton}
+              onPress={handleVerificarPuntos}
+            >
+              <Text style={styles.verifyButtonText}>Verificar puntos</Text>
+            </TouchableOpacity>
+          )}
+          
+          {/* Botón de siguiente/cerrar siempre a la derecha */}
           <TouchableOpacity
             onPress={handleNext}
             style={[styles.button, isNextDisabled && { opacity: 0.5 }]}
@@ -110,34 +115,39 @@ const styles = StyleSheet.create({
   pointsContainer: {
     marginTop: 10,
     marginBottom: 15,
-    alignItems: 'center',
   },
   waitingText: {
     textAlign: 'center',
     fontWeight: '600',
-    fontSize: 13,
-    marginBottom: 10,
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  buttonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  spacer: {
+    flex: 1, // Esto empuja el botón siguiente/cerrar hacia la derecha
   },
   verifyButton: {
-    backgroundColor: '#1E5A26',
+    backgroundColor: '#1287A6',
     paddingVertical: 8,
     paddingHorizontal: 15,
-    borderRadius: 8,
+    borderRadius: 10,
+    marginRight: 10,
   },
   verifyButtonText: {
     color: 'white',
     fontWeight: '600',
     fontSize: 13,
   },
-  buttonContainer: {
-    alignItems: 'flex-end',
-  },
   button: {
     backgroundColor: '#1287A6',
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 10,
-    marginBottom: 0,
   },
   buttonText: {
     fontSize: 13,

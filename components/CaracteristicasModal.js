@@ -1,5 +1,4 @@
 //Es necesario eventualmente quitar el botón de cerrar, de momento se deja para probar pero ya después hay que quitarlo para evitar que el usuario se salga del flujo del tutorial.
-
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -13,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import useCaracteristicasValidation from "../hooks/useCaracteristicasValidation"; // Importar el hook
+import useDecimalValidation from "../hooks/useDecimalValidation"; // Importar el hook de validación decimal
 
 // Opciones para los pickers
 const COBERTURAS = [
@@ -61,10 +61,14 @@ const CaracteristicasModal = ({
   puntoId,
   nombreSubparcela,
   selectedPunto,
-  errorMedicion,
-  setErrorMedicion,
+  errorMedicion: initialErrorMedicion, // Renombramos para evitar conflictos
+  setErrorMedicion: originalSetErrorMedicion, // Renombramos para evitar conflictos
 }) => {
-  // Usar el hook de validación
+  // Usar el hook de validación decimal para el error de medición
+  const [errorMedicion, setErrorMedicion, errorMedicionError, isErrorMedicionValid] = 
+    useDecimalValidation('', 9.9, 1);
+    
+  // Usar el hook de validación de características
   const {
     selectedCobertura,
     setSelectedCobertura,
@@ -93,7 +97,21 @@ const CaracteristicasModal = ({
     botonAfectacionesHabilitado
   } = useCaracteristicasValidation();
 
-  // Limpiar estados al cerrar
+  // Reiniciar error de medición cuando el modal se cierra/abre
+  useEffect(() => {
+    if (visible) {
+      setErrorMedicion(initialErrorMedicion || '');
+    } else {
+      originalSetErrorMedicion('');
+    }
+  }, [visible]);
+  
+  // Sincronizar el valor interno con el componente padre
+  useEffect(() => {
+    originalSetErrorMedicion(errorMedicion);
+  }, [errorMedicion]);
+
+  // Limpiar estados de características al cerrar
   useEffect(() => {
     if (!visible) {
       limpiarEstados();
@@ -102,7 +120,8 @@ const CaracteristicasModal = ({
 
   // Validación del formulario
   const isFormValid = 
-    (errorMedicion ?? "").trim() !== "" && 
+    errorMedicion.trim() !== "" && 
+    isErrorMedicionValid &&
     coberturas.length > 0 && 
     afectaciones.length > 0;
 
@@ -111,7 +130,7 @@ const CaracteristicasModal = ({
     // Crear objeto con todos los datos
     const datosSubparcela = {
       id: puntoId,
-      errorMedicion,
+      errorMedicion: errorMedicion, // Usar el valor validado
       coberturas,
       afectaciones
     };
@@ -121,6 +140,7 @@ const CaracteristicasModal = ({
     
     // Limpiar estados
     limpiarEstados();
+    setErrorMedicion(''); // También limpiar el error de medición
   };
 
   return (
@@ -171,12 +191,18 @@ const CaracteristicasModal = ({
                 <View style={styles.errorContainer}>
                   <Text style={styles.sectionLabel}>Error en la medición (m)</Text>
                   <TextInput
-                    style={styles.errorInput}
+                    style={[
+                      styles.errorInput,
+                      errorMedicionError ? { borderColor: 'red', borderWidth: 1 } : null
+                    ]}
                     value={errorMedicion}
                     onChangeText={setErrorMedicion}
                     keyboardType="numeric"
-                    placeholder="Ingrese error"
+                    placeholder="Ingrese error (0-9.9)"
                   />
+                  {errorMedicionError ? (
+                    <Text style={styles.errorText}>{errorMedicionError}</Text>
+                  ) : null}
                 </View>
               </View>
 

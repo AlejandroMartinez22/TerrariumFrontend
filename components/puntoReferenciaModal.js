@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import useDecimalValidation from "../hooks/useDecimalValidation"; // Importamos el hook personalizado
 
 const ReferenciaModal = ({
   visible,
@@ -17,10 +18,32 @@ const ReferenciaModal = ({
   selectedPunto,
   editedDescription,
   setEditedDescription,
-  errorMedicion,
-  setErrorMedicion,
+  errorMedicion: initialErrorMedicion,
+  setErrorMedicion: originalSetErrorMedicion,
 }) => {
   const [descriptionError, setDescriptionError] = useState("");
+  
+  // Usamos nuestro hook personalizado con el valor inicial
+  const [errorMedicion, setErrorMedicion, errorMedicionError, isErrorMedicionValid] = 
+    useDecimalValidation(initialErrorMedicion, 9.9, 1);
+  
+  // Reiniciar los campos cuando el modal se abre (cuando visible cambia a true)
+  useEffect(() => {
+    if (visible) {
+      // Aquí solo actualizamos el estado interno del hook
+      setErrorMedicion(initialErrorMedicion);
+    } else {
+      // Cuando el modal se cierra, reiniciamos el valor en el componente padre
+      if (errorMedicion !== '') {
+        originalSetErrorMedicion('');
+      }
+    }
+  }, [visible]);
+  
+  // Actualizar el estado externo cuando el valor cambie y sea válido
+  useEffect(() => {
+    originalSetErrorMedicion(errorMedicion);
+  }, [errorMedicion]);
   
   // Función para contar palabras en un texto
   const countWords = (text) => {
@@ -40,11 +63,12 @@ const ReferenciaModal = ({
     }
   }, [editedDescription]);
   
-  // Actualizar validación del formulario incluyendo la condición de 5 palabras
+  // Actualizar validación del formulario incluyendo todas las condiciones
   const isFormValid =
     editedDescription.trim() !== "" && 
-    errorMedicion.trim() !== "" &&
-    countWords(editedDescription) >= 5;
+    countWords(editedDescription) >= 5 &&
+    errorMedicion.trim() !== "" && 
+    isErrorMedicionValid;
 
   return (
     <Modal
@@ -98,12 +122,18 @@ const ReferenciaModal = ({
             <View style={styles.errorContainer}>
               <Text style={styles.errorLabel}>Error en la medición (m)</Text>
               <TextInput
-                style={styles.errorInput}
+                style={[
+                  styles.errorInput,
+                  errorMedicionError ? styles.inputError : null
+                ]}
                 value={errorMedicion}
                 onChangeText={setErrorMedicion}
                 keyboardType="numeric"
-                placeholder="Ingrese error"
+                placeholder="Ingrese el error"
               />
+              {errorMedicionError ? (
+                <Text style={styles.errorText}>{errorMedicionError}</Text>
+              ) : null}
             </View>
 
             <View style={styles.descriptionContainer}>
@@ -122,12 +152,16 @@ const ReferenciaModal = ({
               {descriptionError ? (
                 <Text style={styles.errorText}>{descriptionError}</Text>
               ) : null}
-              <Text style={styles.wordCount}>
-                Palabras: {countWords(editedDescription)}/5
-              </Text>
             </View>
 
             <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={onEliminar}
+              >
+                <Text style={styles.buttonText}>Eliminar</Text>
+              </TouchableOpacity>
+              
               <TouchableOpacity
                 style={[
                   styles.saveButton,
@@ -137,13 +171,6 @@ const ReferenciaModal = ({
                 disabled={!isFormValid}
               >
                 <Text style={styles.buttonText}>Continuar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={onEliminar}
-              >
-                <Text style={styles.buttonText}>Eliminar</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -260,32 +287,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 5,
   },
-  wordCount: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 5,
-    textAlign: "right",
-  },
   buttonRow: {
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 8,
+    flexDirection: "row",  // Cambiado de "column" a "row"
+    justifyContent: "space-between", // Para separar los botones
+    marginTop: 10,
   },
   saveButton: {
     backgroundColor: "#4169e1",
     padding: 10,
     borderRadius: 5,
-    marginBottom: 10,
-    width: "80%",
+    width: "45%", // Reducido de 80% a 48%
     alignItems: "center",
+    margin:10,
   },
   deleteButton: {
     backgroundColor: "red",
     padding: 10,
     borderRadius: 5,
-    marginBottom: 10,
-    width: "80%",
+    width: "45%", // Reducido de 80% a 48%
     alignItems: "center",
+    margin: 10,
   },
   buttonText: {
     color: "#fff",
