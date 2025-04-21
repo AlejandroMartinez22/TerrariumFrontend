@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, SafeAreaView, StyleSheet, Text, Image, ActivityIndicator } from "react-native";
+import {
+  View,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useBrigadista } from "../context/BrigadistaContext";
 import ReferenciaModal from "./puntoReferenciaModal";
@@ -14,21 +21,32 @@ import { useTrayectos } from "../hooks/useTrayecto";
 import { usePuntosReferencia } from "../hooks/usePuntosReferencia";
 
 export default function MapScreen() {
-  const { brigadista } = useBrigadista();
+  const { brigadista, localTutorialCompletado, completarTutorial } =
+    useBrigadista();
   const mapRef = useRef(null);
-  
+
   // Custom hooks
-  const { coordenadas, fetchCoordenadas, isLoading: loadingCoordenadas } = useCoordenadas(brigadista);
-  const { centrosPoblados, isLoading: loadingCentros } = useCentrosPoblados(brigadista);
-  const { getSiguienteId, guardarReferencia, actualizarPuntoReferencia, borrarReferencia } = useReferencias();
+  const {
+    coordenadas,
+    fetchCoordenadas,
+    isLoading: loadingCoordenadas,
+  } = useCoordenadas(brigadista);
+  const { centrosPoblados, isLoading: loadingCentros } =
+    useCentrosPoblados(brigadista);
+  const {
+    getSiguienteId,
+    guardarReferencia,
+    actualizarPuntoReferencia,
+    borrarReferencia,
+  } = useReferencias();
   const { guardarTrayecto, actualizarDatosTrayecto } = useTrayectos();
-  
+
   // Usar el hook para gestionar puntos de referencia desde la base de datos
-  const { 
-    puntosReferencia, 
-    setPuntosReferencia, 
+  const {
+    puntosReferencia,
+    setPuntosReferencia,
     fetchPuntosReferencia,
-    isLoading: loadingPuntosReferencia 
+    isLoading: loadingPuntosReferencia,
   } = usePuntosReferencia(brigadista);
 
   // Estado local
@@ -112,25 +130,65 @@ export default function MapScreen() {
     setTrayectoModalVisible(false);
   };
 
-  const continuar = () => {
+  const continuar = async () => {
     if (!selectedPunto) return;
 
-    // Preparamos los datos pero NO los guardamos en la base de datos todavía
+    // Preparamos los datos actualizados
     const puntoActualizado = {
       ...selectedPunto,
-      title: selectedPunto.title || `Punto de referencia ${selectedPunto.index + 1}`,
+      title:
+        selectedPunto.title || `Punto de referencia ${selectedPunto.index + 1}`,
       description: editedDescription,
       errorMedicion: errorMedicion,
       latitude: selectedPunto.latitude,
       longitude: selectedPunto.longitude,
     };
 
-    // Almacenamos temporalmente el punto actualizado para usar en el próximo modal
+    // Almacenamos temporalmente el punto actualizado
     setTempPuntoData(puntoActualizado);
     setModalVisible(false);
-    
-    // Mostramos el modal de trayecto
-    setTrayectoModalVisible(true);
+
+    // Si no vamos a mostrar el modal de trayecto, guardamos directamente
+    if (!(!localTutorialCompletado && isNewPoint)) {
+      await guardarSinTrayecto(puntoActualizado); // Pasar el punto actualizado directamente
+    } else {
+      // Si mostraremos el modal de trayecto, dejamos que confirmarTrayecto se encargue
+      setTrayectoModalVisible(true);
+    }
+  };
+
+  // Nueva función para guardar punto sin trayecto
+  const guardarSinTrayecto = async (puntoData) => {
+    // Usar el punto pasado directamente o caer en el tempPuntoData
+    const puntoAGuardar = puntoData || tempPuntoData;
+
+    if (!puntoAGuardar) return;
+
+    try {
+      if (isNewPoint) {
+        console.log("🆕 Guardando nuevo punto sin trayecto");
+        await guardarReferencia(puntoAGuardar, brigadista.cedula);
+
+        // Actualizar la interfaz con el nuevo punto
+        setPuntosReferencia([...puntosReferencia, puntoAGuardar]);
+      } else {
+        console.log("🔄 Actualizando punto existente");
+        await actualizarPuntoReferencia(puntoAGuardar, brigadista.cedula);
+
+        // Actualizar la interfaz
+        const updatedPuntos = puntosReferencia.map((p) =>
+          p.id === puntoAGuardar.id ? puntoAGuardar : p
+        );
+        setPuntosReferencia(updatedPuntos);
+      }
+
+      // Refresca los puntos de la base de datos
+      await refreshPuntos();
+    } catch (error) {
+      console.error("❌ Error al guardar punto:", error);
+    }
+
+    setTempPuntoData(null); // Limpiamos el punto temporal
   };
 
   const confirmarTrayecto = async (datosTrayecto) => {
@@ -143,37 +201,47 @@ export default function MapScreen() {
     };
 
     try {
-      // Ahora guardaremos tanto la referencia como el trayecto
       if (isNewPoint) {
-        // Punto nuevo: guardar referencia primero, luego el trayecto
         console.log("🆕 Guardando nuevo punto y trayecto");
-        const puntoId = await guardarReferencia(puntoConTrayecto, brigadista.cedula);
-        await guardarTrayecto(datosTrayecto, puntoId);
-        console.log("✅ Punto y trayecto nuevos guardados");
+        const puntoId = await guardarReferencia(
+          puntoConTrayecto,
+          brigadista.cedula
+        );
+
+        if (puntoId) {
+          // Aseguramos que el trayecto se guarde con el ID correcto
+          await guardarTrayecto(datosTrayecto, puntoId, brigadista.cedula);
+          console.log("✅ Punto y trayecto nuevos guardados");
+
+          // Añadir el ID correcto al punto para la interfaz
+          const puntoCompleto = { ...puntoConTrayecto, id: puntoId };
+
+          // Actualizar la interfaz con el nuevo punto
+          setPuntosReferencia([...puntosReferencia, puntoCompleto]);
+        }
       } else {
-        // Punto existente: actualizar referencia y trayecto
         console.log("🔄 Actualizando punto y trayecto existentes");
         await actualizarPuntoReferencia(puntoConTrayecto, brigadista.cedula);
-        await actualizarDatosTrayecto(datosTrayecto, puntoBase.id);
+        await actualizarDatosTrayecto(
+          datosTrayecto,
+          puntoBase.id,
+          brigadista.cedula
+        );
         console.log("✏️ Punto y trayecto actualizados correctamente");
-      }
-      
-      // Refresca los puntos de la base de datos
-      await refreshPuntos();
-      
-      // Actualizar la interfaz con el nuevo punto
-      if (isNewPoint) {
-        setPuntosReferencia([...puntosReferencia, puntoConTrayecto]);
-      } else {
-        const updatedPuntos = puntosReferencia.map(p => 
+
+        // Actualizar la interfaz
+        const updatedPuntos = puntosReferencia.map((p) =>
           p.id === puntoConTrayecto.id ? puntoConTrayecto : p
         );
         setPuntosReferencia(updatedPuntos);
       }
+
+      // Refresca los puntos de la base de datos
+      await refreshPuntos();
     } catch (error) {
       console.error("❌ Error al guardar punto y trayecto:", error);
     }
-    
+
     setTrayectoModalVisible(false);
     setTempPuntoData(null); // Limpiamos el punto temporal
   };
@@ -213,12 +281,14 @@ export default function MapScreen() {
         setModalVisible(false);
         return;
       }
-      
-      // Eliminar usando el hook personalizado
-      const resultado = await borrarReferencia(puntoId);
+
+      // Pasar la cédula del brigadista actual como segundo parámetro
+      const resultado = await borrarReferencia(puntoId, brigadista.cedula);
 
       if (resultado.success) {
-        const nuevosPuntos = puntosReferencia.filter((punto) => punto.id !== puntoId);
+        const nuevosPuntos = puntosReferencia.filter(
+          (punto) => punto.id !== puntoId
+        );
         setPuntosReferencia(nuevosPuntos);
         console.log(`Punto con ID ${puntoId} eliminado correctamente`);
       } else {
@@ -264,30 +334,44 @@ export default function MapScreen() {
           onLongPress={handleLongPress}
           onRegionChangeComplete={handleRegionChange}
         >
-          {coordenadas.length > 0 && coordenadas[0].latitud && coordenadas[0].longitud && (
-            <Circle
-              center={{
-                latitude: typeof coordenadas[0].latitud === 'string' ? parseFloat(coordenadas[0].latitud) : coordenadas[0].latitud,
-                longitude: typeof coordenadas[0].longitud === 'string' ? parseFloat(coordenadas[0].longitud) : coordenadas[0].longitud,
-              }}
-              radius={100}
-              strokeColor="rgba(0, 122, 255, 0.8)"
-              fillColor="rgba(0, 122, 255, 0.2)"
-              zIndex={1}
-            />
-          )}
+          {coordenadas.length > 0 &&
+            coordenadas[0].latitud &&
+            coordenadas[0].longitud && (
+              <Circle
+                center={{
+                  latitude:
+                    typeof coordenadas[0].latitud === "string"
+                      ? parseFloat(coordenadas[0].latitud)
+                      : coordenadas[0].latitud,
+                  longitude:
+                    typeof coordenadas[0].longitud === "string"
+                      ? parseFloat(coordenadas[0].longitud)
+                      : coordenadas[0].longitud,
+                }}
+                radius={100}
+                strokeColor="rgba(0, 122, 255, 0.8)"
+                fillColor="rgba(0, 122, 255, 0.2)"
+                zIndex={1}
+              />
+            )}
 
           {coordenadas.map((coordenada, index) => {
             // Omitir coordenadas inválidas
             if (!coordenada.latitud || !coordenada.longitud) return null;
-            
+
             // Asegurar que las coordenadas sean números
-            const lat = typeof coordenada.latitud === 'string' ? parseFloat(coordenada.latitud) : coordenada.latitud;
-            const lng = typeof coordenada.longitud === 'string' ? parseFloat(coordenada.longitud) : coordenada.longitud;
-            
+            const lat =
+              typeof coordenada.latitud === "string"
+                ? parseFloat(coordenada.latitud)
+                : coordenada.latitud;
+            const lng =
+              typeof coordenada.longitud === "string"
+                ? parseFloat(coordenada.longitud)
+                : coordenada.longitud;
+
             // Omitir si son números inválidos
             if (isNaN(lat) || isNaN(lng)) return null;
-            
+
             return (
               <React.Fragment key={`coord-${index}-${forceUpdate}`}>
                 <Circle
@@ -315,7 +399,9 @@ export default function MapScreen() {
                       longitude: lng,
                     }}
                   >
-                    <View style={{ backgroundColor: "transparent", padding: 4 }}>
+                    <View
+                      style={{ backgroundColor: "transparent", padding: 4 }}
+                    >
                       <Text
                         style={{
                           fontSize: 12,
@@ -335,14 +421,14 @@ export default function MapScreen() {
           {centrosPoblados.map((centro, index) => {
             // Omitir coordenadas inválidas
             if (!centro.latitud || !centro.longitud) return null;
-            
+
             // Asegurar que las coordenadas sean números
             const lat = parseFloat(centro.latitud);
             const lng = parseFloat(centro.longitud);
-            
+
             // Omitir si el parsing resultó en NaN
             if (isNaN(lat) || isNaN(lng)) return null;
-            
+
             return (
               <Marker
                 key={`centro-${index}-${forceUpdate}`}
@@ -384,6 +470,7 @@ export default function MapScreen() {
         puntoId={puntoId}
         selectedPunto={selectedPunto}
         isNewPoint={isNewPoint}
+        cedulaUsuarioActual={brigadista?.cedula}
       />
 
       <TrayectoModal
@@ -398,6 +485,7 @@ export default function MapScreen() {
   );
 }
 
+// Los estilos se mantienen igual a tu implementación original
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -409,12 +497,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#333',
-  }
+    color: "#333",
+  },
 });

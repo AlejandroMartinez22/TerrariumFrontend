@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -6,8 +7,10 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import useDecimalValidation from "../hooks/useDecimalValidation"; // Importamos el hook personalizado
+import { obtenerReferenciaPorId } from "../supabase/getReferenciaPorId"; // Separar esto.
 
 const ReferenciaModal = ({
   visible,
@@ -20,12 +23,53 @@ const ReferenciaModal = ({
   setEditedDescription,
   errorMedicion: initialErrorMedicion,
   setErrorMedicion: originalSetErrorMedicion,
+  cedulaUsuarioActual, // Añadimos la cédula del usuario actual como prop
+  isNewPoint = false, // Nueva prop para indicar si estamos creando un nuevo punto
 }) => {
   const [descriptionError, setDescriptionError] = useState("");
+  const [isUserOwner, setIsUserOwner] = useState(false); // Estado para verificar si el usuario es el creador
+  const [isCheckingOwner, setIsCheckingOwner] = useState(true); // Estado para mostrar indicador de carga
   
   // Usamos nuestro hook personalizado con el valor inicial
   const [errorMedicion, setErrorMedicion, errorMedicionError, isErrorMedicionValid] = 
     useDecimalValidation(initialErrorMedicion, 9.9, 1);
+  
+  // Verificar si el usuario es el propietario del punto cuando se abre el modal
+  useEffect(() => {
+    const checkOwnership = async () => {
+      if (visible) {
+        setIsCheckingOwner(true);
+        
+        // Si es un punto nuevo, automáticamente el usuario es propietario
+        if (isNewPoint) {
+          setIsUserOwner(true);
+          setIsCheckingOwner(false);
+          return;
+        }
+        
+        // Solo verificamos propiedad si es un punto existente
+        if (puntoId) {
+          try {
+            const referencia = await obtenerReferenciaPorId(puntoId);
+            setIsUserOwner(referencia && referencia.cedula_brigadista === cedulaUsuarioActual);
+          } catch (error) {
+            console.error("Error al verificar propietario:", error);
+            setIsUserOwner(false);
+          }
+        } else {
+          // Si no hay puntoId pero no es nuevo punto (caso raro), por seguridad no es propietario
+          setIsUserOwner(false);
+        }
+        
+        setIsCheckingOwner(false);
+      }
+    };
+    
+    checkOwnership();
+  }, [visible, puntoId, cedulaUsuarioActual, isNewPoint]);
+  
+
+
   
   // Reiniciar los campos cuando el modal se abre (cuando visible cambia a true)
   useEffect(() => {
@@ -40,6 +84,10 @@ const ReferenciaModal = ({
     }
   }, [visible]);
   
+
+
+
+
   // Actualizar el estado externo cuando el valor cambie y sea válido
   useEffect(() => {
     originalSetErrorMedicion(errorMedicion);
@@ -64,11 +112,13 @@ const ReferenciaModal = ({
   }, [editedDescription]);
   
   // Actualizar validación del formulario incluyendo todas las condiciones
+  // Si es un punto nuevo o si el usuario es propietario del punto existente, se permite la edición
   const isFormValid =
     editedDescription.trim() !== "" && 
     countWords(editedDescription) >= 5 &&
     errorMedicion.trim() !== "" && 
-    isErrorMedicionValid;
+    isErrorMedicionValid &&
+    (isNewPoint || isUserOwner); // Permitir si es nuevo punto O si el usuario es propietario
 
   return (
     <Modal
@@ -84,13 +134,17 @@ const ReferenciaModal = ({
           </TouchableOpacity>
 
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Punto de Referencia</Text>
+            <Text style={styles.modalTitle}>
+              {isNewPoint ? "Nuevo Punto de Referencia" : "Punto de Referencia"}
+            </Text>
           </View>
 
           <View style={styles.modalBody}>
-            <View style={styles.idContainer}>
-              <Text style={styles.idLabel}>ID: {puntoId}</Text>
-            </View>
+            {!isNewPoint && (
+              <View style={styles.idContainer}>
+                <Text style={styles.idLabel}>ID: {puntoId}</Text>
+              </View>
+            )}
 
             <View style={styles.coordsContainer}>
               <View style={styles.coordColumn}>
@@ -130,6 +184,7 @@ const ReferenciaModal = ({
                 onChangeText={setErrorMedicion}
                 keyboardType="numeric"
                 placeholder="Ingrese el error"
+                editable={isNewPoint || isUserOwner} // Editable si es nuevo punto o es propietario
               />
               {errorMedicionError ? (
                 <Text style={styles.errorText}>{errorMedicionError}</Text>
@@ -148,29 +203,52 @@ const ReferenciaModal = ({
                 multiline
                 numberOfLines={4}
                 placeholder="Descripción del punto de referencia..."
+                editable={isNewPoint || isUserOwner} // Editable si es nuevo punto o es propietario
               />
               {descriptionError ? (
                 <Text style={styles.errorText}>{descriptionError}</Text>
               ) : null}
             </View>
 
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={onEliminar}
-              >
-                <Text style={styles.buttonText}>Eliminar</Text>
-              </TouchableOpacity>
+            {isCheckingOwner ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#4169e1" />
+                <Text style={styles.loadingText}>Verificando permisos...</Text>
+              </View>
+            ) : !isUserOwner && !isNewPoint ? (
+              <View style={styles.notOwnerContainer}>
+                <Text style={styles.notOwnerText}>
+                  No tienes permisos para editar este punto de referencia.
+                </Text>
+              </View>
+            ) : null}
+
+            {/* Modificación aquí: Usamos diferentes estilos según haya uno o dos botones */}
+            <View style={isNewPoint ? styles.singleButtonContainer : styles.buttonRow}>
+              {!isNewPoint && (
+                <TouchableOpacity
+                  style={[
+                    styles.deleteButton,
+                    (!isUserOwner || isCheckingOwner) && { backgroundColor: "#ccc" }
+                  ]}
+                  onPress={onEliminar}
+                  disabled={!isUserOwner || isCheckingOwner}
+                >
+                  <Text style={styles.buttonText}>Eliminar</Text>
+                </TouchableOpacity>
+              )}
               
               <TouchableOpacity
                 style={[
-                  styles.saveButton,
-                  !isFormValid && { backgroundColor: "#ccc" },
+                  isNewPoint ? styles.centeredButton : styles.saveButton,
+                  (!isFormValid || isCheckingOwner) && { backgroundColor: "#ccc" }
                 ]}
                 onPress={onContinuar}
-                disabled={!isFormValid}
+                disabled={!isFormValid || isCheckingOwner}
               >
-                <Text style={styles.buttonText}>Continuar</Text>
+                <Text style={styles.buttonText}>
+                  {isNewPoint ? "Crear" : "Continuar"}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -178,7 +256,7 @@ const ReferenciaModal = ({
       </View>
     </Modal>
   );
-};
+}
 
 const styles = StyleSheet.create({
   modalOverlay: {
@@ -312,6 +390,41 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    marginBottom: 15,
+  },
+  loadingText: {
+    marginLeft: 10,
+    color: "#666",
+  },
+  notOwnerContainer: {
+    backgroundColor: "#fff8dc",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#ffd700",
+  },
+  notOwnerText: {
+    color: "#8b4513",
+    textAlign: "center",
+  },
+  singleButtonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  centeredButton: {
+    backgroundColor: "#4169e1",
+    borderRadius: 5,
+    padding: 12,
+    width: "50%", // Ancho del 50% para que se vea centrado y proporcionado
+    alignItems: "center",
+  },
+
 });
 
 export default ReferenciaModal;

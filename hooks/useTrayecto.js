@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { insertarTrayecto } from "../supabase/saveTrayecto";
 import { actualizarTrayecto } from "../supabase/updateTrayecto";
-import { obtenerTrayectoPorId } from "../supabase/getTrayectoPorId"; // Necesitarás crear esta función
+import { obtenerTrayectoPorId } from "../supabase/getTrayectoPorId";
 import { obtenerReferenciaPorId } from "../supabase/getReferenciaPorId";
 import { useBrigadista } from "../context/BrigadistaContext";
 
@@ -11,10 +11,13 @@ export function useTrayectos() {
   const { brigadista } = useBrigadista();
   const cedula = brigadista?.cedula;
 
-  const guardarTrayecto = async (datosTrayecto, puntoId, cedulaBrigadista) => {
+  const guardarTrayecto = async (datosTrayecto, puntoId, cedulaBrigadista = cedula) => {
     setIsLoading(true);
     setError(null);
     try {
+      // Usar la cédula pasada como parámetro o caer en la del contexto
+      const cedulaAUsar = cedulaBrigadista || cedula;
+      
       // Verificar que el punto de referencia pertenezca al brigadista
       const puntoReferencia = await obtenerReferenciaPorId(puntoId);
 
@@ -22,7 +25,7 @@ export function useTrayectos() {
         throw new Error("El punto de referencia no existe");
       }
 
-      if (puntoReferencia.cedula_brigadista !== cedula) {
+      if (puntoReferencia.cedula_brigadista !== cedulaAUsar) {
         throw new Error(
           "No tienes permisos para añadir trayectos a este punto de referencia"
         );
@@ -31,7 +34,7 @@ export function useTrayectos() {
       // Guardar con la cedula del brigadista
       const datosCompletos = {
         ...datosTrayecto,
-        cedula_brigadista: cedula,
+        cedula_brigadista: cedulaAUsar,
       };
 
       const result = await insertarTrayecto(datosCompletos, puntoId);
@@ -45,14 +48,17 @@ export function useTrayectos() {
     }
   };
 
-  // Dentro de useTrayectos
   const actualizarDatosTrayecto = async (
     datosTrayecto,
     puntoId,
+    cedulaBrigadista = cedula
   ) => {
     setIsLoading(true);
     setError(null);
     try {
+      // Usar la cédula pasada como parámetro o caer en la del contexto
+      const cedulaAUsar = cedulaBrigadista || cedula;
+      
       // Validar punto de referencia como primer paso
       const puntoReferencia = await obtenerReferenciaPorId(puntoId);
 
@@ -64,9 +70,10 @@ export function useTrayectos() {
         "cedula en base de datos:",
         puntoReferencia.cedula_brigadista
       );
-      console.log("cedula del usuario:", cedula);
+      console.log("cedula del usuario:", cedulaAUsar);
+      
       if (
-        String(puntoReferencia.cedula_brigadista) !== String(cedula)
+        String(puntoReferencia.cedula_brigadista) !== String(cedulaAUsar)
       ) {
         throw new Error(
           "No tienes permisos para modificar este punto de referencia"
@@ -83,7 +90,7 @@ export function useTrayectos() {
 
       const datosCompletos = {
         ...datosTrayecto,
-        cedula_brigadista: cedula,
+        cedula_brigadista: cedulaAUsar,
       };
 
       const result = await actualizarTrayecto(datosCompletos, puntoId);

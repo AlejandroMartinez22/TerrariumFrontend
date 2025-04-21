@@ -5,7 +5,7 @@ const ViewScreen = () => {
 
     return (
         <View style={styles.container}>
-        <Text style={styles.titulo}>Visualizar</Text>
+        <Text style={styles.titulo}>En construcción</Text>
         </View>
     );
 };

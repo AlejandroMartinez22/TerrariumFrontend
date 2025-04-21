@@ -1,6 +1,7 @@
+// en supabase/getReferenciaPorId.js
 import supabase from './supabaseClient';
 
-export async function obtenerReferenciaPorId(id) {
+export const obtenerReferenciaPorId = async (id) => {
   try {
     const { data, error } = await supabase
       .from('punto_referencia')
@@ -10,9 +11,9 @@ export async function obtenerReferenciaPorId(id) {
     
     if (error) throw error;
     
-    return data;
+    return data;  // Esto debe retornar el objeto con todos los campos, incluyendo cedula_brigadista
   } catch (error) {
-    console.error('Error al obtener punto de referencia:', error);
+    console.error("Error al obtener referencia por ID:", error);
     throw error;
   }
-}
+};
