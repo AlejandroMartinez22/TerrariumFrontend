@@ -142,6 +142,7 @@
           });
           console.log('Coordenadas del centro poblado recibidas del backend:', response.data.data.length);
           if (response.data.success) {
+            console.log('Coordenadas del centro poblado:', response.data.data);
             return response.data.data;
           } else {
             throw new Error(response.data.message || 'Error al obtener coordenadas del centro poblado');

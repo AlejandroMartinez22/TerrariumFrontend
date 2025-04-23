@@ -13,10 +13,11 @@ Cambios realizados 23/04
 3. Se eliminó el archivo getInfoBrigadista de la carpeta supabase
 4. Se eliminó el archivo updateTutorialCompletado de la carpeta supabase.
 5. Se modificó el hook signOut.js
-6. Se modificó el hook useCoordenadas.js
-7. Se eliminó el archivo getCoordenadas de la carpeta supabase
-8. se modificó el archivo subparcelaContext
-9. Se modificó el mapscreen.js
-9. Se modifico el archivo useCentrosPoblados.js
+6. Se añadieron funciones al api/index.js
+7. Se modificó el hook useCoordenadas.js
+8. Se eliminó el archivo getCoordenadas de la carpeta supabase
+9. se modificó el archivo subparcelaContext
+10. Se modificó el mapscreen.js
+11. Se modifico el archivo useCentrosPoblados.js
 
 
