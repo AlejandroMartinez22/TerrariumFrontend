@@ -32,8 +32,6 @@
     }
     );
 
-
-
     // Función para obtener el token actual del usuario autenticado en Firebase. Este token sirve para verificar la identidad del usuario con el backend.
     const getCurrentToken = async () => {
     const auth = getAuth(); // Obtener instancia de autenticación
