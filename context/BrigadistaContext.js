@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getInfoBrigadista } from "../supabase/getInfoBrigadista";
-import { updateTutorialCompletado } from "../supabase/updateTutorialCompletado"; // Necesitarás crear esta función
+import { getInfoBrigadistaFromBackend, updateTutorialCompletadoInBackend } from "../api";
 
 const BrigadistaContext = createContext();
 
@@ -18,7 +17,7 @@ export const BrigadistaProvider = ({ children }) => {
       if (user) {
         try {
           setLoading(true);
-          const info = await getInfoBrigadista();
+          const info = await getInfoBrigadistaFromBackend();
           if (!info) {
             throw new Error("No se encontró información del brigadista.");
           }
@@ -45,15 +44,14 @@ export const BrigadistaProvider = ({ children }) => {
   }, []);
 
   // Función para marcar el tutorial como completado
-  
   const completarTutorial = async () => {
     try {
       // Actualizar el estado local inmediatamente
       setLocalTutorialCompletado(true);
       
-      // Actualizar también en la BD
+      // Actualizar también en la BD a través del backend
       if (brigadista) {
-        await updateTutorialCompletado(true);
+        await updateTutorialCompletadoInBackend(true);
         // Actualizamos el objeto brigadista localmente
         setBrigadista({
           ...brigadista,

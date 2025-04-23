@@ -1,3 +1,6 @@
+/* PARTE DEL PROFILE SCREEN*/
+/* ESTE ARCHIVO DEBE MANTENERSE EN EL FRONT */
+
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export const getCurrentUserUid = () => {

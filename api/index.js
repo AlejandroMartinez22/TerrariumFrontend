@@ -7,7 +7,7 @@
     import { getAuth } from 'firebase/auth';// Importamos la función getAuth de Firebase para manejar la autenticación del usuario
 
     // Configuramos la URL base del backend
-    const API_URL = 'http://192.168.1.7:5000/api'; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+    const API_URL = 'http://192.168.11.35:5000/api'; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
 
     // Creamos una instancia de Axios preconfigurada con la URL base del backend
     const api = axios.create({
@@ -31,6 +31,7 @@
         return Promise.reject(error);
     }
     );
+
 
 
     // Función para obtener el token actual del usuario autenticado en Firebase. Este token sirve para verificar la identidad del usuario con el backend.
@@ -76,6 +77,40 @@
         handleError(error);
     }
     };
+
+    export const getInfoBrigadistaFromBackend = async () => {
+        try {
+          const token = await getCurrentToken();
+          const response = await api.get('/brigadista/info', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          return response.data;
+        } catch (error) {
+          console.error('Error al obtener información del brigadista:', error);
+          handleError(error);
+        }
+      };
+      
+      // Actualizar el estado del tutorial en el backend
+      export const updateTutorialCompletadoInBackend = async (completado) => {
+        try {
+          const token = await getCurrentToken();
+          const response = await api.post('/brigadista/tutorial', 
+            { completado },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            }
+          );
+          return response.data;
+        } catch (error) {
+          console.error('Error al actualizar el estado del tutorial:', error);
+          handleError(error);
+        }
+      };
 
     // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
     export default api;
