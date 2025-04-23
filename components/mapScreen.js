@@ -31,8 +31,7 @@ export default function MapScreen() {
     fetchCoordenadas,
     isLoading: loadingCoordenadas,
   } = useCoordenadas(brigadista);
-  const { centrosPoblados, fetchCentrosPoblados, isLoading: loadingCentros } =
-    useCentrosPoblados(brigadista);
+  const { centrosPoblados, fetchCentrosPoblados, isLoading: loadingCentros } = useCentrosPoblados(brigadista);
   const {
     getSiguienteId,
     guardarReferencia,
