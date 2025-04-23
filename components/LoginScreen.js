@@ -1,3 +1,5 @@
+/*RELACIONADO CON EL INICIO DE SESIÓN */
+
 import React from "react";
 import {
   StyleSheet,

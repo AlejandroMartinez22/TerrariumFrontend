@@ -1,3 +1,5 @@
+/*Este archivo es necesario para la autenticación inicial con Firebase desde el cliente. De momento 22/04 a las 3:19 está bien así*/
+
 import { Platform } from 'react-native';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';

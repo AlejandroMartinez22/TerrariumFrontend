@@ -21,6 +21,7 @@
     "@react-navigation/stack": "^7.2.3",
     "@rnmapbox/maps": "^10.1.38",
     "@supabase/supabase-js": "^2.49.4",
+    "axios": "^1.8.4",
     "expo": "^52.0.44",
     "expo-file-system": "~18.0.12",
     "expo-status-bar": "~2.0.1",
