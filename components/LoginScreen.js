@@ -1,4 +1,5 @@
 /*RELACIONADO CON EL INICIO DE SESIÓN */
+/* YA ESTÁ LO RELACIONADO CON ESTE COMPONENTE */
 
 import React from "react";
 import {

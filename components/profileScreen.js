@@ -1,3 +1,5 @@
+/* YA ESTÁ LO RELACIONADO CON ESTE COMPONENTE */
+
 import { Ionicons } from "@expo/vector-icons"; //Importamos Iconos de Expo.
 
 import {
