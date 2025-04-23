@@ -1,38 +1,39 @@
 // useCentrosPoblados.js
 import { useState, useEffect } from 'react';
-import { getCentrosPoblados } from '../supabase/getCentroPoblado';
+import { fetchCoordenadasCentroPoblado } from '../api';
 
-export function useCentrosPoblados(brigadista) {
+export function getCentrosPoblados(brigadista) {
   const [centrosPoblados, setCentrosPoblados] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchCentrosPoblados = async () => {
-    if (!brigadista) return;
-    
+  const getCentrosPobladosData = async () => {
     setIsLoading(true);
     setError(null);
+
+    if (!brigadista.idConglomerado) return;
+
     try {
-      const centros = await getCentrosPoblados(brigadista);
-      setCentrosPoblados(centros);
+      const data = await fetchCoordenadasCentroPoblado();
+      setCentrosPoblados(data || []);
       setIsLoading(false);
-      return centros;
+      return data;
     } catch (err) {
       setError(err);
       setIsLoading(false);
-      console.error("Error al cargar centros poblados:", err);
+      console.error('Error al cargar centros poblados:', err);
       return [];
     }
   };
 
   useEffect(() => {
-    fetchCentrosPoblados();
-  }, [brigadista]);
+    getCentrosPobladosData();
+  }, []);
 
   return {
     centrosPoblados,
-    fetchCentrosPoblados,
+    fetchCentrosPoblados: getCentrosPobladosData,
     isLoading,
-    error
+    error,
   };
 }
