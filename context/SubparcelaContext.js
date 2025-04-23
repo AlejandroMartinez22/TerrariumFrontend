@@ -1,30 +1,21 @@
 // context/SubparcelaContext.js
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getCoordenadas } from '../supabase/getCoordenadas';
+import React, { createContext, useContext } from 'react';
 import { useBrigadista } from './BrigadistaContext';
+import { useCoordenadas } from '../hooks/useCoordenadas';
 
 const SubparcelaContext = createContext();
 
 export const SubparcelaProvider = ({ children }) => {
   const { brigadista } = useBrigadista();
-  const [subparcelas, setSubparcelas] = useState([]); //La información de las subparcelas se está guardando en el estado subparcelas, que es un array. 
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const cargarSubparcelas = async () => {
-      if (brigadista) {
-        setLoading(true);
-        const data = await getCoordenadas(brigadista);
-        setSubparcelas(data);
-        setLoading(false);
-      }
-    };
-
-    cargarSubparcelas();
-  }, [brigadista]);
+  const {
+    coordenadas: subparcelas,
+    isLoading: loading,
+    error,
+    fetchCoordenadas,
+  } = useCoordenadas(brigadista);
 
   return (
-    <SubparcelaContext.Provider value={{ subparcelas, loading }}>
+    <SubparcelaContext.Provider value={{ subparcelas, loading, error, fetchCoordenadas }}>
       {children}
     </SubparcelaContext.Provider>
   );

@@ -7,7 +7,7 @@
     import { getAuth } from 'firebase/auth';// Importamos la función getAuth de Firebase para manejar la autenticación del usuario
 
     // Configuramos la URL base del backend
-    const API_URL = 'http://192.168.11.35:5000/api'; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+    const API_URL = 'http://10.16.13.108:5000/api'; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
 
     // Creamos una instancia de Axios preconfigurada con la URL base del backend
     const api = axios.create({
@@ -108,6 +108,28 @@
           return response.data;
         } catch (error) {
           console.error('Error al actualizar el estado del tutorial:', error);
+          handleError(error);
+        }
+      };
+
+      export const fetchCoordenadas = async () => {
+        try {
+          const token = await getCurrentToken();
+          const response = await api.get('/coordenadas/subparcelas', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          
+          console.log('Coordenadas recibidas del backend:', response.data.data.length);
+          
+          if (response.data.success) {
+            return response.data.data;
+          } else {
+            throw new Error(response.data.message || 'Error al obtener coordenadas');
+          }
+        } catch (error) {
+          console.error('Error al obtener coordenadas:', error);
           handleError(error);
         }
       };
