@@ -59,16 +59,9 @@ export default function MapScreen() {
   const [tempPuntoData, setTempPuntoData] = useState(null);
   const [forceUpdate, setForceUpdate] = useState(0);
   const [isNewPoint, setIsNewPoint] = useState(false); // Nuevo estado para controlar si es un punto nuevo
+  const [defaultCenter, setDefaultCenter] = useState(null);
 
-  // Coordenadas por defecto (Bucaramanga)
-  const defaultCenter = {
-    latitude: 7.12539,
-    longitude: -73.1198,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  };
-
-  const [mapZoom, setMapZoom] = useState(defaultCenter.latitudeDelta);
+  const [mapZoom, setMapZoom] = useState("0.2");
   const [isLoading, setIsLoading] = useState(true);
 
   // Función para generar puntos de referencia
@@ -105,6 +98,22 @@ export default function MapScreen() {
       );
     }
   }, [coordenadas]);
+
+  useEffect(() => {
+    if (!loadingCoordenadas && coordenadas.length > 0) {
+      const firstValid = coordenadas.find(
+        (coord) => coord.latitud && coord.longitud
+      );
+      if (firstValid) {
+        setDefaultCenter({
+          latitude: parseFloat(firstValid.latitud),
+          longitude: parseFloat(firstValid.longitud),
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+      }
+    }
+  }, [loadingCoordenadas, coordenadas]);
 
   // Refrescar puntos cuando sea necesario
   const refreshPuntos = async () => {
@@ -313,7 +322,7 @@ export default function MapScreen() {
   const shouldShowLabels = mapZoom < 0.005;
 
   // Mostrar indicador de carga mientras se obtienen los datos
-  if (isLoading) {
+  if (isLoading || !defaultCenter) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
         <ActivityIndicator size="large" color="#0066cc" />

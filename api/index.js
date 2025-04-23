@@ -134,5 +134,25 @@
         }
       };
 
+      export const fetchCoordenadasCentroPoblado = async () => {
+        try {
+          const token = await getCurrentToken();
+          const response = await api.get('/coordenadas/centro-poblado', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          console.log('Coordenadas del centro poblado recibidas del backend:', response.data.data.length);
+          if (response.data.success) {
+            return response.data.data;
+          } else {
+            throw new Error(response.data.message || 'Error al obtener coordenadas del centro poblado');
+          }
+        } catch (error) {
+          console.error('Error al obtener coordenadas del centro poblado:', error);
+          handleError(error);
+        }
+      };
+
     // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
     export default api;
