@@ -4,6 +4,8 @@
     /**
      * Hook personalizado para manejar validaciones de coberturas y afectaciones
      */
+
+    
     const useCaracteristicasValidation = () => {
     // Estados para coberturas
     const [selectedCobertura, setSelectedCobertura] = useState("Seleccionar");

@@ -1,19 +1,18 @@
-    // src/hooks/useSincronizarSubparcelas.js
     import { useState } from 'react';
-    import { sincronizarSubparcelas } from '../supabase/coberturaAlteracionService';
+    import { sincronizarSubparcelas } from '../api'; // Cambiado de supabase a api
 
     export const useSincronizarSubparcelas = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [resultados, setResultados] = useState(null);
 
-    // Función para sincronizar con Supabase
+    // Función para sincronizar con el backend
     const sincronizar = async (subparcelasCaracteristicas) => {
         try {
         setLoading(true);
         setError(null);
         
-        // Llamar al servicio de Supabase para sincronizar
+        // Ahora llamamos a la API en lugar de al servicio de Supabase directamente
         const result = await sincronizarSubparcelas(subparcelasCaracteristicas);
         
         setResultados(result);

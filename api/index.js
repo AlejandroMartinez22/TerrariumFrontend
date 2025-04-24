@@ -302,13 +302,13 @@ export const obtenerReferenciaPorIdDesdeBackend = async (id) => {
   try {
     const token = await getCurrentToken();
 
-    const response = await api.get(`/referencias/${id}`, {
+    const response = await api.get(`/referencias/punto/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    if (response.data.success) {
+    if (response.data.success) {  
       return response.data.data;
     } else {
       throw new Error(response.data.message || "Error al obtener referencia");
@@ -448,6 +448,66 @@ export const getUltimoIdTrayectoDeBack = async () => {
     throw error;
   }
 };
+
+
+export const VerificarPuntosEnBackEnd = async (cedulaBrigadista) => {
+  try {
+    // Obtener el token de autenticación del usuario actual
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const token = user ? await user.getIdToken() : null;
+
+    if (!token) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    // Usar la ruta corregida según la nueva estructura
+    const response = await api.get(
+      `/referencias/verificar/${cedulaBrigadista}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // Retornar específicamente el valor numérico de la cantidad
+    return response.data.cantidad; // Ajustar según el cambio en el controlador
+  } catch (error) {
+    console.error("Error al obtener los puntos de referencia relacionados al brigadista:", error);
+    throw error;
+  }
+};
+
+
+export const sincronizarSubparcelas = async (subparcelasCaracteristicas) => {
+  try {
+    // Obtener el token de autenticación del usuario actual 
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const token = user ? await user.getIdToken() : null;
+
+    if (!token) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    const response = await api.post(
+      '/subparcelas/sincronizar',
+      subparcelasCaracteristicas,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Error al sincronizar subparcelas con el backend:", error);
+    throw error;
+  }
+};
+
 
 // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
 export default api;

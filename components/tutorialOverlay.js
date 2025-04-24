@@ -35,11 +35,11 @@ const TutorialOverlay = ({ step, setStep, onClose, onVerificarPuntos, cantidadPu
         <Text style={styles.text}>{steps[step - 1]}</Text>
         
         <View style={styles.pointsContainer}>
-          <Text style={styles.waitingText}>
-            {cantidadPuntos >= 4 
-              ? '¡Puntos verificados correctamente!' 
-              : `Puntos de referencia verificados: ${cantidadPuntos}/4`}
-          </Text>
+        <Text style={styles.waitingText}>
+          {cantidadPuntos >= 4 
+            ? '¡Puntos verificados correctamente!' 
+            : `Puntos de referencia verificados: ${cantidadPuntos || 0}/4`}
+        </Text>
         </View>
       </>
     );

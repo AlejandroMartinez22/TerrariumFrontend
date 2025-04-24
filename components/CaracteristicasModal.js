@@ -1,3 +1,5 @@
+/*LISTO COMPONENTE */
+
 //Es necesario eventualmente quitar el botón de cerrar, de momento se deja para probar pero ya después hay que quitarlo para evitar que el usuario se salga del flujo del tutorial.
 import React, { useState, useEffect } from "react";
 import {
@@ -11,8 +13,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import useCaracteristicasValidation from "../hooks/useCaracteristicasValidation"; // Importar el hook
-import useDecimalValidation from "../hooks/useDecimalValidation"; // Importar el hook de validación decimal
+import useCaracteristicasValidation from "../hooks/useCaracteristicasValidation"; /*LISTO */
+import useDecimalValidation from "../hooks/useDecimalValidation"; /*LISTO*/
 
 // Opciones para los pickers
 const COBERTURAS = [

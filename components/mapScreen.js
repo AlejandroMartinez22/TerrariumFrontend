@@ -1,3 +1,5 @@
+/*LISTO COMPONENTE */
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -9,16 +11,16 @@ import {
 } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useBrigadista } from "../context/BrigadistaContext"; /*LISTO*/
-import ReferenciaModal from "./puntoReferenciaModal"; 
-import ReferenciaMarker from "./referenciaMarker";
-import TrayectoModal from "./trayectoModal";
+import ReferenciaModal from "./puntoReferenciaModal";  /*LISTO*/
+import ReferenciaMarker from "./referenciaMarker"; /*LISTO*/
+import TrayectoModal from "./trayectoModal"; /*LISTO*/
 
 // Importar los hooks personalizados
 import { useCoordenadas } from "../hooks/useCoordenadas"; /*LISTO*/
 import { useCentrosPoblados } from "../hooks/useCentrosPoblados"; /*LISTO*/
 import { useReferencias } from "../hooks/useReferencia"; /*LISTO*/
-import { useTrayectos } from "../hooks/useTrayecto";
-import { usePuntosReferencia } from "../hooks/usePuntosReferencia";
+import { useTrayectos } from "../hooks/useTrayecto"; /*LISTO*/
+import { usePuntosReferencia } from "../hooks/usePuntosReferencia"; /*LISTO*/
 
 export default function MapScreen() {
   const { brigadista, localTutorialCompletado, completarTutorial } =

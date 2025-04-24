@@ -12,11 +12,13 @@
   import { useBrigadista } from "../context/BrigadistaContext";
   import { useReferencia } from "../context/ReferenciaContext";
   import { useSubparcelas } from "../context/SubparcelaContext";
+
   import { useSincronizarSubparcelas } from "../hooks/useSincronizarSubparcelas";
+
   import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-  import { verificarPuntosReferencia } from "../supabase/verificarPuntosReferencia"; // Asegúrate de ajustar la ruta
+  import { VerificarPuntosEnBackEnd } from "../api"; // Asegúrate de ajustar la ruta
 
   const Tab = createBottomTabNavigator();
 
@@ -53,9 +55,11 @@
       if (brigadista?.cedula) {
         try {
           console.log("Verificando puntos directamente para:", brigadista.cedula);
-          const cantidad = await verificarPuntosReferencia(brigadista.cedula);
+          const cantidad = await VerificarPuntosEnBackEnd(brigadista.cedula);
           console.log("Cantidad de puntos verificados en BD:", cantidad);
-          setCantidadPuntos(cantidad);
+          
+          // Asegúrate de que cantidad sea numérico
+          setCantidadPuntos(Number(cantidad) || 0);
           
           // Si estamos en el paso 4 y hay suficientes puntos, avanzar
           if (tutorialStep === 4 && cantidad >= 4) {
@@ -66,6 +70,8 @@
           return cantidad;
         } catch (error) {
           console.error("Error al verificar puntos:", error);
+          // En caso de error, asegurarse de que no afecte la UI
+          setCantidadPuntos(0);
         }
       }
       return 0;
