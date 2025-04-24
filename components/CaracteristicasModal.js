@@ -1,6 +1,5 @@
 /*LISTO COMPONENTE */
 
-//Es necesario eventualmente quitar el botón de cerrar, de momento se deja para probar pero ya después hay que quitarlo para evitar que el usuario se salga del flujo del tutorial.
 import React, { useState, useEffect } from "react";
 import {
   Modal,

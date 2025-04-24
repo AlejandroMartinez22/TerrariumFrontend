@@ -14,11 +14,11 @@
   import { useSubparcelas } from "../context/SubparcelaContext";
 
   import { useSincronizarSubparcelas } from "../hooks/useSincronizarSubparcelas";
+  import { VerificarPuntosEnBackEnd } from "../api"; 
 
   import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-  import { VerificarPuntosEnBackEnd } from "../api"; // Asegúrate de ajustar la ruta
 
   const Tab = createBottomTabNavigator();
 

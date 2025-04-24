@@ -1,8 +1,5 @@
-  /*PARTE DEL INICIO DE SESIÓN*/
-  /*CORRECTO, REVISADO EL 22/04 16:12 PM*/
-  /*DOCUMENTADO*/
-  /*ESTE ARCHIVO SI DEBE MANTENERSE EN EL FRONTEND*/
-  /*La responsabilidad del frontend es la autenticación del usuario, la obtención del token y el envío de ese token al backend para su verificación.*/
+/*ESTE ARCHIVO SI DEBE MANTENERSE EN EL FRONTEND*/
+/*La responsabilidad del frontend es la autenticación del usuario, la obtención del token y el envío de ese token al backend para su verificación.*/
 
 import { signInWithEmailAndPassword} from "firebase/auth";  // Importamos funciones necesarias desde Firebase para autenticar usuarios
 import { auth } from "../config/firebaseConfig"; // Importamos nuestra instancia de autenticación de Firebase ya configurada

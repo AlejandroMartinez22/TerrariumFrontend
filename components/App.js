@@ -6,7 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { BrigadistaProvider } from '../context/BrigadistaContext';
 import { SubparcelaProvider } from '../context/SubparcelaContext'; 
-import { ReferenciaProvider } from '../context/ReferenciaContext'; // Asegúrate de que la ruta sea correcta
+import { ReferenciaProvider } from '../context/ReferenciaContext'; 
 
 // Pantallas
 import LoginScreen from './LoginScreen';
@@ -25,7 +25,7 @@ export default function App() {
               <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
-                <Stack.Screen name="Main" component={AppNavigator} />
+                <Stack.Screen name="MainScreen" component={AppNavigator} />
               </Stack.Navigator>
             </NavigationContainer>
           </SafeAreaProvider>

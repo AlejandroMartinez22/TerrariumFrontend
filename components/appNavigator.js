@@ -14,7 +14,7 @@ export default function AppNavigator() {
     return (
         <Stack.Navigator>
         <Stack.Screen
-            name="Main"
+            name="Main" /*QUITA ESTO TOCA CAMBIAR */
             component={NavigationTabs}
             options={({ navigation }) => ({
                 

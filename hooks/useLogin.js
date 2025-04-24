@@ -48,7 +48,7 @@ export const useLogin = (navigation) => {
         // Si obtenemos datos del usuario, verificamos si tiene nombre
         if (userData.nombre) {
           setUserName(userData.nombre);  // Establecemos el nombre del usuario
-          navigation.replace("Main"); // Navegamos a la pantalla principal
+          navigation.replace("MainScreen"); // Navegamos a la pantalla principal
           navigation.navigate("Profile"); // La ventana del perfil del usuario se abre encima de la pantalla principal.
         } else {
           showMessage("Advertencia", "No se encontró el nombre del usuario", "error");
