@@ -1,6 +1,6 @@
 // usePuntosReferencia.js
 import { useState, useEffect } from "react";
-import { getPuntosReferencia } from "../supabase/getPuntosReferencia";
+import { getPuntosReferenciaByConglomerado } from "../api";
 
 export function usePuntosReferencia(brigadista) {
   const [puntosReferencia, setPuntosReferencia] = useState([]);
@@ -46,7 +46,7 @@ export function usePuntosReferencia(brigadista) {
     setError(null);
 
     try {
-      const data = await getPuntosReferencia(brigadista.idConglomerado);
+      const data = await getPuntosReferenciaByConglomerado(brigadista.idConglomerado);
       // Procesar los datos para asegurar que las coordenadas son números
       setPuntosReferencia(processPuntos(data));
     } catch (err) {

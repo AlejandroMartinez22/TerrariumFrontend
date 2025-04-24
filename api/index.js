@@ -292,5 +292,32 @@ export const obtenerReferenciaPorIdDesdeBackend = async (id) => {
   }
 };
 
+
+export const getPuntosReferenciaByConglomerado = async (idConglomerado) => {
+  try {
+    if (!idConglomerado) {
+      throw new Error("Se requiere el ID del conglomerado");
+    }
+
+    const token = await getCurrentToken();
+
+    const response = await api.get(`/referencias/conglomerado/${idConglomerado}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (response.data.success) {
+      return response.data.data;
+    } else {
+      throw new Error(response.data.message || 'Error al obtener puntos de referencia');
+    }
+  } catch (error) {
+    console.error("Error en API getPuntosReferenciaByConglomerado:", error);
+    handleError(error);
+  }
+};
+
+
     // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
     export default api;

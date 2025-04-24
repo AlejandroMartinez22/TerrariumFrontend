@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { getPuntosReferencia } from "../supabase/getPuntosReferencia"; // Ajusta la ruta según corresponda
+import { getPuntosReferenciaByConglomerado } from "../api";
 
 const ReferenciaContext = createContext();
 
@@ -31,7 +31,7 @@ export const ReferenciaProvider = ({ children }) => {
       setError(null);
       
       // Obtener los puntos de referencia usando la función importada
-      const puntos = await getPuntosReferencia(cedulaBrigadista);
+      const puntos = await getPuntosReferenciaByConglomerado(cedulaBrigadista);
       
       // Depuración - verificar lo que se está obteniendo
       console.log("Puntos cargados de la BD:", puntos);

@@ -44,7 +44,13 @@ Cambios realizados 23/04
 
 15. Se cambió la importación en este hook
 
-16. Se va a modificar el context ReferenciaContext.js
+16. Se eliminó el archivo getPuntosReferencia.js de la carpeta supabase (Chao papá)
+17. Se añadió la función al index.js del api.
+18. Se modificó el context ReferenciaContext.js, cambiando la importación
+
+-- Aqui surgió un error por que el hook usePuntosReferencia usaba el archivo getPuntosReferencia --
+
+19. Se modificó la importación en este hook
 
 
 
