@@ -7,7 +7,7 @@
     import { getAuth } from 'firebase/auth';// Importamos la función getAuth de Firebase para manejar la autenticación del usuario
 
     // Configuramos la URL base del backend
-    const API_URL = 'http://10.16.13.108:5000/api'; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+    const API_URL = 'http://192.168.1.7:5000/api'; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
 
     // Creamos una instancia de Axios preconfigurada con la URL base del backend
     const api = axios.create({
@@ -152,6 +152,65 @@
           handleError(error);
         }
       };
+
+
+    /*Funcion para obtener el siguiente id para asignarlo a un punto de referencia */
+
+    export const fetchSiguienteIdReferencia = async () => {
+      try {
+        const token = await getCurrentToken();
+        const response = await api.get('/referencias/siguiente-id', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (response.data.siguienteId) {
+          return response.data.siguienteId;
+        } else {
+          throw new Error(response.data.message || 'Error al obtener ID de referencia');
+        }
+      } catch (error) {
+        console.error('Error al obtener siguiente ID de referencia:', error);
+        handleError(error);
+      }
+    };
+
+
+export const guardarReferenciaEnBackend = async (puntoReferencia, cedulaBrigadista) => {
+  try {
+    const token = await getCurrentToken();
+    
+    // Incluimos la cédula en los datos enviados
+    const puntoData = {
+      id: puntoReferencia.id,
+      latitud: puntoReferencia.latitude,
+      longitud: puntoReferencia.longitude,
+      descripcion: puntoReferencia.description,
+      error: puntoReferencia.errorMedicion,
+      tipo: puntoReferencia.tipo || 'Referencia',
+      cedula_brigadista: cedulaBrigadista // Incluimos la cédula explícitamente
+    };
+    
+    const response = await api.post('/referencias', 
+      puntoData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    
+    if (response.data.success) {
+      return response.data.id;
+    } else {
+      throw new Error(response.data.message || 'Error al guardar referencia');
+    }
+  } catch (error) {
+    console.error('Error al guardar referencia:', error);
+    handleError(error);
+  }
+};
 
     // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
     export default api;

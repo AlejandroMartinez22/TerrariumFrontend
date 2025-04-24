@@ -1,9 +1,11 @@
+
+/*TRABAJANDO EN ESTE ARCHIVO 6:36 PM */
+
 import { useState } from "react";
-import { obtenerSiguienteId } from "../supabase/getUltimoIdReferencia";
-import { insertarReferencia } from "../supabase/saveReferencia";
+import { fetchSiguienteIdReferencia, guardarReferenciaEnBackend } from "../api";
 import { actualizarReferencia } from "../supabase/updateReferencia";
 import { eliminarReferencia } from "../supabase/deleteReferencia";
-import { obtenerReferenciaPorId } from "../supabase/getReferenciaPorId"; // Necesitarás crear esta función
+import { obtenerReferenciaPorId } from "../supabase/getReferenciaPorId";
 
 export function useReferencias() {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +15,7 @@ export function useReferencias() {
     setIsLoading(true);
     setError(null);
     try {
-      const id = await obtenerSiguienteId();
+      const id = await fetchSiguienteIdReferencia();
       setIsLoading(false);
       return id;
     } catch (err) {
@@ -24,25 +26,26 @@ export function useReferencias() {
     }
   };
 
+
   const guardarReferencia = async (puntoReferencia, cedulaBrigadista) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const savedPuntoData = {
-        ...puntoReferencia,
-        cedula_brigadista: cedulaBrigadista
-      };
-      
-      const id = await insertarReferencia(savedPuntoData, cedulaBrigadista);
-      setIsLoading(false);
-      return id;
-    } catch (err) {
-      setError(err);
-      setIsLoading(false);
-      console.error("Error al guardar referencia:", err);
-      return null;
-    }
-  };
+  setIsLoading(true);
+  setError(null);
+  try {
+    const savedPuntoData = {
+      ...puntoReferencia
+    };
+    
+    // Seguimos pasando la cédula
+    const id = await guardarReferenciaEnBackend(savedPuntoData, cedulaBrigadista);
+    setIsLoading(false);
+    return id;
+  } catch (err) {
+    setError(err);
+    setIsLoading(false);
+    console.error("Error al guardar referencia:", err);
+    return null;
+  }
+};
 
   const actualizarPuntoReferencia = async (puntoReferencia, cedulaBrigadista) => {
     setIsLoading(true);

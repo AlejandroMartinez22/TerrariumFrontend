@@ -18,6 +18,20 @@ Cambios realizados 23/04
 8. Se eliminó el archivo getCoordenadas de la carpeta supabase
 9. se modificó el archivo subparcelaContext
 10. Se modificó el mapscreen.js
-11. Se modifico el archivo useCentrosPoblados.js
+11. Se modifico el archivo useCentrosPoblados.js´
 
+--- Alejandro ----
+
+1. Se eliminó el archivo getUltimoIdReferencia de /Supabase
+2. Se modificó el hook useReferencia.js
+3. Se añadió la función fetchSiguienteIdReferencia en el api/index.js
+4. Se eliminó el archivo addReferencia.js
+
+
+
+
+
+Trabajando en hook useReferencia.js
+
+1. ../supabase/getUltimoIdReferencia -- listo
 

@@ -85,9 +85,6 @@ const ReferenciaModal = ({
   }, [visible]);
   
 
-
-
-
   // Actualizar el estado externo cuando el valor cambie y sea válido
   useEffect(() => {
     originalSetErrorMedicion(errorMedicion);

@@ -15,7 +15,7 @@ import TrayectoModal from "./trayectoModal";
 
 // Importar los hooks personalizados
 import { useCoordenadas } from "../hooks/useCoordenadas"; /*Ya está*/
-import { useCentrosPoblados } from "../hooks/useCentrosPoblados"; /*En progreso*/
+import { useCentrosPoblados } from "../hooks/useCentrosPoblados"; /*Ya está*/
 import { useReferencias } from "../hooks/useReferencia";
 import { useTrayectos } from "../hooks/useTrayecto";
 import { usePuntosReferencia } from "../hooks/usePuntosReferencia";
