@@ -65,6 +65,8 @@ Cambios realizados el 24/04
 6. Se eliminó el archivo updateTrayecto de la carpeta supabase
 7. Se modificaron las importaciones en el hook useTrayecto.
 8. Se añadieron al index las funciones guardarTrayectoEnBackend y actualizarTrayectoEnBackend
+9. se finalizó con el proceso de los trayectos
+10. se elimino getCentroPoblado y getName de la carpeta supabase.
 
 
 
@@ -72,4 +74,5 @@ Cambios realizados el 24/04
 Trabajando en hook useReferencia.js
 
 1. ../supabase/getUltimoIdReferencia -- listo
+
 
