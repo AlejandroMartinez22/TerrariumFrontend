@@ -246,5 +246,51 @@ export const actualizarReferenciaEnBackend = async (puntoReferencia, cedulaBriga
   }
 };
 
+export const eliminarReferenciaEnBackend = async (puntoId, cedulaBrigadista) => {
+  try {
+    const token = await getCurrentToken();
+    
+    const response = await api.delete(`/referencias/${puntoId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      data: {
+        cedula_brigadista: cedulaBrigadista
+      }
+    });
+    
+    if (response.data.success) {
+      return { success: true, data: response.data.data };
+    } else {
+      throw new Error(response.data.message || 'Error al eliminar referencia');
+    }
+  } catch (error) {
+    console.error('Error al eliminar referencia:', error);
+    return { success: false, error: error.message || error };
+  }
+};
+
+export const obtenerReferenciaPorIdDesdeBackend = async (id) => {
+  try {
+    const token = await getCurrentToken();
+    
+    const response = await api.get(`/referencias/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    
+    if (response.data.success) {
+      return response.data.data;
+    } else {
+      throw new Error(response.data.message || 'Error al obtener referencia');
+    }
+  } catch (error) {
+    console.error('Error al obtener referencia por ID:', error);
+    handleError(error);
+    throw error;
+  }
+};
+
     // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
     export default api;

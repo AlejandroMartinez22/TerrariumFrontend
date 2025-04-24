@@ -1,10 +1,15 @@
 
-/*TRABAJANDO EN ESTE ARCHIVO 6:36 PM */
+/*ARCHIVO FINALIZADO, TODO LO QUE USA DE BACK ESTÁ EN EL PROYECTO DEL BACKEND*/
 
 import { useState } from "react";
-import { fetchSiguienteIdReferencia, guardarReferenciaEnBackend, actualizarReferenciaEnBackend } from "../api";
-import { eliminarReferencia } from "../supabase/deleteReferencia";
-import { obtenerReferenciaPorId } from "../supabase/getReferenciaPorId";
+import { 
+  fetchSiguienteIdReferencia, 
+  guardarReferenciaEnBackend, 
+  actualizarReferenciaEnBackend,
+  eliminarReferenciaEnBackend,
+  obtenerReferenciaPorIdDesdeBackend
+} from "../api";
+
 
 export function useReferencias() {
   const [isLoading, setIsLoading] = useState(false);
@@ -62,24 +67,12 @@ const actualizarPuntoReferencia = async (puntoReferencia, cedulaBrigadista) => {
   }
 };
 
-
   const borrarReferencia = async (referenciaId, cedulaBrigadista) => {
     setIsLoading(true);
     setError(null);
     try {
-      // Primero verificamos que el punto pertenezca al brigadista
-      const referenciaExistente = await obtenerReferenciaPorId(referenciaId);
-      
-      if (!referenciaExistente) {
-        throw new Error("El punto de referencia no existe");
-      }
-      
-      // Validar que el brigadista sea el propietario del punto
-      if (referenciaExistente.cedula_brigadista !== cedulaBrigadista) {
-        throw new Error("No tienes permisos para eliminar este punto de referencia");
-      }
-      
-      const result = await eliminarReferencia(referenciaId);
+      // La verificación de permisos se hace ahora en el backend
+      const result = await eliminarReferenciaEnBackend(referenciaId, cedulaBrigadista);
       setIsLoading(false);
       return result;
     } catch (err) {
@@ -90,12 +83,28 @@ const actualizarPuntoReferencia = async (puntoReferencia, cedulaBrigadista) => {
     }
   };
 
+  const obtenerReferencia = async (id) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await obtenerReferenciaPorIdDesdeBackend(id);
+      setIsLoading(false);
+      return data;
+    } catch (err) {
+      setError(err);
+      setIsLoading(false);
+      console.error("Error al obtener referencia:", err);
+      return null;
+    }
+  };
+
   return {
     getSiguienteId,
     guardarReferencia,
     actualizarPuntoReferencia,
     borrarReferencia,
+    obtenerReferencia, 
     isLoading,
     error
-  };
-}
+};
+};

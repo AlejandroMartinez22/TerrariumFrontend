@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import useDecimalValidation from "../hooks/useDecimalValidation"; // Importamos el hook personalizado
-import { obtenerReferenciaPorId } from "../supabase/getReferenciaPorId"; // Separar esto.
+import { obtenerReferenciaPorIdDesdeBackend } from "../api";
 
 const ReferenciaModal = ({
   visible,
@@ -50,7 +50,7 @@ const ReferenciaModal = ({
         // Solo verificamos propiedad si es un punto existente
         if (puntoId) {
           try {
-            const referencia = await obtenerReferenciaPorId(puntoId);
+            const referencia = await obtenerReferenciaPorIdDesdeBackend(puntoId);
             setIsUserOwner(referencia && referencia.cedula_brigadista === cedulaUsuarioActual);
           } catch (error) {
             console.error("Error al verificar propietario:", error);

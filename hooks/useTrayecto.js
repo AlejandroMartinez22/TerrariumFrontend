@@ -2,7 +2,7 @@ import { useState } from "react";
 import { insertarTrayecto } from "../supabase/saveTrayecto";
 import { actualizarTrayecto } from "../supabase/updateTrayecto";
 import { obtenerTrayectoPorId } from "../supabase/getTrayectoPorId";
-import { obtenerReferenciaPorId } from "../supabase/getReferenciaPorId";
+import { obtenerReferenciaPorIdDesdeBackend } from "../api";
 import { useBrigadista } from "../context/BrigadistaContext";
 
 export function useTrayectos() {
@@ -19,7 +19,7 @@ export function useTrayectos() {
       const cedulaAUsar = cedulaBrigadista || cedula;
       
       // Verificar que el punto de referencia pertenezca al brigadista
-      const puntoReferencia = await obtenerReferenciaPorId(puntoId);
+      const puntoReferencia = await obtenerReferenciaPorIdDesdeBackend(puntoId);
 
       if (!puntoReferencia) {
         throw new Error("El punto de referencia no existe");
@@ -60,7 +60,7 @@ export function useTrayectos() {
       const cedulaAUsar = cedulaBrigadista || cedula;
       
       // Validar punto de referencia como primer paso
-      const puntoReferencia = await obtenerReferenciaPorId(puntoId);
+      const puntoReferencia = await obtenerReferenciaPorIdDesdeBackend(puntoId);
 
       if (!puntoReferencia) {
         throw new Error("El punto de referencia no existe");

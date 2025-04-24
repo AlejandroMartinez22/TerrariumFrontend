@@ -8,15 +8,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { useBrigadista } from "../context/BrigadistaContext"; /*ya está*/
+import { useBrigadista } from "../context/BrigadistaContext"; /*LISTO*/
 import ReferenciaModal from "./puntoReferenciaModal"; 
 import ReferenciaMarker from "./referenciaMarker";
 import TrayectoModal from "./trayectoModal";
 
 // Importar los hooks personalizados
-import { useCoordenadas } from "../hooks/useCoordenadas"; /*Ya está*/
-import { useCentrosPoblados } from "../hooks/useCentrosPoblados"; /*Ya está*/
-import { useReferencias } from "../hooks/useReferencia"; /*Trabajando en esto*/
+import { useCoordenadas } from "../hooks/useCoordenadas"; /*LISTO*/
+import { useCentrosPoblados } from "../hooks/useCentrosPoblados"; /*LISTO*/
+import { useReferencias } from "../hooks/useReferencia"; /*LISTO*/
 import { useTrayectos } from "../hooks/useTrayecto";
 import { usePuntosReferencia } from "../hooks/usePuntosReferencia";
 

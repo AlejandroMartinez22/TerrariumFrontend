@@ -31,6 +31,21 @@ Cambios realizados 23/04
 7. Se añadío la función actualizarReferenciaEnBackend en el api/index.js
 8. Se modificó el hook useReferencia.js
 9. Se eliminó el archivo updateReferencia.js de la carpeta supabase.
+10. Se añadió la función eliminarReferenciaEnBackend en el api/index.js
+11. Se eliminó el archivo getReferenciaPorId de la carpeta supabase.
+12. Se añadió la función al index.
+13. se modificó el hook useReferencia.js
+
+-- Aqui surgió un error por que el modal de punto de Referencia usaba el archivo getReferenciaPorId. --
+
+14. Se cambió la importación en este modal
+
+-- Aqui surgió un error por que el hook useTrayecto que usaba el archivo getReferenciaPorId. --
+
+15. Se cambió la importación en este hook
+
+16. Se va a modificar el context ReferenciaContext.js
+
 
 
 
