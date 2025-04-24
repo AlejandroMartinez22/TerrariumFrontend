@@ -7,7 +7,7 @@
     import { getAuth } from 'firebase/auth';// Importamos la función getAuth de Firebase para manejar la autenticación del usuario
 
     // Configuramos la URL base del backend
-    const API_URL = 'http://192.168.1.7:5000/api'; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+    const API_URL = 'http://192.168.11.58:5000/api'; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
 
     // Creamos una instancia de Axios preconfigurada con la URL base del backend
     const api = axios.create({
@@ -350,6 +350,35 @@ export const guardarTrayectoEnBackend = async (datosTrayecto, puntoId, cedulaBri
   } catch (error) {
     console.error('Error al guardar trayecto:', error);
     return { success: false, error: error.message || 'Error al guardar trayecto' };
+  }
+};
+
+
+// Función para actualizar un trayecto en el backend
+export const actualizarTrayectoEnBackend = async (datosTrayecto, puntoId) => {
+  try {
+    // Obtener el token de autenticación del usuario actual
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const token = user ? await user.getIdToken() : null;
+
+    if (!token) {
+      throw new Error('Usuario no autenticado');
+    }
+
+    const response = await api.put(`/trayectos/${puntoId}`, {
+      datosTrayecto,
+      puntoId
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar trayecto en el backend:', error);
+    throw error;
   }
 };
 

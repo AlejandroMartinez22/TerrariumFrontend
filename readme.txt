@@ -53,6 +53,18 @@ Cambios realizados 23/04
 19. Se modificó la importación en este hook
 
 
+Cambios realizados el 24/04
+
+1. Se eliminó el archivo saveTrayecto.js en la carpeta supabase
+2. Se añadió una nueva función  guardarTrayectoEnBackend en el api/index
+3. Se modificó el hook useTrayecto con la importación correcta
+
+4. Se eliminó el archivo saveTrayecto de la carpeta supabase
+5. Se eliminó el archivo getUltimoIdTrayecto de la carpeta supabase
+5. Se eliminó el archivo getTrayectoPorId de la carpeta supabase
+6. Se eliminó el archivo updateTrayecto de la carpeta supabase
+7. Se modificaron las importaciones en el hook useTrayecto.
+8. Se añadieron al index las funciones guardarTrayectoEnBackend y actualizarTrayectoEnBackend
 
 
 

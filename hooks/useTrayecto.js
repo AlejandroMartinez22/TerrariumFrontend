@@ -1,8 +1,11 @@
+/* LISTO, EPICO */
+
 import { useState } from "react";
-import { insertarTrayecto } from "../supabase/saveTrayecto";
-import { actualizarTrayecto } from "../supabase/updateTrayecto";
-import { obtenerTrayectoPorId } from "../supabase/getTrayectoPorId";
-import { obtenerReferenciaPorIdDesdeBackend } from "../api";
+import { 
+  guardarTrayectoEnBackend, 
+  actualizarTrayectoEnBackend,
+  obtenerReferenciaPorIdDesdeBackend 
+} from "../api";
 import { useBrigadista } from "../context/BrigadistaContext";
 
 export function useTrayectos() {
@@ -37,7 +40,7 @@ export function useTrayectos() {
         cedula_brigadista: cedulaAUsar,
       };
 
-      const result = await insertarTrayecto(datosCompletos, puntoId);
+      const result = await guardarTrayectoEnBackend(datosCompletos, puntoId);
       setIsLoading(false);
       return result;
     } catch (err) {
@@ -59,41 +62,13 @@ export function useTrayectos() {
       // Usar la cédula pasada como parámetro o caer en la del contexto
       const cedulaAUsar = cedulaBrigadista || cedula;
       
-      // Validar punto de referencia como primer paso
-      const puntoReferencia = await obtenerReferenciaPorIdDesdeBackend(puntoId);
-
-      if (!puntoReferencia) {
-        throw new Error("El punto de referencia no existe");
-      }
-
-      console.log(
-        "cedula en base de datos:",
-        puntoReferencia.cedula_brigadista
-      );
-      console.log("cedula del usuario:", cedulaAUsar);
-      
-      if (
-        String(puntoReferencia.cedula_brigadista) !== String(cedulaAUsar)
-      ) {
-        throw new Error(
-          "No tienes permisos para modificar este punto de referencia"
-        );
-      }
-
-      // Validar trayecto
-      const trayectoExistente = await obtenerTrayectoPorId(
-        datosTrayecto.idTrayecto
-      );
-      if (!trayectoExistente) {
-        throw new Error("El trayecto no existe");
-      }
-
+      // Toda la validación del punto de referencia y el trayecto ahora se hace en el backend
       const datosCompletos = {
         ...datosTrayecto,
         cedula_brigadista: cedulaAUsar,
       };
 
-      const result = await actualizarTrayecto(datosCompletos, puntoId);
+      const result = await actualizarTrayectoEnBackend(datosCompletos, puntoId);
       setIsLoading(false);
       return result;
     } catch (err) {
