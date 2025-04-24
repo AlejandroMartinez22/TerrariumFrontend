@@ -1,5 +1,3 @@
-/* LISTO, EPICO */
-
 import { useState } from "react";
 import { 
   guardarTrayectoEnBackend, 
@@ -14,33 +12,28 @@ export function useTrayectos() {
   const { brigadista } = useBrigadista();
   const cedula = brigadista?.cedula;
 
-  const guardarTrayecto = async (datosTrayecto, puntoId, cedulaBrigadista = cedula) => {
+  const guardarTrayecto = async (datosTrayecto, puntoId, cedulaBrigadista) => {
     setIsLoading(true);
     setError(null);
     try {
-      // Usar la cédula pasada como parámetro o caer en la del contexto
-      const cedulaAUsar = cedulaBrigadista || cedula;
+      // Use cedulaBrigadista from parameters or from datosTrayecto
+      const cedulaAUsar = cedulaBrigadista || datosTrayecto.cedula_brigadista;
       
-      // Verificar que el punto de referencia pertenezca al brigadista
+      // Get reference point
       const puntoReferencia = await obtenerReferenciaPorIdDesdeBackend(puntoId);
-
+      
       if (!puntoReferencia) {
         throw new Error("El punto de referencia no existe");
       }
-
+      
       if (puntoReferencia.cedula_brigadista !== cedulaAUsar) {
         throw new Error(
           "No tienes permisos para añadir trayectos a este punto de referencia"
         );
       }
-
-      // Guardar con la cedula del brigadista
-      const datosCompletos = {
-        ...datosTrayecto,
-        cedula_brigadista: cedulaAUsar,
-      };
-
-      const result = await guardarTrayectoEnBackend(datosCompletos, puntoId);
+      
+      // Send data to backend
+      const result = await guardarTrayectoEnBackend(datosTrayecto, puntoId, cedulaAUsar);
       setIsLoading(false);
       return result;
     } catch (err) {

@@ -8,7 +8,7 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import { obtenerSiguienteIdTrayecto } from "../supabase/getUltimoIdTrayecto";
+import { getUltimoIdTrayectoDeBack } from "../api";
 
 export default function TrayectoModal({
   visible,
@@ -64,8 +64,9 @@ export default function TrayectoModal({
       } else {
         // Si estamos creando uno nuevo, generamos un nuevo ID desde la base de datos
         try {
-          const nuevoId = await obtenerSiguienteIdTrayecto();
-          console.log("Nuevo ID generado desde Supabase:", nuevoId);
+          // Utilizamos la función importada para obtener el ID del backend
+          const nuevoId = await getUltimoIdTrayectoDeBack();
+          console.log("Nuevo ID generado desde el backend:", nuevoId);
           
           if (nuevoId) {
             setIdTrayecto(nuevoId);
