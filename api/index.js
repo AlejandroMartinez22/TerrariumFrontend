@@ -319,5 +319,39 @@ export const getPuntosReferenciaByConglomerado = async (idConglomerado) => {
 };
 
 
+/*Funcion para guardar el trayecto en la base de datos */
+
+export const guardarTrayectoEnBackend = async (datosTrayecto, puntoId, cedulaBrigadista) => {
+  try {
+    const token = await getCurrentToken();
+    
+    const payload = {
+      datosTrayecto: {
+        ...datosTrayecto,
+        cedula_brigadista: cedulaBrigadista
+      },
+      puntoId
+    };
+    
+    const response = await api.post('/trayectos', 
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    
+    if (response.data.success) {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || 'Error al guardar trayecto');
+    }
+  } catch (error) {
+    console.error('Error al guardar trayecto:', error);
+    return { success: false, error: error.message || 'Error al guardar trayecto' };
+  }
+};
+
     // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
     export default api;
