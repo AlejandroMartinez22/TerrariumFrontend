@@ -26,6 +26,11 @@ Cambios realizados 23/04
 2. Se modificó el hook useReferencia.js
 3. Se añadió la función fetchSiguienteIdReferencia en el api/index.js
 4. Se eliminó el archivo addReferencia.js
+5. Se modificó el hook useReferencia.js
+6. Se añadió la función guardarReferenciaEnBackend en el api/index.js
+7. Se añadío la función actualizarReferenciaEnBackend en el api/index.js
+8. Se modificó el hook useReferencia.js
+9. Se eliminó el archivo updateReferencia.js de la carpeta supabase.
 
 
 

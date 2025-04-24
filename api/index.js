@@ -212,5 +212,39 @@ export const guardarReferenciaEnBackend = async (puntoReferencia, cedulaBrigadis
   }
 };
 
+export const actualizarReferenciaEnBackend = async (puntoReferencia, cedulaBrigadista) => {
+  try {
+    const token = await getCurrentToken();
+    
+    // Preparamos los datos para enviar al backend
+    const puntoData = {
+      id: puntoReferencia.id,
+      latitud: puntoReferencia.latitude,
+      longitud: puntoReferencia.longitude,
+      descripcion: puntoReferencia.description,
+      error: puntoReferencia.errorMedicion,
+      cedula_brigadista: cedulaBrigadista
+    };
+    
+    const response = await api.put(`/referencias/${puntoReferencia.id}`, 
+      puntoData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    
+    if (response.data.success) {
+      return { success: true };
+    } else {
+      throw new Error(response.data.message || 'Error al actualizar referencia');
+    }
+  } catch (error) {
+    console.error('Error al actualizar referencia:', error);
+    return { success: false, error: error.message || error };
+  }
+};
+
     // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
     export default api;

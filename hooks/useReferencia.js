@@ -2,8 +2,7 @@
 /*TRABAJANDO EN ESTE ARCHIVO 6:36 PM */
 
 import { useState } from "react";
-import { fetchSiguienteIdReferencia, guardarReferenciaEnBackend } from "../api";
-import { actualizarReferencia } from "../supabase/updateReferencia";
+import { fetchSiguienteIdReferencia, guardarReferenciaEnBackend, actualizarReferenciaEnBackend } from "../api";
 import { eliminarReferencia } from "../supabase/deleteReferencia";
 import { obtenerReferenciaPorId } from "../supabase/getReferenciaPorId";
 
@@ -47,37 +46,22 @@ export function useReferencias() {
   }
 };
 
-  const actualizarPuntoReferencia = async (puntoReferencia, cedulaBrigadista) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // Primero verificamos que el punto pertenezca al brigadista
-      const referenciaExistente = await obtenerReferenciaPorId(puntoReferencia.id);
-      
-      if (!referenciaExistente) {
-        throw new Error("El punto de referencia no existe");
-      }
-      
-      // Validar que el brigadista sea el propietario del punto
-      if (referenciaExistente.cedula_brigadista !== cedulaBrigadista) {
-        throw new Error("No tienes permisos para modificar este punto de referencia");
-      }
-      
-      const updatedPuntoData = {
-        ...puntoReferencia,
-        cedula_brigadista: cedulaBrigadista
-      };
-      
-      const result = await actualizarReferencia(updatedPuntoData, cedulaBrigadista);
-      setIsLoading(false);
-      return result;
-    } catch (err) {
-      setError(err);
-      setIsLoading(false);
-      console.error("Error al actualizar referencia:", err);
-      return { success: false, error: err.message };
-    }
-  };
+const actualizarPuntoReferencia = async (puntoReferencia, cedulaBrigadista) => {
+  setIsLoading(true);
+  setError(null);
+  try {
+    // La verificación de permisos se hace ahora en el backend
+    const result = await actualizarReferenciaEnBackend(puntoReferencia, cedulaBrigadista);
+    setIsLoading(false);
+    return result;
+  } catch (err) {
+    setError(err);
+    setIsLoading(false);
+    console.error("Error al actualizar referencia:", err);
+    return { success: false, error: err.message };
+  }
+};
+
 
   const borrarReferencia = async (referenciaId, cedulaBrigadista) => {
     setIsLoading(true);
