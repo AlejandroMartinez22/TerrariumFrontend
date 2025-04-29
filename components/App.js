@@ -26,6 +26,7 @@ y los providers que permiten manejar el estado global de la aplicacion, ademas d
 */
 export default function App() {
   return (
+    
     <BrigadistaProvider>
       <SubparcelaProvider> 
         <ReferenciaProvider>
