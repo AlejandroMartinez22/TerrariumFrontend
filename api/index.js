@@ -64,7 +64,6 @@ export const verifyTokenAndGetUser = async (idToken) => {
   console.log("Enviando token para verificación...");
   try {
     const response = await api.post("/auth/verify-token", { idToken });
-    console.log("Datos de usuario recibidos del backend:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error al verificar token:", error);
@@ -77,7 +76,6 @@ export const getUserNameFromBackend = async (uid) => {
   console.log(`Solicitando nombre para UID: ${uid}`);
   try {
     const response = await api.get(`/auth/username/${uid}`);
-    console.log(`Nombre recibido: ${response.data.nombre}`);
     return response.data.nombre;
   } catch (error) {
     console.error(`Error al obtener nombre para ${uid}:`, error);
@@ -85,6 +83,7 @@ export const getUserNameFromBackend = async (uid) => {
   }
 };
 
+/*Consulta al backend para obtener la info del brigadista pasando por una verificacion de sesion.*/
 export const getInfoBrigadistaFromBackend = async () => {
   try {
     const token = await getCurrentToken();
@@ -120,6 +119,7 @@ export const updateTutorialCompletadoInBackend = async (completado) => {
   }
 };
 
+/*Consulta al backend para obtener la lista de coordenadas de las subparcelas.*/
 export const fetchCoordenadas = async () => {
   try {
     const token = await getCurrentToken();
@@ -128,11 +128,6 @@ export const fetchCoordenadas = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-
-    console.log(
-      "Coordenadas recibidas del backend:",
-      response.data.data.length
-    );
 
     if (response.data.success) {
       return response.data.data;
@@ -145,6 +140,7 @@ export const fetchCoordenadas = async () => {
   }
 };
 
+/*Consulta al backend para obtener las coordenadas del centro poblado.*/
 export const fetchCoordenadasCentroPoblado = async () => {
   try {
     const token = await getCurrentToken();
@@ -153,12 +149,7 @@ export const fetchCoordenadasCentroPoblado = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(
-      "Coordenadas del centro poblado recibidas del backend:",
-      response.data.data.length
-    );
     if (response.data.success) {
-      console.log("Coordenadas del centro poblado:", response.data.data);
       return response.data.data;
     } else {
       throw new Error(
@@ -172,8 +163,7 @@ export const fetchCoordenadasCentroPoblado = async () => {
   }
 };
 
-/*Funcion para obtener el siguiente id para asignarlo a un punto de referencia */
-
+/*Funcion para obtener el siguiente id consultando en backend para asignarlo a un nuevo punto de referencia */
 export const fetchSiguienteIdReferencia = async () => {
   try {
     const token = await getCurrentToken();
@@ -196,6 +186,7 @@ export const fetchSiguienteIdReferencia = async () => {
   }
 };
 
+/*Funcion para guardar un nuevo punto de referencia en el backend.*/
 export const guardarReferenciaEnBackend = async (
   puntoReferencia,
   cedulaBrigadista
@@ -203,7 +194,6 @@ export const guardarReferenciaEnBackend = async (
   try {
     const token = await getCurrentToken();
 
-    // Incluimos la cédula en los datos enviados
     const puntoData = {
       id: puntoReferencia.id,
       latitud: puntoReferencia.latitude,
@@ -211,7 +201,7 @@ export const guardarReferenciaEnBackend = async (
       descripcion: puntoReferencia.description,
       error: puntoReferencia.errorMedicion,
       tipo: puntoReferencia.tipo || "Referencia",
-      cedula_brigadista: cedulaBrigadista, // Incluimos la cédula explícitamente
+      cedula_brigadista: cedulaBrigadista,
     };
 
     const response = await api.post("/referencias", puntoData, {
@@ -231,6 +221,7 @@ export const guardarReferenciaEnBackend = async (
   }
 };
 
+/*Funcion para actualizar un punto de referencia en el backend.*/
 export const actualizarReferenciaEnBackend = async (
   puntoReferencia,
   cedulaBrigadista
@@ -238,7 +229,6 @@ export const actualizarReferenciaEnBackend = async (
   try {
     const token = await getCurrentToken();
 
-    // Preparamos los datos para enviar al backend
     const puntoData = {
       id: puntoReferencia.id,
       latitud: puntoReferencia.latitude,
@@ -271,6 +261,7 @@ export const actualizarReferenciaEnBackend = async (
   }
 };
 
+/*Funcion para eliminar un punto de referencia en el backend.*/
 export const eliminarReferenciaEnBackend = async (
   puntoId,
   cedulaBrigadista
@@ -298,6 +289,7 @@ export const eliminarReferenciaEnBackend = async (
   }
 };
 
+/*Funcion para obtener un punto de referencia por su ID desde el backend.*/
 export const obtenerReferenciaPorIdDesdeBackend = async (id) => {
   try {
     const token = await getCurrentToken();
@@ -320,6 +312,7 @@ export const obtenerReferenciaPorIdDesdeBackend = async (id) => {
   }
 };
 
+/*Funcion para obtener todos los puntos de referencia desde el backend.*/
 export const getPuntosReferenciaByConglomerado = async (idConglomerado) => {
   try {
     if (!idConglomerado) {
@@ -351,7 +344,6 @@ export const getPuntosReferenciaByConglomerado = async (idConglomerado) => {
 };
 
 /*Funcion para guardar el trayecto en la base de datos */
-
 export const guardarTrayectoEnBackend = async (
   datosTrayecto,
   puntoId,
@@ -391,7 +383,6 @@ export const guardarTrayectoEnBackend = async (
 // Función para actualizar un trayecto en el backend
 export const actualizarTrayectoEnBackend = async (datosTrayecto, puntoId) => {
   try {
-    // Obtener el token de autenticación del usuario actual
     const auth = getAuth();
     const user = auth.currentUser;
     const token = user ? await user.getIdToken() : null;
@@ -420,9 +411,9 @@ export const actualizarTrayectoEnBackend = async (datosTrayecto, puntoId) => {
   }
 };
 
+// Funcion para obtener el siguiente ID de trayecto desde el backend
 export const getUltimoIdTrayectoDeBack = async () => {
   try {
-    // Obtener el token de autenticación del usuario actual
     const auth = getAuth();
     const user = auth.currentUser;
     const token = user ? await user.getIdToken() : null;
@@ -437,7 +428,6 @@ export const getUltimoIdTrayectoDeBack = async () => {
       },
     });
 
-    // Extraer solo el ID del objeto de respuesta
     if (response.data && response.data.success && response.data.data) {
       return response.data.data.siguienteId;
     } else {
@@ -449,10 +439,9 @@ export const getUltimoIdTrayectoDeBack = async () => {
   }
 };
 
-
+// Funcion para obtener la cantidad de puntos de referencia relacionados a un brigadista
 export const VerificarPuntosEnBackEnd = async (cedulaBrigadista) => {
   try {
-    // Obtener el token de autenticación del usuario actual
     const auth = getAuth();
     const user = auth.currentUser;
     const token = user ? await user.getIdToken() : null;
@@ -461,7 +450,6 @@ export const VerificarPuntosEnBackEnd = async (cedulaBrigadista) => {
       throw new Error("Usuario no autenticado");
     }
 
-    // Usar la ruta corregida según la nueva estructura
     const response = await api.get(
       `/referencias/verificar/${cedulaBrigadista}`,
       {
@@ -470,19 +458,17 @@ export const VerificarPuntosEnBackEnd = async (cedulaBrigadista) => {
         },
       }
     );
-
-    // Retornar específicamente el valor numérico de la cantidad
-    return response.data.cantidad; // Ajustar según el cambio en el controlador
+    return response.data.cantidad;
   } catch (error) {
     console.error("Error al obtener los puntos de referencia relacionados al brigadista:", error);
     throw error;
   }
 };
 
-
+/*Funcion para sincronizar las caracteristicas de las subparcelas con el backend,
+  se espera que el backend reciba un array de objetos con las caracteristicas de las subparcelas.*/
 export const sincronizarSubparcelas = async (subparcelasCaracteristicas) => {
   try {
-    // Obtener el token de autenticación del usuario actual 
     const auth = getAuth();
     const user = auth.currentUser;
     const token = user ? await user.getIdToken() : null;
