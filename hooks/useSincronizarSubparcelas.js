@@ -1,34 +1,30 @@
-    import { useState } from 'react';
-    import { sincronizarSubparcelas } from '../api'; // Cambiado de supabase a api
+import { useState } from 'react';
+import { sincronizarSubparcelas } from '../api'; // Se cambia de Supabase a API
 
-    export const useSincronizarSubparcelas = () => {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [resultados, setResultados] = useState(null);
+// Hook para sincronizar subparcelas con el backend
+export const useSincronizarSubparcelas = () => {
+    const [loading, setLoading] = useState(false); // Estado de carga
+    const [error, setError] = useState(null); // Manejo de errores
+    const [resultados, setResultados] = useState(null); // Almacena los resultados de la sincronización
 
-    // Función para sincronizar con el backend
+    // Función para sincronizar subparcelas con el backend
     const sincronizar = async (subparcelasCaracteristicas) => {
         try {
-        setLoading(true);
-        setError(null);
-        
-        // Ahora llamamos a la API en lugar de al servicio de Supabase directamente
-        const result = await sincronizarSubparcelas(subparcelasCaracteristicas);
-        
-        setResultados(result);
-        setLoading(false);
-        return result;
+            setLoading(true);
+            setError(null);
+
+            // Llamada a la API para sincronizar los datos
+            const result = await sincronizarSubparcelas(subparcelasCaracteristicas);
+            
+            setResultados(result);
+            return result;
         } catch (err) {
-        setError(err.message || 'Error al sincronizar con la base de datos');
-        setLoading(false);
-        throw err;
+            setError(err.message || 'Error al sincronizar con la base de datos');
+            throw err;
+        } finally {
+            setLoading(false);
         }
     };
 
-    return {
-        sincronizar,
-        loading,
-        error,
-        resultados
-    };
-    };
+    return { sincronizar, loading, error, resultados };
+};

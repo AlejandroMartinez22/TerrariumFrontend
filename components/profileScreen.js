@@ -1,7 +1,7 @@
 /* YA ESTÁ LO RELACIONADO CON ESTE COMPONENTE */
 
 import { Ionicons } from "@expo/vector-icons"; //Importamos Iconos de Expo.
-
+// importar React y otros componentes necesarios de React Native
 import {
 View,
 Text,
@@ -11,10 +11,13 @@ TouchableOpacity,
 Image,
 ImageBackground,
 } from "react-native";
+// importar el logo de Terrarium
 import { handleSignOut } from "../hooks/signOut";
+// importar el hook useLogin
 import { useBrigadista } from "../context/BrigadistaContext";
 
 export default function ProfileScreen({ navigation  }) {
+// usar el hook useLogin para manejar el inicio de sesión
     const { brigadista, loading, error, setBrigadista, setError } = useBrigadista();
 
 return (
@@ -102,6 +105,7 @@ return (
 );
 }
 
+// definir los estilos para el componente ProfileScreen
 const styles = StyleSheet.create({
 container: {
     flex: 1,
@@ -169,12 +173,12 @@ errorText: {
 signOutButton: {
     position: "absolute",
     alignSelf: "center",
-    bottom: 40, // margen más pequeño desde abajo
+    bottom: 40,
     backgroundColor: "#AB0808",
     padding: 12,
     borderRadius: 8,
-    flexDirection: "row", //  Alínea hijos en fila
-    alignItems: "center", //  Centra verticalmente
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     elevation: 4,
 },

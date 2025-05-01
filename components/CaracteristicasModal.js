@@ -1,6 +1,8 @@
 /*LISTO COMPONENTE */
 
+// Importar librerías y componentes necesarios
 import React, { useState, useEffect } from "react";
+// Importar componentes de React Native
 import {
   Modal,
   View,
@@ -10,9 +12,13 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
+// Importar iconos de Ionicons
 import { Ionicons } from "@expo/vector-icons";
+// Importar el componente Picker de React Native Picker
 import { Picker } from "@react-native-picker/picker";
-import useCaracteristicasValidation from "../hooks/useCaracteristicasValidation"; /*LISTO */
+// Importar el hook de validación de características
+import useCaracteristicasValidation from "../hooks/useCaracteristicasValidation";
+// Importar el hook de validación decimal
 import useDecimalValidation from "../hooks/useDecimalValidation"; /*LISTO*/
 
 // Opciones para los pickers
@@ -32,6 +38,7 @@ const COBERTURAS = [
   "Zona urbana"
 ];
 
+// Opciones para afectaciones
 const AFECTACIONES = [
   "Seleccionar",
   "Corte de Lianas",
@@ -55,6 +62,7 @@ const SEVERIDADES = [
   "NP",
 ];
 
+// Componente principal
 const CaracteristicasModal = ({
   visible,
   onClose,
@@ -62,8 +70,8 @@ const CaracteristicasModal = ({
   puntoId,
   nombreSubparcela,
   selectedPunto,
-  errorMedicion: initialErrorMedicion, // Renombramos para evitar conflictos
-  setErrorMedicion: originalSetErrorMedicion, // Renombramos para evitar conflictos
+  errorMedicion: initialErrorMedicion,
+  setErrorMedicion: originalSetErrorMedicion,
 }) => {
   // Usar el hook de validación decimal para el error de medición
   const [errorMedicion, setErrorMedicion, errorMedicionError, isErrorMedicionValid] = 
@@ -145,14 +153,19 @@ const CaracteristicasModal = ({
   };
 
   return (
+    // Modal para mostrar las características de la subparcela
     <Modal
       visible={visible}
       animationType="slide"
       transparent={true}
     >
+      {/* Overlay del modal */}
       <View style={styles.modalOverlay}>
+        {/* Contenido del modal */}
         <View style={styles.modalContent}>
+          {/* ScrollView para permitir desplazamiento en caso de contenido largo */}
           <ScrollView>
+            {/* Encabezado del modal */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
                 Características de la subparcela {nombreSubparcela}
@@ -379,6 +392,7 @@ const CaracteristicasModal = ({
   );
 };
 
+// Estilos del componente
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
@@ -407,7 +421,6 @@ const styles = StyleSheet.create({
   modalBody: {
     marginTop: 10,
   },
-  // Nueva sección para mejorar la organización
   mainSection: {
     marginBottom: 20,
     paddingHorizontal: 8,
@@ -452,7 +465,6 @@ const styles = StyleSheet.create({
     padding: 8,
     height: 40,
   },
-  // Divider para separar secciones
   divider: {
     height: 1,
     backgroundColor: "#eee",
@@ -600,4 +612,5 @@ const styles = StyleSheet.create({
   },
 });
 
+// Exportar el componente para su uso en otros archivos
 export default CaracteristicasModal;

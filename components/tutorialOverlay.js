@@ -1,8 +1,14 @@
+// import React para la intefaz
 import React from 'react';
+// importar los componentes de React Native necesarios
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
+// importar Ionicons para los iconos
 import { Ionicons } from "@expo/vector-icons";
 
+// metodo para crear el overlay del tutorial
+// Este componente muestra un overlay con instrucciones para el usuario
 const TutorialOverlay = ({ step, setStep, onClose, onVerificarPuntos, cantidadPuntos }) => {
+  // Definición de los pasos del tutorial
   const steps = [
     'Como Jefe de Brigada, tu primer paso es dirigir a tu equipo hacia el conglomerado asignado.',
     'Para facilitar el recorrido, deberás marcar cuatro puntos de referencia en el camino que sirvan como guía durante el desplazamiento.',
@@ -12,6 +18,7 @@ const TutorialOverlay = ({ step, setStep, onClose, onVerificarPuntos, cantidadPu
     'Ingresa las características de las cinco subparcelas en las ventanas emergentes'
   ];
 
+  // Manejo del evento de siguiente/cerrar
   const handleNext = () => {
     if (step < steps.length) {
       setStep(step + 1);
@@ -20,6 +27,7 @@ const TutorialOverlay = ({ step, setStep, onClose, onVerificarPuntos, cantidadPu
     }
   };
 
+  // Manejo del evento de verificar puntos
   const handleVerificarPuntos = () => {
     if (onVerificarPuntos) {
       onVerificarPuntos();
@@ -83,8 +91,10 @@ const TutorialOverlay = ({ step, setStep, onClose, onVerificarPuntos, cantidadPu
   );
 };
 
+// Obtener el ancho de la pantalla para el diseño responsivo
 const { width } = Dimensions.get('window');
 
+// Definición de estilos para el componente
 const styles = StyleSheet.create({
   overlay: {
     position: 'absolute',

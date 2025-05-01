@@ -1,7 +1,10 @@
+// importar funciones de Firebase
 import { getAuth, signOut } from "firebase/auth";
-import api from "../api"; // Tu instancia de axios configurada
+import api from "../api"; //instancia de axios configurada
 
+// metodo para cerrar sesión
 export const handleSignOut = async (navigation, setBrigadista, setError) => {
+  // Obtener la instancia de autenticación de Firebase
   const auth = getAuth();
   try {
     // 1. Cierra la sesión en Firebase

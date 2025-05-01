@@ -194,6 +194,7 @@ export const guardarReferenciaEnBackend = async (
   try {
     const token = await getCurrentToken();
 
+    //guardamos las variables en un objeto para enviarlas al backend
     const puntoData = {
       id: puntoReferencia.id,
       latitud: puntoReferencia.latitude,
@@ -204,6 +205,7 @@ export const guardarReferenciaEnBackend = async (
       cedula_brigadista: cedulaBrigadista,
     };
 
+    //Llamamos al endpoint del backend para guardar el punto de referencia
     const response = await api.post("/referencias", puntoData, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -227,8 +229,10 @@ export const actualizarReferenciaEnBackend = async (
   cedulaBrigadista
 ) => {
   try {
+    // Obtenemos el token de autenticación del usuario actual
     const token = await getCurrentToken();
 
+    //guardamos las variables en un objeto para enviarlas al backend
     const puntoData = {
       id: puntoReferencia.id,
       latitud: puntoReferencia.latitude,
@@ -238,6 +242,7 @@ export const actualizarReferenciaEnBackend = async (
       cedula_brigadista: cedulaBrigadista,
     };
 
+    //Llamamos al endpoint del backend para actualizar el punto de referencia
     const response = await api.put(
       `/referencias/${puntoReferencia.id}`,
       puntoData,
@@ -267,8 +272,10 @@ export const eliminarReferenciaEnBackend = async (
   cedulaBrigadista
 ) => {
   try {
+    // Obtenemos el token de autenticación del usuario actual
     const token = await getCurrentToken();
 
+    //Llamamos al endpoint del backend para eliminar el punto de referencia
     const response = await api.delete(`/referencias/${puntoId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -279,6 +286,7 @@ export const eliminarReferenciaEnBackend = async (
     });
 
     if (response.data.success) {
+      // Si la respuesta es exitosa, retornamos el ID del punto eliminado
       return { success: true, data: response.data.data };
     } else {
       throw new Error(response.data.message || "Error al eliminar referencia");
@@ -292,15 +300,22 @@ export const eliminarReferenciaEnBackend = async (
 /*Funcion para obtener un punto de referencia por su ID desde el backend.*/
 export const obtenerReferenciaPorIdDesdeBackend = async (id) => {
   try {
+    if (!id) {
+      throw new Error("Se requiere un ID de referencia válido");
+    }
+
+    // Verificamos que se haya pasado un ID válido
     const token = await getCurrentToken();
 
+    // Realizamos la consulta al backend para obtener el punto de referencia
     const response = await api.get(`/referencias/punto/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    if (response.data.success) {  
+    if (response.data.success) {
+      // Si la respuesta es exitosa, retornamos los datos del punto de referencia
       return response.data.data;
     } else {
       throw new Error(response.data.message || "Error al obtener referencia");
@@ -315,12 +330,15 @@ export const obtenerReferenciaPorIdDesdeBackend = async (id) => {
 /*Funcion para obtener todos los puntos de referencia desde el backend.*/
 export const getPuntosReferenciaByConglomerado = async (idConglomerado) => {
   try {
+    // Verificamos que se haya pasado un ID de conglomerado válido
     if (!idConglomerado) {
       throw new Error("Se requiere el ID del conglomerado");
     }
 
+    // Obtenemos el token de autenticación del usuario actual
     const token = await getCurrentToken();
 
+    // Realizamos la consulta al backend para obtener los puntos de referencia, mediante el endpoint correspondiente
     const response = await api.get(
       `/referencias/conglomerado/${idConglomerado}`,
       {
@@ -331,6 +349,7 @@ export const getPuntosReferenciaByConglomerado = async (idConglomerado) => {
     );
 
     if (response.data.success) {
+      // Si la respuesta es exitosa, retornamos los datos de los puntos de referencia
       return response.data.data;
     } else {
       throw new Error(
@@ -350,8 +369,10 @@ export const guardarTrayectoEnBackend = async (
   cedulaBrigadista
 ) => {
   try {
+    // Obtenemos el token de autenticación del usuario actual
     const token = await getCurrentToken();
 
+    // almacenamos las variables en un objeto para enviarlas al backend
     const payload = {
       datosTrayecto: {
         ...datosTrayecto,
@@ -360,6 +381,7 @@ export const guardarTrayectoEnBackend = async (
       puntoId,
     };
 
+    // Llamamos al endpoint del backend para guardar el trayecto
     const response = await api.post("/trayectos", payload, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -367,6 +389,7 @@ export const guardarTrayectoEnBackend = async (
     });
 
     if (response.data.success) {
+      // Si la respuesta es exitosa, retornamos los datos del trayecto guardado
       return response.data;
     } else {
       throw new Error(response.data.message || "Error al guardar trayecto");
@@ -383,14 +406,18 @@ export const guardarTrayectoEnBackend = async (
 // Función para actualizar un trayecto en el backend
 export const actualizarTrayectoEnBackend = async (datosTrayecto, puntoId) => {
   try {
+    // Obtenemos el token de autenticación del usuario actual
     const auth = getAuth();
+    // Verificamos que el usuario esté autenticado
     const user = auth.currentUser;
+    // Si el usuario no está autenticado, lanzamos un error
     const token = user ? await user.getIdToken() : null;
 
     if (!token) {
       throw new Error("Usuario no autenticado");
     }
 
+    // Llamamos al endpoint del backend para actualizar el trayecto
     const response = await api.put(
       `/trayectos/${puntoId}`,
       {
@@ -404,6 +431,7 @@ export const actualizarTrayectoEnBackend = async (datosTrayecto, puntoId) => {
       }
     );
 
+    // Verificamos si la respuesta es exitosa
     return response.data;
   } catch (error) {
     console.error("Error al actualizar trayecto en el backend:", error);
@@ -414,7 +442,9 @@ export const actualizarTrayectoEnBackend = async (datosTrayecto, puntoId) => {
 // Funcion para obtener el siguiente ID de trayecto desde el backend
 export const getUltimoIdTrayectoDeBack = async () => {
   try {
+    // Obtenemos el token de autenticación del usuario actual
     const auth = getAuth();
+    // Verificamos que el usuario esté autenticado
     const user = auth.currentUser;
     const token = user ? await user.getIdToken() : null;
 
@@ -422,6 +452,7 @@ export const getUltimoIdTrayectoDeBack = async () => {
       throw new Error("Usuario no autenticado");
     }
 
+    // Llamamos al endpoint del backend para obtener el siguiente ID de trayecto
     const response = await api.get(`/trayectos/siguienteId`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -442,7 +473,9 @@ export const getUltimoIdTrayectoDeBack = async () => {
 // Funcion para obtener la cantidad de puntos de referencia relacionados a un brigadista
 export const VerificarPuntosEnBackEnd = async (cedulaBrigadista) => {
   try {
+    // Obtenemos el token de autenticación del usuario actual
     const auth = getAuth();
+    // Verificamos que el usuario esté autenticado
     const user = auth.currentUser;
     const token = user ? await user.getIdToken() : null;
 
@@ -450,6 +483,7 @@ export const VerificarPuntosEnBackEnd = async (cedulaBrigadista) => {
       throw new Error("Usuario no autenticado");
     }
 
+    // Llamamos al endpoint del backend para verificar la cantidad de los puntos de referencia
     const response = await api.get(
       `/referencias/verificar/${cedulaBrigadista}`,
       {
@@ -458,9 +492,14 @@ export const VerificarPuntosEnBackEnd = async (cedulaBrigadista) => {
         },
       }
     );
+    
+    // Verificamos si la respuesta es exitosa
     return response.data.cantidad;
   } catch (error) {
-    console.error("Error al obtener los puntos de referencia relacionados al brigadista:", error);
+    console.error(
+      "Error al obtener los puntos de referencia relacionados al brigadista:",
+      error
+    );
     throw error;
   }
 };
@@ -469,7 +508,9 @@ export const VerificarPuntosEnBackEnd = async (cedulaBrigadista) => {
   se espera que el backend reciba un array de objetos con las caracteristicas de las subparcelas.*/
 export const sincronizarSubparcelas = async (subparcelasCaracteristicas) => {
   try {
+    // Obtenemos el token de autenticación del usuario actual
     const auth = getAuth();
+    // Verificamos que el usuario esté autenticado
     const user = auth.currentUser;
     const token = user ? await user.getIdToken() : null;
 
@@ -477,8 +518,9 @@ export const sincronizarSubparcelas = async (subparcelasCaracteristicas) => {
       throw new Error("Usuario no autenticado");
     }
 
+    // Llamamos al endpoint del backend para sincronizar las subparcelas
     const response = await api.post(
-      '/subparcelas/sincronizar',
+      "/subparcelas/sincronizar",
       subparcelasCaracteristicas,
       {
         headers: {
@@ -487,13 +529,13 @@ export const sincronizarSubparcelas = async (subparcelasCaracteristicas) => {
       }
     );
 
+    // Verificamos si la respuesta es exitosa
     return response.data.data;
   } catch (error) {
     console.error("Error al sincronizar subparcelas con el backend:", error);
     throw error;
   }
 };
-
 
 // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
 export default api;

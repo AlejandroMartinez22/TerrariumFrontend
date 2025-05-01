@@ -1,13 +1,19 @@
+// importar React y los hooks necesarios de react
 import React, { createContext, useContext, useState, useEffect } from "react";
+// importar el metodo getPuntosReferenciaByConglomerado desde la API
 import { getPuntosReferenciaByConglomerado } from "../api";
 
+// Crear el contexto para los puntos de referencia
 const ReferenciaContext = createContext();
 
+// Proveedor del contexto para envolver la aplicación
 export const ReferenciaProvider = ({ children }) => {
+  // Estado para manejar los puntos de referencia, el estado de carga y errores
   const [puntosReferencia, setPuntosReferencia] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Estado para manejar la referencia inicial
   const generarReferenciaInicial = (coordinate) => {
     const id = `PR00${puntosReferencia.length + 1}`;
     return {
@@ -66,6 +72,7 @@ export const ReferenciaProvider = ({ children }) => {
     return cantidad >= 4;
   };
 
+
   return (
     <ReferenciaContext.Provider
       value={{
@@ -84,7 +91,9 @@ export const ReferenciaProvider = ({ children }) => {
   );
 };
 
+// Hook para acceder al contexto de referencia
 export const useReferencia = () => {
+  // Obtener el contexto de ReferenciaContext
   const context = useContext(ReferenciaContext);
   if (!context) {
     throw new Error("useReferencia debe usarse dentro de un ReferenciaProvider");

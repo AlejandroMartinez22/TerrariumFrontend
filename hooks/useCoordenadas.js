@@ -1,14 +1,15 @@
-// hooks/useCoordenadas.js
+// Importamos React y los hooks necesarios
 import { useState, useEffect } from "react";
-import { fetchCoordenadas } from "../api"; // La función que acabamos de crear
+import { fetchCoordenadas } from "../api"; // Función para obtener coordenadas del backend
 
+// Hook personalizado para gestionar las coordenadas
 export function useCoordenadas(brigadista) {
-  const [coordenadas, setCoordenadas] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [coordenadas, setCoordenadas] = useState([]); // Almacena las coordenadas
+  const [isLoading, setIsLoading] = useState(false); // Indica si la solicitud está en curso
+  const [error, setError] = useState(null); // Captura errores
 
+  // Función para obtener coordenadas si hay un brigadista válido
   const getCoordenadas = async () => {
-    // Solo intentamos obtener coordenadas si tenemos un brigadista con ID de conglomerado
     if (!brigadista?.idConglomerado) return;
 
     setIsLoading(true);
@@ -16,29 +17,21 @@ export function useCoordenadas(brigadista) {
 
     try {
       const data = await fetchCoordenadas();
-      // Si la función devuelve null o undefined, usamos un array vacío
-      setCoordenadas(data || []);
-      setIsLoading(false);
-      return data;
+      setCoordenadas(data || []); // Evita valores nulos
     } catch (err) {
       setError(err);
-      setIsLoading(false);
       console.error("Error al cargar coordenadas:", err);
-      return [];
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Efecto para cargar coordenadas al inicializar o cuando cambia el conglomerado
+  // Ejecuta la función cuando cambia el brigadista
   useEffect(() => {
     if (brigadista?.idConglomerado) {
       getCoordenadas();
     }
   }, [brigadista?.idConglomerado]);
 
-  return {
-    coordenadas,
-    fetchCoordenadas: getCoordenadas,
-    isLoading,
-    error,
-  };
+  return { coordenadas, fetchCoordenadas: getCoordenadas, isLoading, error };
 }

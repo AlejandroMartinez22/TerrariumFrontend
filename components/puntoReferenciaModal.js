@@ -1,5 +1,6 @@
-
+// importamos React para la interfaz de usuario
 import React, { useState, useEffect } from "react";
+// importar los componentes de React Native
 import {
   Modal,
   View,
@@ -9,9 +10,12 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import useDecimalValidation from "../hooks/useDecimalValidation"; // Importamos el hook personalizado
+// importar el hook useDecimalValidation para validar el error de medición
+import useDecimalValidation from "../hooks/useDecimalValidation";
+// importar la función obtenerReferenciaPorIdDesdeBackend para obtener la referencia por ID
 import { obtenerReferenciaPorIdDesdeBackend } from "../api";
 
+// importar el componente ReferenciaModal
 const ReferenciaModal = ({
   visible,
   onClose,
@@ -23,12 +27,15 @@ const ReferenciaModal = ({
   setEditedDescription,
   errorMedicion: initialErrorMedicion,
   setErrorMedicion: originalSetErrorMedicion,
-  cedulaUsuarioActual, // Añadimos la cédula del usuario actual como prop
-  isNewPoint = false, // Nueva prop para indicar si estamos creando un nuevo punto
+  cedulaUsuarioActual, 
+  isNewPoint = false,
 }) => {
+  // Estado para manejar la descripción del punto
   const [descriptionError, setDescriptionError] = useState("");
-  const [isUserOwner, setIsUserOwner] = useState(false); // Estado para verificar si el usuario es el creador
-  const [isCheckingOwner, setIsCheckingOwner] = useState(true); // Estado para mostrar indicador de carga
+  // Estado para verificar si el usuario es el propietario del punto
+  const [isUserOwner, setIsUserOwner] = useState(false);
+  // Estado para verificar si se está comprobando la propiedad del punto
+  const [isCheckingOwner, setIsCheckingOwner] = useState(true);
   
   // Usamos nuestro hook personalizado con el valor inicial
   const [errorMedicion, setErrorMedicion, errorMedicionError, isErrorMedicionValid] = 
@@ -255,6 +262,7 @@ const ReferenciaModal = ({
   );
 }
 
+// Definimos los estilos para el componente ReferenciaModal
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,

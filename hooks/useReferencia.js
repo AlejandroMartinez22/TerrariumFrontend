@@ -1,5 +1,4 @@
-
-/*ARCHIVO FINALIZADO, TODO LO QUE USA DE BACK ESTÁ EN EL PROYECTO DEL BACKEND*/
+// Archivo finalizado, toda la lógica del backend está en el proyecto del backend
 
 import { useState } from "react";
 import { 
@@ -10,91 +9,88 @@ import {
   obtenerReferenciaPorIdDesdeBackend
 } from "../api";
 
-
+// Hook para gestionar referencias en la aplicación
 export function useReferencias() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // Estado de carga
+  const [error, setError] = useState(null); // Manejo de errores
 
+  // Obtiene el siguiente ID disponible para una referencia
   const getSiguienteId = async () => {
     setIsLoading(true);
     setError(null);
     try {
       const id = await fetchSiguienteIdReferencia();
-      setIsLoading(false);
       return id;
     } catch (err) {
       setError(err);
-      setIsLoading(false);
       console.error("Error al obtener siguiente ID:", err);
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-
+  // Guarda una nueva referencia en el backend
   const guardarReferencia = async (puntoReferencia, cedulaBrigadista) => {
-  setIsLoading(true);
-  setError(null);
-  try {
-    const savedPuntoData = {
-      ...puntoReferencia
-    };
-    
-    // Seguimos pasando la cédula
-    const id = await guardarReferenciaEnBackend(savedPuntoData, cedulaBrigadista);
-    setIsLoading(false);
-    return id;
-  } catch (err) {
-    setError(err);
-    setIsLoading(false);
-    console.error("Error al guardar referencia:", err);
-    return null;
-  }
-};
+    setIsLoading(true);
+    setError(null);
+    try {
+      const id = await guardarReferenciaEnBackend(puntoReferencia, cedulaBrigadista);
+      return id;
+    } catch (err) {
+      setError(err);
+      console.error("Error al guardar referencia:", err);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-const actualizarPuntoReferencia = async (puntoReferencia, cedulaBrigadista) => {
-  setIsLoading(true);
-  setError(null);
-  try {
-    // La verificación de permisos se hace ahora en el backend
-    const result = await actualizarReferenciaEnBackend(puntoReferencia, cedulaBrigadista);
-    setIsLoading(false);
-    return result;
-  } catch (err) {
-    setError(err);
-    setIsLoading(false);
-    console.error("Error al actualizar referencia:", err);
-    return { success: false, error: err.message };
-  }
-};
+  // Actualiza una referencia existente en el backend
+  const actualizarPuntoReferencia = async (puntoReferencia, cedulaBrigadista) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await actualizarReferenciaEnBackend(puntoReferencia, cedulaBrigadista);
+      return result;
+    } catch (err) {
+      setError(err);
+      console.error("Error al actualizar referencia:", err);
+      return { success: false, error: err.message };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Elimina una referencia del backend
   const borrarReferencia = async (referenciaId, cedulaBrigadista) => {
     setIsLoading(true);
     setError(null);
     try {
-      // La verificación de permisos se hace ahora en el backend
       const result = await eliminarReferenciaEnBackend(referenciaId, cedulaBrigadista);
-      setIsLoading(false);
       return result;
     } catch (err) {
       setError(err);
-      setIsLoading(false);
       console.error("Error al eliminar referencia:", err);
       return { success: false, error: err.message };
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Obtiene una referencia por su ID
   const obtenerReferencia = async (id) => {
     setIsLoading(true);
     setError(null);
     try {
       const data = await obtenerReferenciaPorIdDesdeBackend(id);
-      setIsLoading(false);
       return data;
     } catch (err) {
       setError(err);
-      setIsLoading(false);
       console.error("Error al obtener referencia:", err);
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -106,5 +102,5 @@ const actualizarPuntoReferencia = async (puntoReferencia, cedulaBrigadista) => {
     obtenerReferencia, 
     isLoading,
     error
-};
-};
+  };
+}

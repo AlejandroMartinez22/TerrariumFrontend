@@ -534,7 +534,7 @@ export default function MapScreen() {
   );
 }
 
-// Los estilos se mantienen igual a tu implementación original
+// Estilos para el componente
 const styles = StyleSheet.create({
   container: {
     flex: 1,

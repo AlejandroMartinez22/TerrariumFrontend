@@ -1,29 +1,28 @@
-// React para la interfaz de usuario
+// Importaciones necesarias para React Native
 import React from "react";
-// elementos de React Native necesarios para la interfaz de usuario
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native"; 
 
-// Funcion para agregar pestañas, en este caso se usa para las secciones aun no implementadas
+// Componente que representa una pantalla de sección aún no implementada
 const AddScreen = () => {
-return (
+  return (
     <View style={styles.container}>
-    <Text style={styles.text}>En construcción</Text>
+      <Text style={styles.text}>En construcción</Text>
     </View>
-);
+  );
 };
 
 export default AddScreen;
 
-// Estilos para esta pestaña
+// Estilos para la pantalla: diseño simple con un fondo blanco y texto centrado
 const styles = StyleSheet.create({
-container: {
+  container: {
     flex: 1,
-    backgroundColor: "#fff", 
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-},
-text: {
+  },
+  text: {
     fontSize: 24,
-    color: "#000", 
-},
+    color: "#000",
+  },
 });

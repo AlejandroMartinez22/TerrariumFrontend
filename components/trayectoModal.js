@@ -1,4 +1,6 @@
+// importar react para la interfaz de usuario
 import React, { useState, useEffect } from "react";
+// importar el componentes necesarios de react-native
 import {
   Modal,
   View,
@@ -8,9 +10,12 @@ import {
   TextInput,
   Alert,
 } from "react-native";
+// importar el metodo del api para obtener el id del trayecto
 import { getUltimoIdTrayectoDeBack } from "../api";
-import useValidacionEntero from "../hooks/useValidacionEntero"; // Importamos el hook personalizado
+// importar el hook useValidacionEntero para validar la duración
+import useValidacionEntero from "../hooks/useValidacionEntero";
 
+// metodo para crear el modal de trayecto
 export default function TrayectoModal({
   visible,
   onClose,
@@ -19,18 +24,24 @@ export default function TrayectoModal({
   selectedPunto,
   trayectoEditado = null,
 }) {
+  // Estado para el medio de transporte, duración y distancia
   const [medioTransporte, setMedioTransporte] = useState("Terrestre");
   // Usamos nuestro hook personalizado para la duración (solo enteros)
   const [duracion, setDuracion, duracionError, isDuracionValid] = 
     useValidacionEntero(trayectoEditado?.duracion || '', 360, 1); // Max 24 horas (1440 min), mínimo 1 min
   
+    // Estado para la distancia
   const [distancia, setDistancia] = useState("");
+  // Estado para mostrar/ocultar el dropdown de transporte
   const [showDropdown, setShowDropdown] = useState(false);
+  // Estado para el ID del trayecto
   const [idTrayecto, setIdTrayecto] = useState("");
+  // Estado para manejar errores de validación
   const [errors, setErrors] = useState({
     distancia: false,
   });
 
+  // opciones de transporte disponibles
   const transportOptions = ["Terrestre", "Marítimo", "Aéreo"];
 
   // Determinar si el formulario está completo para habilitar/deshabilitar el botón
@@ -94,7 +105,7 @@ export default function TrayectoModal({
   }, [visible, trayectoEditado]);
 
   // Para debugging - registrar los cambios en las variables principales
-  useEffect(() => {
+  useEffect(() => { 
     console.log("Estado actual:", {
       medioTransporte,
       duracion,
@@ -105,6 +116,7 @@ export default function TrayectoModal({
     });
   }, [medioTransporte, duracion, distancia, idTrayecto, isDuracionValid, trayectoEditado]);
 
+  // Validar campos antes de guardar
   const validateFields = () => {
     let isValid = true;
     const newErrors = {
@@ -123,6 +135,7 @@ export default function TrayectoModal({
     return isValid && isDuracionValid;
   };
 
+  // Manejar el evento de guardar
   const handleGuardar = () => {
     if (!validateFields()) {
       Alert.alert(
@@ -133,6 +146,7 @@ export default function TrayectoModal({
       return;
     }
 
+    // Si el formulario es válido, guardamos los datos
     const datosTrayecto = {
       idTrayecto,
       medioTransporte,
@@ -144,11 +158,14 @@ export default function TrayectoModal({
       },
     };
 
+    // Si estamos editando, pasamos el ID del trayecto editado
     const esEdicion = !!trayectoEditado;
+
     console.log("Guardando trayecto:", datosTrayecto, "Es edición:", esEdicion);
     onConfirmar(datosTrayecto, esEdicion);
   };
 
+  // Manejar el evento de selección del medio de transporte
   const selectTransportOption = (option) => {
     setMedioTransporte(option);
     setShowDropdown(false);
@@ -260,6 +277,7 @@ export default function TrayectoModal({
   );
 }
 
+// estilos para el modal
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,

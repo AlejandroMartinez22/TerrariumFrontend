@@ -1,7 +1,9 @@
 /*RELACIONADO CON EL INICIO DE SESIÓN */
 /* YA ESTÁ LO RELACIONADO CON ESTE COMPONENTE */
 
+// importar React y otros componentes necesarios de React Native
 import React from "react";
+// importar los componentes de React Native
 import {
   StyleSheet,
   TextInput,
@@ -13,12 +15,18 @@ import {
   TouchableOpacity,
 } from "react-native";
 
+// importar el logo de Terrarium
 import LogoTerrarium from "../assets/LogoTerrarium.png";
+// importar el hook useLogin
 import { useLogin } from "../hooks/useLogin";
+// importar Ionicons para el icono de ojo
 import { Ionicons } from '@expo/vector-icons';
+// importar el hook useState para manejar el estado de la contraseña
 import {useState} from "react";
 
+// importar el componente LoginScreen
 export default function LoginScreen({ navigation }) {
+  // usar el hook useLogin para manejar el inicio de sesión
   const {
     email,
     password,
@@ -96,6 +104,7 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
+// definir los estilos para el componente LoginScreen
 const styles = StyleSheet.create({
   image: {
     flex: 1,
