@@ -18,9 +18,6 @@ import { verifyTokenAndGetUser } from "../api"; // Importamos nuestra función p
 
 export const login = async (email, password) => {
   try {
-
-    // Imprimimos en consola el intento de login con el email proporcionad
-    console.log(`Intentando login con:`, email);
     
     // Autenticación con Firebase (frontend)
     const userCredential = await signInWithEmailAndPassword(
@@ -28,13 +25,7 @@ export const login = async (email, password) => {
       email,
       password
     );
-    
-    console.log(`Login exitoso:`, userCredential.user.uid);
-    
-    // Obtener token de Firebase para verificación en el backend
-    console.log("Obteniendo token ID de Firebase...");
     const idToken = await userCredential.user.getIdToken();
-    console.log("Token obtenido, enviando al backend...");
     
     //Verificar token en backend y obtener datos adicionales
     const userData = await verifyTokenAndGetUser(idToken);
