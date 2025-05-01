@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Hook personalizado para validar números decimales
+ * Hook personalizado para validar números enteros
  * @param {string} initialValue - Valor inicial del campo
  * @param {number} maxValue - Valor máximo permitido (opcional)
  * @param {number} minValue - Valor mínimo permitido (opcional)
  * @returns {[string, function, string, boolean]} - [valor, setValor, mensajeError, esValido]
  */
-const useDecimalValidation = (initialValue = '', maxValue = null, minValue = null) => {
+const useValidacionEntero = (initialValue = '', maxValue = null, minValue = null) => {
   // Aseguramos que initialValue sea un string
     const safeInitialValue = initialValue !== null && initialValue !== undefined 
         ? String(initialValue) 
@@ -34,15 +34,14 @@ const useDecimalValidation = (initialValue = '', maxValue = null, minValue = nul
         return;
         }
 
-        // Verificar si es un formato de número válido (entero o decimal)
-        // Permitimos: '0', '123', '123.45', '.5'
-        if (!/^(\d*\.?\d+|\d+\.?\d*)$/.test(inputValue)) {
-        setError('Formato no válido');
+        // Verificar si contiene caracteres que no sean dígitos
+        if (!/^\d+$/.test(inputValue)) {
+        setError('Ingrese solo números enteros');
         setIsValid(false);
         return;
         }
 
-        const numValue = parseFloat(inputValue);
+        const numValue = parseInt(inputValue, 10);
 
         // Verificar si es un número válido
         if (isNaN(numValue)) {
@@ -70,7 +69,7 @@ const useDecimalValidation = (initialValue = '', maxValue = null, minValue = nul
         setIsValid(true);
     };
 
-    // Esta función maneja el cambio del valor
+    // Esta función maneja el cambio del valor y restringe la entrada a solo dígitos
     const handleValueChange = (newValue) => {
         // Protección contra valores null o undefined
         if (newValue === null || newValue === undefined) {
@@ -81,9 +80,8 @@ const useDecimalValidation = (initialValue = '', maxValue = null, minValue = nul
         // Convertimos a string si es necesario
         const stringValue = String(newValue);
         
-        // Permitimos solo números y un punto decimal
-        // Aceptamos: números, punto decimal, campo vacío
-        if (stringValue === '' || /^(\d*\.?\d*|\.\d*)$/.test(stringValue)) {
+        // Solo permitimos dígitos o campo vacío
+        if (stringValue === '' || /^\d+$/.test(stringValue)) {
         setValue(stringValue);
         }
     };
@@ -91,4 +89,4 @@ const useDecimalValidation = (initialValue = '', maxValue = null, minValue = nul
     return [value, handleValueChange, error, isValid];
 };
 
-export default useDecimalValidation;
+export default useValidacionEntero;

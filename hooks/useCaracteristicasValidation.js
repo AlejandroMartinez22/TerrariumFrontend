@@ -1,12 +1,13 @@
-    // hooks/useCaracteristicasValidation.js
-    import { useState, useEffect } from 'react';
+// hooks/useCaracteristicasValidation.js
+import { useState, useEffect } from 'react';
 
-    /**
-     * Hook personalizado para manejar validaciones de coberturas y afectaciones
-     */
+/**
+ * Hook personalizado para manejar validaciones de coberturas y afectaciones
+ * Modificado para almacenar porcentajes como números enteros
+ */
 
-    const useCaracteristicasValidation = () => {
-    // Estados para coberturas
+const useCaracteristicasValidation = () => {
+  // Estados para coberturas
     const [selectedCobertura, setSelectedCobertura] = useState("Seleccionar");
     const [porcentajeCobertura, setPorcentajeCobertura] = useState("");
     const [coberturas, setCoberturas] = useState([]);
@@ -28,8 +29,9 @@
     };
 
     // Calcula la suma total de los porcentajes de cobertura
+    // Ya que ahora guardamos como números, no necesitamos parseInt
     const calcularSumaPorcentajes = () => {
-        return coberturas.reduce((total, item) => total + parseInt(item.porcentaje), 0);
+        return coberturas.reduce((total, item) => total + item.porcentaje, 0);
     };
 
     // Validar si se puede agregar una nueva cobertura
@@ -87,7 +89,7 @@
         if (validarNuevaCobertura(porcentajeCobertura)) {
             const nuevaCobertura = {
             tipo: selectedCobertura,
-            porcentaje: porcentajeCobertura
+            porcentaje: parseInt(porcentajeCobertura, 10) // Convertir a número entero aquí
             };
             
             setCoberturas([...coberturas, nuevaCobertura]);
@@ -157,35 +159,35 @@
     };
 
     return {
-        // Estados
-        selectedCobertura,
-        setSelectedCobertura,
-        porcentajeCobertura,
-        setPorcentajeCobertura,
-        coberturas,
-        setCoberturas,
-        coberturasError,
-        
-        selectedAfectacion,
-        setSelectedAfectacion,
-        selectedSeveridad,
-        setSelectedSeveridad,
-        afectaciones,
-        setAfectaciones,
-        afectacionesError,
-        
-        // Funciones
-        agregarCobertura,
-        eliminarCobertura,
-        agregarAfectacion,
-        eliminarAfectacion,
-        limpiarEstados,
-        calcularSumaPorcentajes,
-        
-        // Estados de botones
-        botonCoberturasHabilitado,
-        botonAfectacionesHabilitado
+    // Estados
+    selectedCobertura,
+    setSelectedCobertura,
+    porcentajeCobertura,
+    setPorcentajeCobertura,
+    coberturas,
+    setCoberturas,
+    coberturasError,
+    
+    selectedAfectacion,
+    setSelectedAfectacion,
+    selectedSeveridad,
+    setSelectedSeveridad,
+    afectaciones,
+    setAfectaciones,
+    afectacionesError,
+    
+    // Funciones
+    agregarCobertura,
+    eliminarCobertura,
+    agregarAfectacion,
+    eliminarAfectacion,
+    limpiarEstados,
+    calcularSumaPorcentajes,
+    
+    // Estados de botones
+    botonCoberturasHabilitado,
+    botonAfectacionesHabilitado
     };
-    };
+};
 
-    export default useCaracteristicasValidation;
+export default useCaracteristicasValidation;

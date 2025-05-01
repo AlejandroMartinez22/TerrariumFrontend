@@ -8,23 +8,26 @@ import {
   Text,
   Image,
   ActivityIndicator,
+  Alert, // Añadido el import de Alert aquí
 } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { useBrigadista } from "../context/BrigadistaContext"; /*LISTO*/
-import ReferenciaModal from "./puntoReferenciaModal";  /*LISTO*/
-import ReferenciaMarker from "./referenciaMarker"; /*LISTO*/
-import TrayectoModal from "./trayectoModal"; /*LISTO*/
+import { useBrigadista } from "../context/BrigadistaContext";
+import ReferenciaModal from "./puntoReferenciaModal";
+import ReferenciaMarker from "./referenciaMarker";
+import TrayectoModal from "./trayectoModal";
 
 // Importar los hooks personalizados
-import { useCoordenadas } from "../hooks/useCoordenadas"; /*LISTO*/
-import { useCentrosPoblados } from "../hooks/useCentrosPoblados"; /*LISTO*/
-import { useReferencias } from "../hooks/useReferencia"; /*LISTO*/
-import { useTrayectos } from "../hooks/useTrayecto"; /*LISTO*/
-import { usePuntosReferencia } from "../hooks/usePuntosReferencia"; /*LISTO*/
+import { useCoordenadas } from "../hooks/useCoordenadas";
+import { useCentrosPoblados } from "../hooks/useCentrosPoblados";
+import { useReferencias } from "../hooks/useReferencia";
+import { useTrayectos } from "../hooks/useTrayecto";
+import { usePuntosReferencia } from "../hooks/usePuntosReferencia";
+import { useValidacionGeografica } from "../hooks/useValidacionGeografica";
 
 export default function MapScreen() {
-  const { brigadista, localTutorialCompletado, completarTutorial } =
-    useBrigadista();
+  const { brigadista, localTutorialCompletado, completarTutorial } = useBrigadista();
+  const { calcularDistancia, validarDistanciaPunto } = useValidacionGeografica();
+  const DISTANCIA_MAXIMA = 5000; //(5km)
   const mapRef = useRef(null);
 
   // Custom hooks
@@ -258,8 +261,44 @@ export default function MapScreen() {
 
   const handleLongPress = async (event) => {
     const coordinate = event.nativeEvent.coordinate;
+    
+    // Verificar si hay coordenadas del conglomerado disponibles
+    if (coordenadas.length === 0 || !coordenadas[0].latitud || !coordenadas[0].longitud) {
+      Alert.alert(
+        "Error",
+        "No se puede añadir un punto de referencia porque no hay información del conglomerado disponible."
+      );
+      return;
+    }
+
+    // Obtener las coordenadas del centro del conglomerado (primer elemento del array)
+    const centroConglomerado = {
+      latitude: typeof coordenadas[0].latitud === "string" 
+        ? parseFloat(coordenadas[0].latitud) 
+        : coordenadas[0].latitud,
+      longitude: typeof coordenadas[0].longitud === "string" 
+        ? parseFloat(coordenadas[0].longitud) 
+        : coordenadas[0].longitud
+    };
+
+    // Usar la función del hook para validar la distancia
+    const validacion = validarDistanciaPunto(
+      coordinate,
+      centroConglomerado,
+      DISTANCIA_MAXIMA
+    );
+
+    // Si el punto no es válido, mostrar alerta y salir
+    if (!validacion.valido) {
+      Alert.alert(
+        "Ubicación no válida",
+        `El punto que intentas agregar está muy alejado del área del conglomerado, Este debe encontrarse dentro de un radio de 5 km. Por favor, selecciona una ubicación más cercana.`
+      );
+      return;
+    } 
 
     try {
+      // Proceder con la creación del punto de referencia
       // Obtén el siguiente ID usando el hook personalizado
       const siguienteId = await getSiguienteId();
 
