@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { getUltimoIdTrayectoDeBack } from "../api";
+import useValidacionEntero from "../hooks/useValidacionEntero"; // Importamos el hook personalizado
 
 export default function TrayectoModal({
   visible,
@@ -19,19 +20,22 @@ export default function TrayectoModal({
   trayectoEditado = null,
 }) {
   const [medioTransporte, setMedioTransporte] = useState("Terrestre");
-  const [duracion, setDuracion] = useState("");
+  // Usamos nuestro hook personalizado para la duración (solo enteros)
+  const [duracion, setDuracion, duracionError, isDuracionValid] = 
+    useValidacionEntero(trayectoEditado?.duracion || '', 360, 1); // Max 24 horas (1440 min), mínimo 1 min
+  
   const [distancia, setDistancia] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [idTrayecto, setIdTrayecto] = useState("");
   const [errors, setErrors] = useState({
-    duracion: false,
     distancia: false,
   });
 
   const transportOptions = ["Terrestre", "Marítimo", "Aéreo"];
 
   // Determinar si el formulario está completo para habilitar/deshabilitar el botón
-  const isFormValid = duracion && duracion.trim() !== "" && distancia && distancia.trim() !== "";
+  const isFormValid = duracion && duracion.trim() !== "" && isDuracionValid && 
+                      distancia && distancia.trim() !== "";
 
   useEffect(() => {
     // Verificamos si el modal está visible
@@ -40,7 +44,6 @@ export default function TrayectoModal({
     const inicializarDatos = async () => {
       // Reiniciamos los errores cuando se abre el modal
       setErrors({
-        duracion: false,
         distancia: false,
       });
       
@@ -51,13 +54,13 @@ export default function TrayectoModal({
         console.log("Cargando datos del trayecto existente:", trayectoEditado);
         
         // Si estamos editando, usamos los valores del trayecto editado
-        // Asegúrate de que todas las propiedades existan o proporciona valores predeterminados
         setMedioTransporte(trayectoEditado.medioTransporte || "Terrestre");
         
         // Convertimos a string los valores en caso de que sean números
         const duracionStr = trayectoEditado.duracion != null ? String(trayectoEditado.duracion) : "";
         const distanciaStr = trayectoEditado.distancia != null ? String(trayectoEditado.distancia) : "";
         
+        // Usamos la función del hook para establecer el valor (que ya tiene validaciones)
         setDuracion(duracionStr);
         setDistancia(distanciaStr);
         setIdTrayecto(trayectoEditado.idTrayecto || trayectoEditado.id || "");
@@ -82,7 +85,7 @@ export default function TrayectoModal({
         
         // Reiniciar valores para un nuevo trayecto
         setMedioTransporte("Terrestre");
-        setDuracion("");
+        setDuracion(""); // Usamos la función segura del hook
         setDistancia("");
       }
     };
@@ -97,22 +100,18 @@ export default function TrayectoModal({
       duracion,
       distancia,
       idTrayecto,
+      isDuracionValid,
       trayectoEditadoPresente: !!trayectoEditado
     });
-  }, [medioTransporte, duracion, distancia, idTrayecto, trayectoEditado]);
+  }, [medioTransporte, duracion, distancia, idTrayecto, isDuracionValid, trayectoEditado]);
 
   const validateFields = () => {
     let isValid = true;
     const newErrors = {
-      duracion: false,
       distancia: false,
     };
 
-    // Validate duration - Protección contra valores undefined
-    if (!duracion || !duracion.trim()) {
-      newErrors.duracion = true;
-      isValid = false;
-    }
+    // No necesitamos validar duración aquí, ya que el hook lo hace automáticamente
 
     // Validate distance - Protección contra valores undefined
     if (!distancia || !distancia.trim()) {
@@ -121,7 +120,7 @@ export default function TrayectoModal({
     }
 
     setErrors(newErrors);
-    return isValid;
+    return isValid && isDuracionValid;
   };
 
   const handleGuardar = () => {
@@ -205,19 +204,14 @@ export default function TrayectoModal({
             <View style={styles.formRow}>
               <Text style={styles.label}>Duración (Minutos)</Text>
               <TextInput
-                style={[styles.input, errors.duracion && styles.inputError]}
+                style={[styles.input, duracionError && styles.inputError]}
                 value={duracion}
-                onChangeText={(text) => {
-                  setDuracion(text);
-                  if (text && text.trim()) {
-                    setErrors(prev => ({...prev, duracion: false}));
-                  }
-                }}
+                onChangeText={setDuracion}
                 placeholder="00"
                 keyboardType="numeric"
               />
-              {errors.duracion && (
-                <Text style={styles.errorText}>Este campo es obligatorio</Text>
+              {duracionError && (
+                <Text style={styles.errorText}>{duracionError}</Text>
               )}
             </View>
 
@@ -347,7 +341,6 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: "#FF6B6B",
-    backgroundColor: "#FFEEEE",
   },
   errorText: {
     color: "#FF6B6B",
