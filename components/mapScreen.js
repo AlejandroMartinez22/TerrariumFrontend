@@ -62,7 +62,7 @@ export default function MapScreen() {
   const [puntoId, setPuntoId] = useState("");
   const [tempPuntoData, setTempPuntoData] = useState(null);
   const [forceUpdate, setForceUpdate] = useState(0);
-  const [isNewPoint, setIsNewPoint] = useState(false); // Nuevo estado para controlar si es un punto nuevo
+  const [isNewPoint, setIsNewPoint] = useState(false);
   const [defaultCenter, setDefaultCenter] = useState(null);
 
   const [mapZoom, setMapZoom] = useState("0.2");
