@@ -64,6 +64,7 @@ export default function MapScreen() {
   const [forceUpdate, setForceUpdate] = useState(0);
   const [isNewPoint, setIsNewPoint] = useState(false);
   const [defaultCenter, setDefaultCenter] = useState(null);
+  const [tipoPunto, setTipoPunto] = useState("Referencia"); // Valor predeterminado
 
   const [mapZoom, setMapZoom] = useState("0.2");
   const [isLoading, setIsLoading] = useState(true);
@@ -86,6 +87,19 @@ export default function MapScreen() {
       setIsLoading(false);
     }
   }, [loadingCoordenadas, loadingCentros, loadingPuntosReferencia]);
+
+
+  // para establecer correctamente el tipoPunto al editar un punto existente
+  useEffect(() => {
+    if (modalVisible && selectedPunto && !isNewPoint) {
+      // Si estamos editando un punto existente, cargar su tipo
+      setTipoPunto(selectedPunto.tipo || "Referencia");
+    } else if (modalVisible && isNewPoint) {
+      // Si es un punto nuevo, reiniciar al valor predeterminado
+      setTipoPunto("Referencia");
+    }
+  }, [modalVisible, selectedPunto, isNewPoint]);
+  
 
   // Ajustar el mapa a las coordenadas si están disponibles
   useEffect(() => {
@@ -129,6 +143,7 @@ export default function MapScreen() {
     setEditedDescription(punto.description || "");
     setErrorMedicion(punto.errorMedicion || "");
     setPuntoId(punto.id);
+    setTipoPunto(punto.tipo || "Referencia"); // Añadir esta línea
     setIsNewPoint(false); // Es un punto existente
     setModalVisible(true);
   };
@@ -155,6 +170,7 @@ export default function MapScreen() {
       errorMedicion: errorMedicion,
       latitude: selectedPunto.latitude,
       longitude: selectedPunto.longitude,
+      tipo: tipoPunto,
     };
 
     // Almacenamos temporalmente el punto actualizado
@@ -307,6 +323,7 @@ export default function MapScreen() {
           ...generarReferenciaInicial(siguienteId, coordinate),
           latitude: coordinate.latitude,
           longitude: coordinate.longitude,
+          tipo: tipoPunto,
         };
 
         setSelectedPunto({ ...nuevoPunto, index: puntosReferencia.length });
@@ -520,6 +537,8 @@ export default function MapScreen() {
         selectedPunto={selectedPunto}
         isNewPoint={isNewPoint}
         cedulaUsuarioActual={brigadista?.cedula}
+        tipoPunto={tipoPunto}         
+        setTipoPunto={setTipoPunto}  
       />
 
       <TrayectoModal

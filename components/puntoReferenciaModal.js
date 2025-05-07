@@ -1,5 +1,4 @@
-// importamos React para la interfaz de usuario
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 // importar los componentes de React Native
 import {
   Modal,
@@ -15,7 +14,7 @@ import useDecimalValidation from "../hooks/useDecimalValidation";
 // importar la función obtenerReferenciaPorIdDesdeBackend para obtener la referencia por ID
 import { obtenerReferenciaPorIdDesdeBackend } from "../api";
 
-// importar el componente ReferenciaModal
+  // importar el componente ReferenciaModal
 const ReferenciaModal = ({
   visible,
   onClose,
@@ -29,7 +28,24 @@ const ReferenciaModal = ({
   setErrorMedicion: originalSetErrorMedicion,
   cedulaUsuarioActual, 
   isNewPoint = false,
+  tipoPunto = "Referencia", // Valor predeterminado "Referencia"
+  setTipoPunto, // Función para actualizar el tipo de punto
 }) => {
+  // Si no se proporciona setTipoPunto desde el padre, creamos un estado interno
+  const [tipoPuntoInterno, setTipoPuntoInterno] = useState(tipoPunto);
+  
+  // Función que maneja el cambio de tipo de punto, usando la función del padre si existe
+  const handleTipoPuntoChange = (tipo) => {
+    console.log("Cambiando tipo a:", tipo);
+    if (setTipoPunto) {
+      setTipoPunto(tipo);
+    } else {
+      setTipoPuntoInterno(tipo);
+    }
+  };
+  
+  // Valor actual del tipo de punto (usando el interno si no hay externo)
+  const currentTipoPunto = setTipoPunto ? tipoPunto : tipoPuntoInterno;
   // Estado para manejar la descripción del punto
   const [descriptionError, setDescriptionError] = useState("");
   // Estado para verificar si el usuario es el propietario del punto
@@ -76,8 +92,6 @@ const ReferenciaModal = ({
   }, [visible, puntoId, cedulaUsuarioActual, isNewPoint]);
   
 
-
-  
   // Reiniciar los campos cuando el modal se abre (cuando visible cambia a true)
   useEffect(() => {
     if (visible) {
@@ -91,7 +105,6 @@ const ReferenciaModal = ({
     }
   }, [visible]);
   
-
   // Actualizar el estado externo cuando el valor cambie y sea válido
   useEffect(() => {
     originalSetErrorMedicion(errorMedicion);
@@ -122,6 +135,7 @@ const ReferenciaModal = ({
     countWords(editedDescription) >= 5 &&
     errorMedicion.trim() !== "" && 
     isErrorMedicionValid &&
+    (currentTipoPunto === "Referencia" || currentTipoPunto === "Campamento") &&
     (isNewPoint || isUserOwner); // Permitir si es nuevo punto O si el usuario es propietario
 
   return (
@@ -214,6 +228,48 @@ const ReferenciaModal = ({
               ) : null}
             </View>
 
+            {/* Agregar radio buttons para seleccionar el tipo de punto */}
+            <View style={styles.typeContainer}>
+              <Text style={styles.typeLabel}>Tipo de punto:</Text>
+              <View style={styles.radioContainer}>
+                <TouchableOpacity 
+                  style={styles.radioOption}
+                  onPress={() => handleTipoPuntoChange("Referencia")}
+                  disabled={!isNewPoint && !isUserOwner}
+                  activeOpacity={0.6}
+                >
+                  <View style={[
+                    styles.radioButton,
+                    currentTipoPunto === "Referencia" && styles.radioButtonActive
+                  ]}>
+                    {currentTipoPunto === "Referencia" && <View style={styles.radioButtonSelected} />}
+                  </View>
+                  <Text style={[
+                    styles.radioText,
+                    currentTipoPunto === "Referencia" && styles.radioTextSelected
+                  ]}>Referencia</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={styles.radioOption}
+                  onPress={() => handleTipoPuntoChange("Campamento")}
+                  disabled={!isNewPoint && !isUserOwner}
+                  activeOpacity={0.6}
+                >
+                  <View style={[
+                    styles.radioButton,
+                    currentTipoPunto === "Campamento" && styles.radioButtonActive
+                  ]}>
+                    {currentTipoPunto === "Campamento" && <View style={styles.radioButtonSelected} />}
+                  </View>
+                  <Text style={[
+                    styles.radioText,
+                    currentTipoPunto === "Campamento" && styles.radioTextSelected
+                  ]}>Campamento</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {isCheckingOwner ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color="#4169e1" />
@@ -260,7 +316,7 @@ const ReferenciaModal = ({
       </View>
     </Modal>
   );
-}
+};
 
 // Definimos los estilos para el componente ReferenciaModal
 const styles = StyleSheet.create({
@@ -430,6 +486,45 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  // Estilos para los radio buttons
+  typeContainer: {
+    marginBottom: 15,
+  },
+  typeLabel: {
+    fontSize: 14,
+    marginBottom: 8,
+    marginLeft: 6,
+    color: "#555",
+  },
+  radioContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  radioOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 20,
+  },
+  radioButton: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#4169e1",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+  },
+  radioButtonSelected: {
+    height: 10,
+    width: 10,
+    borderRadius: 5,
+    backgroundColor: "#4169e1",
+  },
+  radioText: {
+    fontSize: 14,
+    color: "#333",
+  },
 });
 
 export default ReferenciaModal;

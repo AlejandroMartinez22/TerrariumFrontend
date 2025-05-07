@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 // Si usas otra biblioteca de navegación, deberás ajustar el código
 
 // Componente que representa la pantalla de registro de árboles
-const AddScreen = ({ navigation }) => {
+const SeleccionarSubparcelaArbol = ({ navigation }) => {
   // Función para navegar a otro componente con el tipo de subparcela seleccionado
   const handleOptionSelect = (option) => {
     // Aquí navegamos a la pantalla de detalles de subparcela y pasamos la opción seleccionada
@@ -53,7 +53,7 @@ const AddScreen = ({ navigation }) => {
   );
 };
 
-export default AddScreen;
+export default SeleccionarSubparcelaArbol;
 
 // Estilos para la pantalla
 const styles = StyleSheet.create({
