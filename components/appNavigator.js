@@ -7,6 +7,7 @@ import { TouchableOpacity, Image, Text, StyleSheet } from "react-native";
 import NavigationTabs from "./navigationTabs";
 import ProfileScreen from "./profileScreen";
 import registrarMuestra from "./registrarMuestra";
+import SeleccionarSubparcelaArbol from "./SeleccionarSubparcelaArbol";
 import { useBrigadista } from "../context/BrigadistaContext";
 
 // Creación del stack navigator para manejar la navegación entre pantallas
@@ -55,6 +56,32 @@ export default function AppNavigator() {
       <Stack.Screen
         name="registrarMuestra"
         component={registrarMuestra}
+        options={({ navigation }) => ({
+          headerTitle: () => (
+            <Image
+              source={require("../assets/LogoTerrarium.png")}
+              style={{ resizeMode: "contain", width: 100, height: 28 }}
+            />
+          ),
+          headerStyle: { backgroundColor: "#1E5A26" },
+          headerTintColor: "#fff",
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Profile")}
+              style={styles.BotonSesion}
+            >
+              <Text style={styles.NombreBrigadista}>{brigadista?.nombre}</Text>
+              <Image
+                source={require("../assets/IconoPerfil.png")}
+                style={{ width: 29, height: 29 }}
+              />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="registrarArbol"
+        component={SeleccionarSubparcelaArbol}
         options={({ navigation }) => ({
           headerTitle: () => (
             <Image
