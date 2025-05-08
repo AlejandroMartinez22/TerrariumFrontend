@@ -164,8 +164,6 @@ export const fetchCoordenadasCentroPoblado = async () => {
 };
 
 
-
-
 /*Funcion para obtener el siguiente id consultando en backend para asignarlo a un nuevo punto de referencia */
 export const fetchSiguienteIdReferencia = async () => {
   try {
@@ -185,6 +183,22 @@ export const fetchSiguienteIdReferencia = async () => {
     }
   } catch (error) {
     console.error("Error al obtener siguiente ID de referencia:", error);
+    handleError(error);
+  }
+};
+
+//NUEVA FUNCION SOSOCHI
+export const verificarCampamentoExistente = async () => {
+  try {
+    const token = await getCurrentToken();
+    const response = await api.get("/referencias/verificar-campamento", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al verificar campamento existente:", error);
     handleError(error);
   }
 };

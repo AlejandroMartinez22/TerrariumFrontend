@@ -1,5 +1,6 @@
+// Modificar el archivo puntoreferenciamodal.js
+
 import React, { useState, useEffect, useCallback } from "react";
-// importar los componentes de React Native
 import {
   Modal,
   View,
@@ -9,12 +10,10 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-// importar el hook useDecimalValidation para validar el error de medición
 import useDecimalValidation from "../hooks/useDecimalValidation";
-// importar la función obtenerReferenciaPorIdDesdeBackend para obtener la referencia por ID
 import { obtenerReferenciaPorIdDesdeBackend } from "../api";
+import { useCampamentoVerification } from "../hooks/useCampamentoVerification"; // Importar el nuevo hook
 
-  // importar el componente ReferenciaModal
 const ReferenciaModal = ({
   visible,
   onClose,
@@ -28,34 +27,30 @@ const ReferenciaModal = ({
   setErrorMedicion: originalSetErrorMedicion,
   cedulaUsuarioActual, 
   isNewPoint = false,
-  tipoPunto = "Referencia", // Valor predeterminado "Referencia"
-  setTipoPunto, // Función para actualizar el tipo de punto
+  tipoPunto = "Referencia",
+  setTipoPunto,
 }) => {
-  // Si no se proporciona setTipoPunto desde el padre, creamos un estado interno
+  // Hook de verificación de campamento
+  const { 
+    isVerifying: verificandoCampamento, 
+    existeCampamento, 
+    verificarCampamento 
+  } = useCampamentoVerification();
+  
   const [tipoPuntoInterno, setTipoPuntoInterno] = useState(tipoPunto);
-  
-  // Función que maneja el cambio de tipo de punto, usando la función del padre si existe
-  const handleTipoPuntoChange = (tipo) => {
-    console.log("Cambiando tipo a:", tipo);
-    if (setTipoPunto) {
-      setTipoPunto(tipo);
-    } else {
-      setTipoPuntoInterno(tipo);
-    }
-  };
-  
-  // Valor actual del tipo de punto (usando el interno si no hay externo)
-  const currentTipoPunto = setTipoPunto ? tipoPunto : tipoPuntoInterno;
-  // Estado para manejar la descripción del punto
   const [descriptionError, setDescriptionError] = useState("");
-  // Estado para verificar si el usuario es el propietario del punto
   const [isUserOwner, setIsUserOwner] = useState(false);
-  // Estado para verificar si se está comprobando la propiedad del punto
   const [isCheckingOwner, setIsCheckingOwner] = useState(true);
   
-  // Usamos nuestro hook personalizado con el valor inicial
   const [errorMedicion, setErrorMedicion, errorMedicionError, isErrorMedicionValid] = 
     useDecimalValidation(initialErrorMedicion, 9.9, 1);
+  
+  // Verificar si existe un campamento cuando se abra el modal
+  useEffect(() => {
+    if (visible) {
+      verificarCampamento();
+    }
+  }, [visible]);
   
   // Verificar si el usuario es el propietario del punto cuando se abre el modal
   useEffect(() => {
@@ -91,7 +86,36 @@ const ReferenciaModal = ({
     checkOwnership();
   }, [visible, puntoId, cedulaUsuarioActual, isNewPoint]);
   
+  // Método para determinar si el radiobutton de Campamento debe estar deshabilitado
+  const isCampamentoDisabled = () => {
+    // Si es un punto existente que ya es de tipo Campamento, permitimos que se mantenga seleccionado
+    if (!isNewPoint && selectedPunto?.tipo === "Campamento") {
+      return false;
+    }
+    
+    // Para puntos nuevos o puntos que no son de tipo Campamento, deshabilitamos si ya existe un campamento
+    return existeCampamento;
+  };
 
+  // Función que maneja el cambio de tipo de punto, usando la función del padre si existe
+  const handleTipoPuntoChange = (tipo) => {
+    console.log("Cambiando tipo a:", tipo);
+    
+    // No permitir cambiar a Campamento si ya existe uno y este punto no es el campamento existente
+    if (tipo === "Campamento" && isCampamentoDisabled()) {
+      return;
+    }
+    
+    if (setTipoPunto) {
+      setTipoPunto(tipo);
+    } else {
+      setTipoPuntoInterno(tipo);
+    }
+  };
+  
+  // Valor actual del tipo de punto (usando el interno si no hay externo)
+  const currentTipoPunto = setTipoPunto ? tipoPunto : tipoPuntoInterno;
+  
   // Reiniciar los campos cuando el modal se abre (cuando visible cambia a true)
   useEffect(() => {
     if (visible) {
@@ -109,6 +133,17 @@ const ReferenciaModal = ({
   useEffect(() => {
     originalSetErrorMedicion(errorMedicion);
   }, [errorMedicion]);
+  
+  // para establecer correctamente el tipoPunto al editar un punto existente
+  useEffect(() => {
+    if (modalVisible && selectedPunto && !isNewPoint) {
+      // Si estamos editando un punto existente, cargar su tipo
+      setTipoPunto(selectedPunto.tipo || "Referencia");
+    } else if (modalVisible && isNewPoint) {
+      // Si es un punto nuevo, reiniciar al valor predeterminado
+      setTipoPunto("Referencia");
+    }
+  }, [modalVisible, selectedPunto, isNewPoint]);
   
   // Función para contar palabras en un texto
   const countWords = (text) => {
@@ -251,24 +286,43 @@ const ReferenciaModal = ({
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
-                  style={styles.radioOption}
+                  style={[
+                    styles.radioOption,
+                    isCampamentoDisabled() && styles.radioOptionDisabled
+                  ]}
                   onPress={() => handleTipoPuntoChange("Campamento")}
-                  disabled={!isNewPoint && !isUserOwner}
+                  disabled={(!isNewPoint && !isUserOwner) || isCampamentoDisabled()}
                   activeOpacity={0.6}
                 >
                   <View style={[
                     styles.radioButton,
-                    currentTipoPunto === "Campamento" && styles.radioButtonActive
+                    currentTipoPunto === "Campamento" && styles.radioButtonActive,
+                    isCampamentoDisabled() && styles.radioButtonDisabled
                   ]}>
                     {currentTipoPunto === "Campamento" && <View style={styles.radioButtonSelected} />}
                   </View>
                   <Text style={[
                     styles.radioText,
-                    currentTipoPunto === "Campamento" && styles.radioTextSelected
+                    currentTipoPunto === "Campamento" && styles.radioTextSelected,
+                    isCampamentoDisabled() && styles.radioTextDisabled
                   ]}>Campamento</Text>
                 </TouchableOpacity>
               </View>
+              
+              {/* Mensaje de información cuando ya existe un campamento */}
+              {existeCampamento && currentTipoPunto !== "Campamento" && (
+                <Text style={styles.infoText}>
+                  Ya existe un punto de campamento para este conglomerado.
+                </Text>
+              )}
             </View>
+
+            {verificandoCampamento ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#4169e1" />
+                <Text style={styles.loadingText}>Verificando puntos existentes...</Text>
+              </View>
+            ) : null}
 
             {isCheckingOwner ? (
               <View style={styles.loadingContainer}>
@@ -301,10 +355,10 @@ const ReferenciaModal = ({
               <TouchableOpacity
                 style={[
                   isNewPoint ? styles.centeredButton : styles.saveButton,
-                  (!isFormValid || isCheckingOwner) && { backgroundColor: "#ccc" }
+                  (!isFormValid || isCheckingOwner || verificandoCampamento) && { backgroundColor: "#ccc" }
                 ]}
                 onPress={onContinuar}
-                disabled={!isFormValid || isCheckingOwner}
+                disabled={!isFormValid || isCheckingOwner || verificandoCampamento}
               >
                 <Text style={styles.buttonText}>
                   {isNewPoint ? "Crear" : "Continuar"}
@@ -318,213 +372,27 @@ const ReferenciaModal = ({
   );
 };
 
-// Definimos los estilos para el componente ReferenciaModal
+// Añadir estos nuevos estilos
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+  // ... estilos existentes
+  
+  // Estilos adicionales para el estado deshabilitado de los radio buttons
+  radioOptionDisabled: {
+    opacity: 0.5,
   },
-  modalContent: {
-    width: "90%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    overflow: "hidden",
-    elevation: 10,
-  },
-  closeButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    zIndex: 1,
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  closeButtonText: {
-    fontSize: 18,
-    color: "#000",
-    fontWeight: "bold",
-  },
-  modalHeader: {
-    padding: 15,
-    alignItems: "center",
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  modalBody: {
-    padding: 15,
-  },
-  idContainer: {
-    marginBottom: 15,
-    alignItems: "center",
-  },
-  idLabel: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  coordsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-  },
-  coordColumn: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  coordLabel: {
-    fontSize: 14,
-    marginBottom: 5,
-    textAlign: "center",
-  },
-  coordInput: {
-    backgroundColor: "#d3d3d3",
-    padding: 8,
-    borderRadius: 5,
-    textAlign: "center",
-  },
-  errorContainer: {
-    marginBottom: 15,
-  },
-  errorLabel: {
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  errorInput: {
-    borderWidth: 1,
+  radioButtonDisabled: {
     borderColor: "#ccc",
-    padding: 8,
-    borderRadius: 5,
   },
-  descriptionContainer: {
-    marginBottom: 20,
+  radioTextDisabled: {
+    color: "#999",
   },
-  descriptionLabel: {
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  descriptionInput: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    borderRadius: 5,
-    height: 100,
-    textAlignVertical: "top",
-  },
-  inputError: {
-    borderColor: "red",
-  },
-  errorText: {
-    color: "red",
+  infoText: {
+    marginTop: 8,
     fontSize: 12,
-    marginTop: 5,
+    color: "#ff6347",
+    fontStyle: "italic",
   },
-  buttonRow: {
-    flexDirection: "row",  // Cambiado de "column" a "row"
-    justifyContent: "space-between", // Para separar los botones
-    marginTop: 10,
-  },
-  saveButton: {
-    backgroundColor: "#4169e1",
-    padding: 10,
-    borderRadius: 5,
-    width: "45%", // Reducido de 80% a 48%
-    alignItems: "center",
-    margin:10,
-  },
-  deleteButton: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
-    width: "45%", // Reducido de 80% a 48%
-    alignItems: "center",
-    margin: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  loadingContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    marginBottom: 15,
-  },
-  loadingText: {
-    marginLeft: 10,
-    color: "#666",
-  },
-  notOwnerContainer: {
-    backgroundColor: "#fff8dc",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#ffd700",
-  },
-  notOwnerText: {
-    color: "#8b4513",
-    textAlign: "center",
-  },
-  singleButtonContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 10,
-  },
-  centeredButton: {
-    backgroundColor: "#4169e1",
-    borderRadius: 5,
-    padding: 12,
-    width: "50%", // Ancho del 50% para que se vea centrado y proporcionado
-    alignItems: "center",
-  },
-
-  // Estilos para los radio buttons
-  typeContainer: {
-    marginBottom: 15,
-  },
-  typeLabel: {
-    fontSize: 14,
-    marginBottom: 8,
-    marginLeft: 6,
-    color: "#555",
-  },
-  radioContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  radioOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 20,
-  },
-  radioButton: {
-    height: 20,
-    width: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#4169e1",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  radioButtonSelected: {
-    height: 10,
-    width: 10,
-    borderRadius: 5,
-    backgroundColor: "#4169e1",
-  },
-  radioText: {
-    fontSize: 14,
-    color: "#333",
-  },
+  // ... resto de estilos existentes
 });
 
 export default ReferenciaModal;
