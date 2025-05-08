@@ -289,6 +289,7 @@ export const actualizarReferenciaEnBackend = async (
       id: puntoReferencia.id,
       latitud: puntoReferencia.latitude,
       longitud: puntoReferencia.longitude,
+      tipo: puntoReferencia.tipo,
       descripcion: puntoReferencia.description,
       error: puntoReferencia.errorMedicion,
       cedula_brigadista: cedulaBrigadista,

@@ -556,6 +556,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginBottom: 15,
+    marginTop: 8,
     borderWidth: 1,
     borderColor: "#ffd700",
   },
@@ -580,7 +581,7 @@ const styles = StyleSheet.create({
   typeContainer: {
     marginBottom: 15,
   },
-  
+
   typeLabel: {
     fontSize: 14,
     marginBottom: 22,
