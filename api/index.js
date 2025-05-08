@@ -7,7 +7,7 @@ import { getAuth } from "firebase/auth"; // Importamos la función getAuth de Fi
 
 // Configuramos la URL base del backend
 const API_URL =
-  "http://192.168.1.9:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+  "http://192.168.1.7:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
 
 // Creamos una instancia de Axios preconfigurada con la URL base del backend
 const api = axios.create({
@@ -163,6 +163,10 @@ export const fetchCoordenadasCentroPoblado = async () => {
   }
 };
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 43ad6894d892ba75e3604c9722ea7f87bec98770
 /*Funcion para obtener el siguiente id consultando en backend para asignarlo a un nuevo punto de referencia */
 export const fetchSiguienteIdReferencia = async () => {
   try {
@@ -183,6 +187,57 @@ export const fetchSiguienteIdReferencia = async () => {
   } catch (error) {
     console.error("Error al obtener siguiente ID de referencia:", error);
     handleError(error);
+  }
+};
+
+//NUEVA FUNCION 
+export const verificarCampamentoExistente = async () => {
+  try {
+    console.log("📤 Iniciando verificación de campamento...");
+    const token = await getCurrentToken();
+    
+    if (!token) {
+      console.error("❌ No se pudo obtener el token de autenticación");
+      return { 
+        success: false,
+        message: "No se pudo obtener el token de autenticación",
+        existeCampamento: false
+      };
+    }
+    
+    console.log("🔑 Token obtenido, realizando petición a /referencias/verificar-campamento");
+    const response = await api.get("/referencias/verificar-campamento", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      // Aumentamos el timeout para operaciones complejas
+      timeout: 10000
+    });
+    
+    console.log("✅ Respuesta recibida:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error en petición a: /referencias/verificar-campamento", error);
+    
+    // Información de diagnóstico ampliada
+    let errorDetails = {
+      message: error.message || "Error desconocido",
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      url: error.config?.url,
+      method: error.config?.method,
+    };
+    
+    console.error("📋 Detalles del error:", JSON.stringify(errorDetails, null, 2));
+    
+    // Manejo mejorado del error
+    return { 
+      success: false,
+      message: `Error ${error.response?.status || ''}: ${error.message}`,
+      existeCampamento: false,
+      errorDetails: errorDetails
+    };
   }
 };
 
@@ -237,6 +292,7 @@ export const actualizarReferenciaEnBackend = async (
       id: puntoReferencia.id,
       latitud: puntoReferencia.latitude,
       longitud: puntoReferencia.longitude,
+      tipo: puntoReferencia.tipo,
       descripcion: puntoReferencia.description,
       error: puntoReferencia.errorMedicion,
       cedula_brigadista: cedulaBrigadista,

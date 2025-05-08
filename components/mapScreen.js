@@ -23,6 +23,7 @@ import { useReferencias } from "../hooks/useReferencia";
 import { useTrayectos } from "../hooks/useTrayecto";
 import { usePuntosReferencia } from "../hooks/usePuntosReferencia";
 import { useValidacionGeografica } from "../hooks/useValidacionGeografica";
+import { useCampamentoVerificacion } from "../hooks/useCampamentoVerificacion";
 
 export default function MapScreen() {
   const { brigadista, localTutorialCompletado, completarTutorial } = useBrigadista();
@@ -38,6 +39,12 @@ export default function MapScreen() {
   } = useCoordenadas(brigadista);
 
   const { centrosPoblados, fetchCentrosPoblados, isLoading: loadingCentros } = useCentrosPoblados(brigadista);
+
+  const { 
+    existeCampamento, 
+    actualizarEstadoCampamento, 
+    verificarCampamento 
+  } = useCampamentoVerificacion();
 
   const {
     getSiguienteId,
@@ -103,6 +110,26 @@ export default function MapScreen() {
       setTipoPunto("Referencia");
     }
   }, [modalVisible, selectedPunto, isNewPoint]);
+  
+
+  useEffect(() => {
+    verificarCampamento();
+  }, []);
+  
+  // Función para actualizar el estado del campamento después de guardar o eliminar
+  const actualizarEstadoTipoCampamento = async (puntoData, esEliminacion = false) => {
+    if (!puntoData) return;
+    
+    // Si se está eliminando un campamento o cambiando su tipo desde campamento a referencia
+    if ((esEliminacion && puntoData.tipo === "Campamento") || 
+       (!esEliminacion && puntoData.tipo !== "Campamento" && selectedPunto?.tipo === "Campamento")) {
+      actualizarEstadoCampamento(false, null);
+    } 
+    // Si se está creando un nuevo campamento o cambiando un punto a tipo campamento
+    else if (!esEliminacion && puntoData.tipo === "Campamento") {
+      actualizarEstadoCampamento(true, puntoData.id);
+    }
+  };
   
 
   // Ajustar el mapa a las coordenadas si están disponibles
@@ -194,33 +221,39 @@ export default function MapScreen() {
   const guardarSinTrayecto = async (puntoData) => {
     // Usar el punto pasado directamente o caer en el tempPuntoData
     const puntoAGuardar = puntoData || tempPuntoData;
-
+  
     if (!puntoAGuardar) return;
-
+  
     try {
       if (isNewPoint) {
         console.log("🆕 Guardando nuevo punto sin trayecto");
         await guardarReferencia(puntoAGuardar, brigadista.cedula);
-
+  
         // Actualizar la interfaz con el nuevo punto
         setPuntosReferencia([...puntosReferencia, puntoAGuardar]);
+        
+        // Actualizar estado de campamento si es necesario
+        await actualizarEstadoTipoCampamento(puntoAGuardar);
       } else {
         console.log("🔄 Actualizando punto existente");
         await actualizarPuntoReferencia(puntoAGuardar, brigadista.cedula);
-
+  
         // Actualizar la interfaz
         const updatedPuntos = puntosReferencia.map((p) =>
           p.id === puntoAGuardar.id ? puntoAGuardar : p
         );
         setPuntosReferencia(updatedPuntos);
+        
+        // Actualizar estado de campamento si es necesario
+        await actualizarEstadoTipoCampamento(puntoAGuardar);
       }
-
+  
       // Refresca los puntos de la base de datos
       await refreshPuntos();
     } catch (error) {
       console.error("❌ Error al guardar punto:", error);
     }
-
+  
     setTempPuntoData(null); // Limpiamos el punto temporal
   };
 
@@ -275,6 +308,7 @@ export default function MapScreen() {
       console.error("❌ Error al guardar punto y trayecto:", error);
     }
 
+    await actualizarEstadoTipoCampamento(puntoConTrayecto);
     setTrayectoModalVisible(false);
     setTempPuntoData(null); // Limpiamos el punto temporal
   };
@@ -344,6 +378,7 @@ export default function MapScreen() {
     }
   };
 
+
   const eliminarPunto = async (puntoId) => {
     try {
       // Si es un punto nuevo que aún no se ha guardado, simplemente cerramos el modal
@@ -351,26 +386,35 @@ export default function MapScreen() {
         setModalVisible(false);
         return;
       }
-
+      
+      // Guardar una referencia al punto antes de eliminarlo para saber si era un campamento
+      const puntoAEliminar = puntosReferencia.find(p => p.id === puntoId);
+  
       // Pasar la cédula del brigadista actual como segundo parámetro
       const resultado = await borrarReferencia(puntoId, brigadista.cedula);
-
+  
       if (resultado.success) {
         const nuevosPuntos = puntosReferencia.filter(
           (punto) => punto.id !== puntoId
         );
         setPuntosReferencia(nuevosPuntos);
         console.log(`Punto con ID ${puntoId} eliminado correctamente`);
+        
+        // Actualizar estado de campamento si eliminamos un campamento
+        if (puntoAEliminar && puntoAEliminar.tipo === "Campamento") {
+          actualizarEstadoCampamento(false, null);
+        }
       } else {
         console.error("Error al eliminar el punto:", resultado.error);
       }
     } catch (error) {
       console.error("Error al procesar la eliminación:", error);
     }
-
+  
     setModalVisible(false);
   };
 
+  
   const handleRegionChange = (region) => {
     const newZoom = region.latitudeDelta;
 

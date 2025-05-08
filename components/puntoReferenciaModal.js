@@ -13,8 +13,10 @@ import {
 import useDecimalValidation from "../hooks/useDecimalValidation";
 // importar la función obtenerReferenciaPorIdDesdeBackend para obtener la referencia por ID
 import { obtenerReferenciaPorIdDesdeBackend } from "../api";
+// importar el hook para verificación de campamento
+import { useCampamentoVerificacion } from "../hooks/useCampamentoVerificacion";
 
-  // importar el componente ReferenciaModal
+// importar el componente ReferenciaModal
 const ReferenciaModal = ({
   visible,
   onClose,
@@ -31,12 +33,26 @@ const ReferenciaModal = ({
   tipoPunto = "Referencia", // Valor predeterminado "Referencia"
   setTipoPunto, // Función para actualizar el tipo de punto
 }) => {
+  // Hook de verificación de campamento
+  const { 
+    isVerifying: verificandoCampamento, 
+    existeCampamento, 
+    verificarCampamento,
+    error: errorCampamento 
+  } = useCampamentoVerificacion();
+  
   // Si no se proporciona setTipoPunto desde el padre, creamos un estado interno
   const [tipoPuntoInterno, setTipoPuntoInterno] = useState(tipoPunto);
   
   // Función que maneja el cambio de tipo de punto, usando la función del padre si existe
   const handleTipoPuntoChange = (tipo) => {
     console.log("Cambiando tipo a:", tipo);
+    
+    // No permitir cambiar a Campamento si ya existe uno y este punto no es el campamento existente
+    if (tipo === "Campamento" && isCampamentoDisabled()) {
+      return;
+    }
+    
     if (setTipoPunto) {
       setTipoPunto(tipo);
     } else {
@@ -46,6 +62,7 @@ const ReferenciaModal = ({
   
   // Valor actual del tipo de punto (usando el interno si no hay externo)
   const currentTipoPunto = setTipoPunto ? tipoPunto : tipoPuntoInterno;
+  
   // Estado para manejar la descripción del punto
   const [descriptionError, setDescriptionError] = useState("");
   // Estado para verificar si el usuario es el propietario del punto
@@ -56,6 +73,38 @@ const ReferenciaModal = ({
   // Usamos nuestro hook personalizado con el valor inicial
   const [errorMedicion, setErrorMedicion, errorMedicionError, isErrorMedicionValid] = 
     useDecimalValidation(initialErrorMedicion, 9.9, 1);
+  
+  // Verificar si existe un campamento cuando se abra el modal
+  useEffect(() => {
+    if (visible) {
+      verificarCampamento();
+    }
+  }, [visible]);
+
+  useEffect(() => {
+    // Agregamos una verificación inmediata solo cuando se abre el modal
+    if (visible) {
+      // Añadimos un pequeño retraso para evitar problemas de estado
+      const timer = setTimeout(verificarCampamento, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [visible]);
+  
+  // Método para determinar si el radiobutton de Campamento debe estar deshabilitado
+  const isCampamentoDisabled = () => {
+    // Si estamos editando un punto que ya es campamento, permitimos mantenerlo
+    if (!isNewPoint && selectedPunto?.tipo === "Campamento") {
+      return false;
+    }
+    
+    // Si estamos verificando, no deshabilitamos para evitar cambios de UI bruscos
+    if (verificandoCampamento) {
+      return false;
+    }
+    
+    // Solo deshabilitamos si tenemos confirmación de que existe un campamento
+    return existeCampamento;
+  };
   
   // Verificar si el usuario es el propietario del punto cuando se abre el modal
   useEffect(() => {
@@ -91,6 +140,24 @@ const ReferenciaModal = ({
     checkOwnership();
   }, [visible, puntoId, cedulaUsuarioActual, isNewPoint]);
   
+  // para establecer correctamente el tipoPunto al editar un punto existente
+  useEffect(() => {
+    if (visible && selectedPunto && !isNewPoint) {
+      // Si estamos editando un punto existente, cargar su tipo
+      if (setTipoPunto) {
+        setTipoPunto(selectedPunto.tipo || "Referencia");
+      } else {
+        setTipoPuntoInterno(selectedPunto.tipo || "Referencia");
+      }
+    } else if (visible && isNewPoint) {
+      // Si es un punto nuevo, reiniciar al valor predeterminado
+      if (setTipoPunto) {
+        setTipoPunto("Referencia");
+      } else {
+        setTipoPuntoInterno("Referencia");
+      }
+    }
+  }, [visible, selectedPunto, isNewPoint]);
 
   // Reiniciar los campos cuando el modal se abre (cuando visible cambia a true)
   useEffect(() => {
@@ -230,7 +297,7 @@ const ReferenciaModal = ({
 
             {/* Agregar radio buttons para seleccionar el tipo de punto */}
             <View style={styles.typeContainer}>
-              <Text style={styles.typeLabel}>Tipo de punto:</Text>
+              <Text style={styles.typeLabel}>Tipo de punto</Text>
               <View style={styles.radioContainer}>
                 <TouchableOpacity 
                   style={styles.radioOption}
@@ -251,24 +318,47 @@ const ReferenciaModal = ({
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
-                  style={styles.radioOption}
+                  style={[
+                    styles.radioOption,
+                    isCampamentoDisabled() && styles.radioOptionDisabled
+                  ]}
                   onPress={() => handleTipoPuntoChange("Campamento")}
-                  disabled={!isNewPoint && !isUserOwner}
+                  disabled={(!isNewPoint && !isUserOwner) || isCampamentoDisabled()}
                   activeOpacity={0.6}
                 >
                   <View style={[
                     styles.radioButton,
-                    currentTipoPunto === "Campamento" && styles.radioButtonActive
+                    currentTipoPunto === "Campamento" && styles.radioButtonActive,
+                    isCampamentoDisabled() && styles.radioButtonDisabled
                   ]}>
                     {currentTipoPunto === "Campamento" && <View style={styles.radioButtonSelected} />}
                   </View>
                   <Text style={[
                     styles.radioText,
-                    currentTipoPunto === "Campamento" && styles.radioTextSelected
+                    currentTipoPunto === "Campamento" && styles.radioTextSelected,
+                    isCampamentoDisabled() && styles.radioTextDisabled
                   ]}>Campamento</Text>
                 </TouchableOpacity>
               </View>
             </View>
+
+            {verificandoCampamento ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#4169e1" />
+                <Text style={styles.loadingText}>Verificando puntos existentes...</Text>
+              </View>
+            ) : errorCampamento ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>
+                  No se pudo verificar si existe un campamento. Por precaución, 
+                  se ha deshabilitado la opción de crear un campamento nuevo.
+                </Text>
+              </View>
+            ) : existeCampamento && currentTipoPunto !== "Campamento" ? (
+              <Text style={styles.infoText}>
+                Ya existe un punto de campamento para este conglomerado.
+              </Text>
+            ) : null}
 
             {isCheckingOwner ? (
               <View style={styles.loadingContainer}>
@@ -301,10 +391,10 @@ const ReferenciaModal = ({
               <TouchableOpacity
                 style={[
                   isNewPoint ? styles.centeredButton : styles.saveButton,
-                  (!isFormValid || isCheckingOwner) && { backgroundColor: "#ccc" }
+                  (!isFormValid || isCheckingOwner || verificandoCampamento) && { backgroundColor: "#ccc" }
                 ]}
                 onPress={onContinuar}
-                disabled={!isFormValid || isCheckingOwner}
+                disabled={!isFormValid || isCheckingOwner || verificandoCampamento}
               >
                 <Text style={styles.buttonText}>
                   {isNewPoint ? "Crear" : "Continuar"}
@@ -466,6 +556,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginBottom: 15,
+    marginTop: 8,
     borderWidth: 1,
     borderColor: "#ffd700",
   },
@@ -490,20 +581,26 @@ const styles = StyleSheet.create({
   typeContainer: {
     marginBottom: 15,
   },
+
   typeLabel: {
     fontSize: 14,
-    marginBottom: 8,
-    marginLeft: 6,
+    marginBottom: 22,
     color: "#555",
+    textAlign: "center", 
   },
+
   radioContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
   },
+
   radioOption: {
     flexDirection: "row",
     alignItems: "center",
     marginRight: 20,
+  },
+  radioOptionDisabled: {
+    opacity: 0.5,
   },
   radioButton: {
     height: 20,
@@ -515,6 +612,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 8,
   },
+  radioButtonActive: {
+    borderColor: "#4169e1",
+  },
+  radioButtonDisabled: {
+    borderColor: "#ccc",
+  },
   radioButtonSelected: {
     height: 10,
     width: 10,
@@ -525,6 +628,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
   },
+  radioTextSelected: {
+    color: "#4169e1",
+    fontWeight: "500",
+  },
+  radioTextDisabled: {
+    color: "#999",
+  },
+  infoText: {
+    marginTop: 8,
+    marginBottom: 20,
+    fontSize: 11,
+    color: "#ff6347",
+    fontStyle: "italic",
+    textAlign: "center", 
+  }
 });
 
 export default ReferenciaModal;
