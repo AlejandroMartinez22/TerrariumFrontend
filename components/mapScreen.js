@@ -36,13 +36,16 @@ export default function MapScreen() {
     fetchCoordenadas,
     isLoading: loadingCoordenadas,
   } = useCoordenadas(brigadista);
+
   const { centrosPoblados, fetchCentrosPoblados, isLoading: loadingCentros } = useCentrosPoblados(brigadista);
+
   const {
     getSiguienteId,
     guardarReferencia,
     actualizarPuntoReferencia,
     borrarReferencia,
   } = useReferencias();
+
   const { guardarTrayecto, actualizarDatosTrayecto } = useTrayectos();
 
   // Usar el hook para gestionar puntos de referencia desde la base de datos
@@ -65,6 +68,7 @@ export default function MapScreen() {
   const [isNewPoint, setIsNewPoint] = useState(false);
   const [defaultCenter, setDefaultCenter] = useState(null);
   const [tipoPunto, setTipoPunto] = useState("Referencia"); // Valor predeterminado
+
 
   const [mapZoom, setMapZoom] = useState("0.2");
   const [isLoading, setIsLoading] = useState(true);

@@ -7,7 +7,7 @@ import { getAuth } from "firebase/auth"; // Importamos la función getAuth de Fi
 
 // Configuramos la URL base del backend
 const API_URL =
-  "http://192.168.1.9:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+  "http://192.168.1.7:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
 
 // Creamos una instancia de Axios preconfigurada con la URL base del backend
 const api = axios.create({
@@ -162,6 +162,9 @@ export const fetchCoordenadasCentroPoblado = async () => {
     handleError(error);
   }
 };
+
+
+
 
 /*Funcion para obtener el siguiente id consultando en backend para asignarlo a un nuevo punto de referencia */
 export const fetchSiguienteIdReferencia = async () => {
