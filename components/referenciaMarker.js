@@ -20,7 +20,7 @@ const ReferenciaMarker = ({ punto, index, onPress, onDragEnd }) => {
       return (
         <Image 
           source={require("../assets/IconoCampamento.png")} 
-          style={{ width: 28, height: 28 }}
+          style={{ width: 32, height: 32 }}
           resizeMode="contain"
         />
       );
