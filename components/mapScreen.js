@@ -23,7 +23,7 @@ import { useReferencias } from "../hooks/useReferencia";
 import { useTrayectos } from "../hooks/useTrayecto";
 import { usePuntosReferencia } from "../hooks/usePuntosReferencia";
 import { useValidacionGeografica } from "../hooks/useValidacionGeografica";
-import { useCampamentoVerification } from "../hooks/useCampamentoVerificacion";
+import { useCampamentoVerificacion } from "../hooks/useCampamentoVerificacion";
 
 export default function MapScreen() {
   const { brigadista, localTutorialCompletado, completarTutorial } = useBrigadista();
@@ -44,7 +44,7 @@ export default function MapScreen() {
     existeCampamento, 
     actualizarEstadoCampamento, 
     verificarCampamento 
-  } = useCampamentoVerification();
+  } = useCampamentoVerificacion();
 
   const {
     getSiguienteId,
