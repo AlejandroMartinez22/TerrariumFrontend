@@ -163,9 +163,6 @@ export const fetchCoordenadasCentroPoblado = async () => {
   }
 };
 
-
-
-
 /*Funcion para obtener el siguiente id consultando en backend para asignarlo a un nuevo punto de referencia */
 export const fetchSiguienteIdReferencia = async () => {
   try {
@@ -495,7 +492,7 @@ export const VerificarPuntosEnBackEnd = async (cedulaBrigadista) => {
         },
       }
     );
-    
+
     // Verificamos si la respuesta es exitosa
     return response.data.cantidad;
   } catch (error) {
@@ -537,6 +534,39 @@ export const sincronizarSubparcelas = async (subparcelasCaracteristicas) => {
   } catch (error) {
     console.error("Error al sincronizar subparcelas con el backend:", error);
     throw error;
+  }
+};
+
+export const getArbolesBySubparcela = async (
+  nombreSubparcela,
+  conglomeradoId
+) => {
+  try {
+    const token = await getCurrentToken();
+    const response = await api.get(
+      `/subparcelas/${conglomeradoId}/${nombreSubparcela}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // Mostrar respuesta completa para debug
+    console.log("Respuesta completa del backend:", JSON.stringify(response.data, null, 2));
+
+    // Comprobamos si la respuesta tiene la estructura esperada
+    if (response.data && response.data.success) {
+      // Normalizamos la estructura de los datos para trabajar con ellos
+      return response.data;
+    } else {
+      console.error("Formato de respuesta inesperado:", response.data);
+      throw new Error("El formato de la respuesta no es el esperado");
+    }
+  } catch (error) {
+    console.error("Error al obtener árboles por subparcela:", error);
+    handleError(error);
+    throw error; // Propagamos el error para manejarlo en el componente
   }
 };
 

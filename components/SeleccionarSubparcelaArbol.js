@@ -1,65 +1,89 @@
 // Importaciones necesarias para React Native
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ImageBackground,
+} from "react-native";
 // Asumimos que utilizas React Navigation para la navegación entre pantallas
-// Si usas otra biblioteca de navegación, deberás ajustar el código
 
 // Componente que representa la pantalla de registro de árboles
-const SeleccionarSubparcelaArbol = ({ navigation }) => {
-  // Función para navegar a otro componente con el tipo de subparcela seleccionado
+const RegistrarMuestraArborea = ({ navigation }) => {
+  // Función para navegar a SelectArbolMuestra con el tipo de subparcela seleccionado
   const handleOptionSelect = (option) => {
-    // Aquí navegamos a la pantalla de detalles de subparcela y pasamos la opción seleccionada
-    navigation.navigate('viewScreen', { subparcelaType: option });
+    // CORRECCIÓN: Cambiamos 'subparcelaType' por 'nombreSubparcela' para que coincida
+    // con lo que espera el componente SelectArbolMuestra
+    navigation.navigate("viewScreen", { nombreSubparcela: option });
     
-    // Si no estás usando React Navigation o quieres implementar otra lógica,
-    // puedes usar un callback o un estado global (Redux, Context API) para manejar esto
+    // Para depuración: mostramos en consola los datos que estamos pasando
+    console.log("Navegando a viewScreen con nombreSubparcela:", option);
   };
-
+  
   // Renderizado de los botones de opciones
   const renderButton = (text) => {
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.optionButton}
         onPress={() => handleOptionSelect(text)}
       >
-        <Text style={styles.buttonText}>
-          {text}
-        </Text>
+        <Text style={styles.buttonText}>{text}</Text>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Registrar nuevo</Text>
-      <Text style={styles.titulo}>individuo árboreo</Text>
-      
-      {/* Contenedor flexbox para la imagen y botones lado a lado */}
-      <View style={styles.contentContainer}>
-        {/* Espacio para la imagen del árbol que se añadirá después */}
-        <View style={styles.imagePlaceholder}></View>
-        
-        {/* Contenedor para los botones de opciones */}
-        <View style={styles.optionsContainer}>
-          {renderButton('SPF-1')}
-          {renderButton('SPF-2')}
-          {renderButton('SPF-3')}
-          {renderButton('SPF-4')}
-          {renderButton('SPF-5')}
+    <ImageBackground
+      source={require("../assets/FondoProfile.png")}
+      style={styles.background}
+      resizeMode="cover"
+      imageStyle={{ opacity: 0.4 }}
+    >
+      <View style={styles.container}>
+        <Text style={styles.titulo}>Registrar nueva</Text>
+        <Text style={styles.titulo}>muestra árborea</Text>
+
+        {/* Contenedor flexbox para la imagen y botones lado a lado */}
+        <View style={styles.contentContainer}>
+          {/* Espacio para la imagen del árbol */}
+          <View style={styles.imagePlaceholder}>
+            <View style={styles.imageWrapper}>
+              <Image
+                source={require("../assets/ImagenRegistroMuestra.png")}
+                style={styles.image}
+                resizeMode="contain"
+              />
+            </View>
+          </View>
+
+          {/* Contenedor para los botones de opciones */}
+          <View style={styles.optionsContainer}>
+            {renderButton("SPF-1")}
+            {renderButton("SPF-2")}
+            {renderButton("SPF-3")}
+            {renderButton("SPF-4")}
+            {renderButton("SPF-5")}
+          </View>
         </View>
       </View>
-      
-    </View>
+    </ImageBackground>
   );
 };
 
-export default SeleccionarSubparcelaArbol;
+export default RegistrarMuestraArborea;
 
 // Estilos para la pantalla
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "transparent",
     alignItems: "center",
     padding: 20,
   },
@@ -70,40 +94,54 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    marginTop: 150,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginTop: 100,
     marginBottom: 20,
     paddingHorizontal: 10,
   },
   imagePlaceholder: {
-    width: 150,
-    height: 150,
-    // Puedes añadir un borde o un color de fondo para visualizar el espacio
-    // borderWidth: 1,
-    // borderColor: '#ccc',
+    width: 200,
+    height: 200,
   },
   optionsContainer: {
     flex: 1,
-    marginLeft: 20,
+    justifyContent: "center",
+    flexShrink: 1,
   },
   optionButton: {
-    width: '100%',
+    width: "100%",
     padding: 10,
-    marginVertical: 5,
+    marginVertical: 10,
     borderRadius: 6,
     borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    backgroundColor: 'white',
-    borderColor: '#ccc',
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    backgroundColor: "white",
+    borderColor: "#ccc",
+    elevation: 3, // Para Android
+    shadowColor: "#000", // Para iOS
+    shadowOffset: { width: 0, height: 2 }, // Para iOS
+    shadowOpacity: 0.3, // Para iOS
+    shadowRadius: 3, // Para iOS
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: '500',
-    color: 'black',
-  }
+    fontWeight: "500",
+    color: "black",
+  },
+  imageWrapper: {
+    width: 150,
+    height: 260,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 20,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
 });

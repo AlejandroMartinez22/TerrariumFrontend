@@ -1,15 +1,22 @@
 // Importaciones necesarias para React Native
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ImageBackground,
+} from "react-native";
 // Asumimos que utilizas React Navigation para la navegación entre pantallas
 // Si usas otra biblioteca de navegación, deberás ajustar el código
 
 // Componente que representa la pantalla de registro de árboles
-const registrarMuestraArborea = ({ navigation }) => {
+const RegistrarMuestraArborea = ({ navigation }) => {
   // Función para navegar a otro componente con el tipo de subparcela seleccionado
   const handleOptionSelect = (option) => {
     // Aquí navegamos a la pantalla de detalles de subparcela y pasamos la opción seleccionada
-    
+
     navigation.navigate("viewScreen", { subparcelaType: option });
 
     // Si no estás usando React Navigation o quieres implementar otra lógica,
@@ -29,43 +36,55 @@ const registrarMuestraArborea = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Registrar nueva</Text>
-      <Text style={styles.titulo}>muestra árborea</Text>
+    <ImageBackground
+      source={require("../assets/FondoProfile.png")}
+      style={styles.background}
+      resizeMode="cover"
+      imageStyle={{ opacity: 0.4 }}
+    >
+      <View style={styles.container}>
+        <Text style={styles.titulo}>Registrar nueva</Text>
+        <Text style={styles.titulo}>muestra árborea</Text>
 
-      {/* Contenedor flexbox para la imagen y botones lado a lado */}
-      <View style={styles.contentContainer}>
-        {/* Espacio para la imagen del árbol que se añadirá después */}
-        <View style={styles.imagePlaceholder}>
-          <View style={styles.imageWrapper}>
-            <Image
-              source={require("../assets/ImagenRegistroMuestra.png")}
-              style={styles.image}
-              resizeMode="contain"
-            />
+        {/* Contenedor flexbox para la imagen y botones lado a lado */}
+        <View style={styles.contentContainer}>
+          {/* Espacio para la imagen del árbol que se añadirá después */}
+          <View style={styles.imagePlaceholder}>
+            <View style={styles.imageWrapper}>
+              <Image
+                source={require("../assets/ImagenRegistroMuestra.png")}
+                style={styles.image}
+                resizeMode="contain"
+              />
+            </View>
+          </View>
+
+          {/* Contenedor para los botones de opciones */}
+          <View style={styles.optionsContainer}>
+            {renderButton("SPF-1")}
+            {renderButton("SPF-2")}
+            {renderButton("SPF-3")}
+            {renderButton("SPF-4")}
+            {renderButton("SPF-5")}
           </View>
         </View>
-
-        {/* Contenedor para los botones de opciones */}
-        <View style={styles.optionsContainer}>
-          {renderButton("SPF-1")}
-          {renderButton("SPF-2")}
-          {renderButton("SPF-3")}
-          {renderButton("SPF-4")}
-          {renderButton("SPF-5")}
-        </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
-export default registrarMuestraArborea;
+export default RegistrarMuestraArborea;
 
 // Estilos para la pantalla
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "transparent",
     alignItems: "center",
     padding: 20,
   },
@@ -78,9 +97,9 @@ const styles = StyleSheet.create({
   contentContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center", 
+    alignItems: "center",
     width: "100%",
-    marginTop: 150,
+    marginTop: 100,
     marginBottom: 20,
     paddingHorizontal: 10,
   },
@@ -93,13 +112,13 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     flexShrink: 1,
   },
   optionButton: {
     width: "100%",
     padding: 10,
-    marginVertical: 5,
+    marginVertical: 10,
     borderRadius: 6,
     borderWidth: 1,
     alignItems: "center",
@@ -107,6 +126,7 @@ const styles = StyleSheet.create({
     position: "relative",
     backgroundColor: "white",
     borderColor: "#ccc",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.3)",
   },
   buttonText: {
     fontSize: 16,
@@ -114,15 +134,14 @@ const styles = StyleSheet.create({
     color: "black",
   },
   imageWrapper: {
-    width: 200,
-    height: 350,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 150,
+    height: 260,
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 20,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
-  
 });
