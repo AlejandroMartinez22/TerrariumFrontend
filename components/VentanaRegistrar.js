@@ -1,4 +1,3 @@
-// Importaciones necesarias para React Native
 import React from "react";
 import {
   View,
@@ -7,16 +6,14 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  SafeAreaView,
 } from "react-native";
 
-// Componente que representa la pantalla de registro
 const VentanaRegistrar = ({ navigation }) => {
-  // Función para manejar la navegación cuando se presiona un botón
   const handleButtonPress = (option) => {
     if (option === "tree") {
-      navigation.navigate("registrarArbol"); // Navegar al componente
+      navigation.navigate("registrarArbol");
     } else if (option === "sample") {
-      // Navegar directamente al componente registrarMuestra
       navigation.navigate("registrarMuestra");
     }
   };
@@ -26,19 +23,18 @@ const VentanaRegistrar = ({ navigation }) => {
       source={require("../assets/FondoProfile.png")}
       style={styles.background}
       resizeMode="cover"
-      imageStyle={{ opacity: 0.6 }}
+      imageStyle={{ opacity: 0.6 }} // Adjust the opacity of the background image
     >
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Text style={styles.titulo}>Registrar</Text>
 
-        {/* Contenedor para los botones centrados */}
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
             style={styles.button}
             onPress={() => handleButtonPress("tree")}
           >
             <Image
-              source={require("../assets/IconoArbol.png")} // Asegúrate de que la ruta sea correcta
+              source={require("../assets/IconoArbol.png")}
               style={{ width: 150, height: 150, marginBottom: 20 }}
             />
             <Text style={styles.buttonText}>Nuevo árbol</Text>
@@ -49,31 +45,30 @@ const VentanaRegistrar = ({ navigation }) => {
             onPress={() => handleButtonPress("sample")}
           >
             <Image
-              source={require("../assets/IconoMuestra.png")} // Asegúrate de que la ruta sea correcta
+              source={require("../assets/IconoMuestra.png")}
               style={{ width: 150, height: 150, marginBottom: 20 }}
             />
             <Text style={styles.buttonText}>Nueva muestra</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
   );
 };
 
 export default VentanaRegistrar;
 
-// Estilos para la pantalla
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    padding: 20,
-  },
   background: {
     flex: 1,
     width: "100%",
     height: "100%",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "transparent", // <- importante
+    alignItems: "center",
+    padding: 20,
   },
   titulo: {
     fontSize: 36,
@@ -91,13 +86,13 @@ const styles = StyleSheet.create({
     width: "70%",
     padding: 15,
     marginVertical: 10,
-    borderRadius: 6,
+    borderRadius: 20,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
     borderColor: "#ccc",
-    borderRadius: 20,
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
   },
   buttonText: {
     fontSize: 18,
