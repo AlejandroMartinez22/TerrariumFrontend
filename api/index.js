@@ -624,28 +624,43 @@ export const getArbolesBySubparcela = async (
 
 export const getUltimoIdMuestraDeBack = async () => {
   try {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    const token = user ? await user.getIdToken() : null;
-
-    if (!token) {
-      throw new Error("Usuario no autenticado");
-    }
-
-    const response = await api.get(`/muestras/siguienteId`, {
+    const token = await getCurrentToken();
+    const response = await api.get("/muestras/siguienteId", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    if (response.data && response.data.success && response.data.ultimoId !== undefined) {
+    if (response.data.ultimoId) {
       return response.data.ultimoId;
     } else {
-      throw new Error("No se pudo obtener el último ID");
+      throw new Error(
+        response.data.message || "Error al obtener ID de muestra"
+      );
     }
   } catch (error) {
-    console.error("Error al obtener el último ID:", error);
-    throw error;
+    console.error("Error al obtener siguiente ID de muestra :", error);
+    handleError(error);
+  }
+};
+
+export const guardarMuestraEnBackend = async (muestraData) => {
+  try {
+    const token = await getCurrentToken();
+    const response = await api.post("/muestras", muestraData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.success) {
+      return response.data.id;
+    } else {
+      throw new Error(response.data.message || "Error al guardar muestra");
+    }
+  } catch (error) {
+    console.error("Error al guardar muestra:", error);
+    handleError(error);
   }
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import {
   Modal,
   View,
@@ -12,16 +12,18 @@ import {
 } from "react-native";
 
 // Función para obtener el ID
-import { getUltimoIdMuestraDeBack } from "../api";
+import { siguienteIdMuestra, guardarMuestra } from "../hooks/useMuestra";
+import { useBrigadista } from "../context/BrigadistaContext";
 
 // Modificamos MuestraModal para recibir parámetros de la ruta
 export default function MuestraModal({ route, navigation }) {
   // Extraemos los parámetros de la ruta
   const { subparcela, arbol, tamanoIndividuo } = route.params || {};
-  
+  const brigadista = useBrigadista();
+
   // Estados para controlar la visibilidad del modal
   const [visible, setVisible] = useState(true);
-  
+
   // Estados para almacenar los valores del formulario
   const [idMuestra, setIdMuestra] = useState("");
   const [idAsignado, setIdAsignado] = useState("");
@@ -29,6 +31,7 @@ export default function MuestraModal({ route, navigation }) {
   const [determinacionCampo, setDeterminacionCampo] = useState("");
   const [numeroColeccion, setNumeroColeccion] = useState("");
   const [observaciones, setObservaciones] = useState("");
+  const [cedula_brigadista, setCedulaBrigadista] = useState("");
 
   // Estado para manejar errores de validación
   const [errors, setErrors] = useState({
@@ -47,8 +50,12 @@ export default function MuestraModal({ route, navigation }) {
     numeroColeccion.trim() !== "";
 
   useEffect(() => {
-    console.log("Parámetros recibidos en MuestraModal:", { subparcela, arbol, tamanoIndividuo });
-    
+    console.log("Parámetros recibidos en MuestraModal:", {
+      subparcela,
+      arbol,
+      tamanoIndividuo,
+    });
+
     const inicializarDatos = async () => {
       // Reiniciamos los errores cuando se abre el componente
       setErrors({
@@ -64,7 +71,7 @@ export default function MuestraModal({ route, navigation }) {
 
       // Generamos un nuevo ID desde la base de datos para la muestra
       try {
-        const nuevoId = await getUltimoIdMuestraDeBack();
+        const nuevoId = await siguienteIdMuestra();
         console.log("Nuevo ID generado desde el backend:", nuevoId);
 
         if (nuevoId) {
@@ -131,30 +138,30 @@ export default function MuestraModal({ route, navigation }) {
   };
 
   // Manejar el evento de guardar
-  const handleGuardar = () => {
+  const handleGuardar = async () => {
     if (!validateFields()) {
       return;
     }
 
+    setCedulaBrigadista(brigadista.cedula_brigadista);
+
+    console.log("brigadista actual:", brigadista);
     // Si el formulario es válido, guardamos los datos
-    const datosMuestra = {
+    const muestraData = {
       idMuestra,
-      idAsignado,
-      subparcela,
-      arbol,
       tamanoIndividuo,
       nombreComun,
       determinacionCampo,
-      numeroColeccion,
       observaciones,
+      numeroColeccion,
+      arbol,
+      cedula_brigadista: brigadista.brigadista.cedula,
     };
 
-    console.log("Guardando muestra:", datosMuestra);
+    console.log("Guardando muestra:", muestraData);
+    const id = await guardarMuestra(muestraData);
+    console.log("ID de muestra guardada:", id);
     
-    // Aquí implementarías la lógica para guardar los datos
-    // Por ejemplo, una llamada a API
-    
-    // Y luego volver a la pantalla anterior
     navigation.goBack();
   };
 
@@ -178,7 +185,10 @@ export default function MuestraModal({ route, navigation }) {
             <View style={styles.modalView}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Registro de la Muestra</Text>
-                <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                <TouchableOpacity
+                  onPress={handleClose}
+                  style={styles.closeButton}
+                >
                   <Text style={styles.closeButtonText}>✕</Text>
                 </TouchableOpacity>
               </View>
