@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { getUltimoIdMuestraDeBack } from "../api";
 import { guardarMuestraEnBackend } from "../api";
 

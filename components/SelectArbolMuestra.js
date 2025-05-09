@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useBrigadista } from "../context/BrigadistaContext";
-import { getArbolesBySubparcela } from "../api";
+import { getArbolesSubparcela } from "../hooks/useArbolesSubparcelas";
 
 const SelectArbolMuestra = ({ route, navigation }) => {
   // Agregamos logs para ver los parámetros de la ruta y detectar problemas
@@ -68,7 +68,7 @@ const SelectArbolMuestra = ({ route, navigation }) => {
       }
 
       // Llamada a la API - Ajustamos para manejar la estructura de respuesta correcta
-      const response = await getArbolesBySubparcela(
+      const response = await getArbolesSubparcela(
         subparcelaType,
         brigadista.idConglomerado
       );
