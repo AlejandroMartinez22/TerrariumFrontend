@@ -11,12 +11,12 @@ import {
 // Asumimos que utilizas React Navigation para la navegación entre pantallas
 
 // Componente que representa la pantalla de registro de árboles
-const RegistrarMuestraArborea = ({ navigation }) => {
+const SeleccionarSubparcelaArbol = ({ navigation }) => {
   // Función para navegar a SelectArbolMuestra con el tipo de subparcela seleccionado
   const handleOptionSelect = (option) => {
     // CORRECCIÓN: Cambiamos 'subparcelaType' por 'nombreSubparcela' para que coincida
     // con lo que espera el componente SelectArbolMuestra
-    navigation.navigate("Selec", { nombreSubparcela: option });
+    navigation.navigate("registrarIndividuoBotanico", { nombreSubparcela: option });
     
     // Para depuración: mostramos en consola los datos que estamos pasando
     console.log("Navegando a viewScreen con nombreSubparcela:", option);
@@ -51,7 +51,7 @@ const RegistrarMuestraArborea = ({ navigation }) => {
           <View style={styles.imagePlaceholder}>
             <View style={styles.imageWrapper}>
               <Image
-                source={require("../assets/ImagenRegistroMuestra.png")}
+                source={require("../assets/ImagenRegistroArbol.png")}
                 style={styles.image}
                 resizeMode="contain"
               />
@@ -72,7 +72,7 @@ const RegistrarMuestraArborea = ({ navigation }) => {
   );
 };
 
-export default RegistrarMuestraArborea;
+export default SeleccionarSubparcelaArbol;
 
 // Estilos para la pantalla
 const styles = StyleSheet.create({

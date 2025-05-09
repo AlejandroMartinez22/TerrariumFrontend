@@ -12,12 +12,14 @@ import {
 // Si usas otra biblioteca de navegación, deberás ajustar el código
 
 // Componente que representa la pantalla de registro de árboles
-const RegistrarMuestraArborea = ({ navigation }) => {
+const SeleccionarSubparcelaMuestra = ({ navigation }) => {
   // Función para navegar a otro componente con el tipo de subparcela seleccionado
   const handleOptionSelect = (option) => {
     // Aquí navegamos a la pantalla de detalles de subparcela y pasamos la opción seleccionada
 
-    navigation.navigate("viewScreen", { subparcelaType: option });
+    navigation.navigate("SeleccionarArbolMuestra", {
+      subparcelaType: option,
+    });
 
     // Si no estás usando React Navigation o quieres implementar otra lógica,
     // puedes usar un callback o un estado global (Redux, Context API) para manejar esto
@@ -73,7 +75,7 @@ const RegistrarMuestraArborea = ({ navigation }) => {
   );
 };
 
-export default RegistrarMuestraArborea;
+export default SeleccionarSubparcelaMuestra;
 
 // Estilos para la pantalla
 const styles = StyleSheet.create({

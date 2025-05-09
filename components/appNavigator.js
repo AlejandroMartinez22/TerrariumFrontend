@@ -6,10 +6,13 @@ import { TouchableOpacity, Image, Text, StyleSheet } from "react-native";
 // Importación de componentes y contexto
 import NavigationTabs from "./navigationTabs";
 import ProfileScreen from "./profileScreen";
-import registrarMuestra from "./SeleccionarSubparcelaMuestra";
+import SeleccionarSubparcelaMuestra from "./SeleccionarSubparcelaMuestra";
 import SeleccionarSubparcelaArbol from "./SeleccionarSubparcelaArbol";
 import { useBrigadista } from "../context/BrigadistaContext";
 import SelectArbolMuestra from "./SelectArbolMuestra";
+import IndividuoModal from "./individuoModal";
+import MuestraModal from "./muestraModal";
+
 // Creación del stack navigator para manejar la navegación entre pantallas
 const Stack = createStackNavigator();
 
@@ -53,10 +56,10 @@ export default function AppNavigator() {
         component={ProfileScreen}
         options={{ headerShown: false }}
       />
-      
+
       <Stack.Screen
-        name="registrarMuestra"
-        component={registrarMuestra}
+        name="SeleccionarSubparcelaMuestra"
+        component={SeleccionarSubparcelaMuestra}
         options={({ navigation }) => ({
           headerTitle: () => (
             <Image
@@ -79,11 +82,10 @@ export default function AppNavigator() {
             </TouchableOpacity>
           ),
         })}
-        
       />
 
       <Stack.Screen
-        name="registrarArbol"
+        name="SeleccionarSubparcelaArbol"
         component={SeleccionarSubparcelaArbol}
         options={({ navigation }) => ({
           headerTitle: () => (
@@ -110,8 +112,62 @@ export default function AppNavigator() {
       />
 
       <Stack.Screen
-        name="SeleccionSubparcelaMuestra"
+        name="SeleccionarArbolMuestra"
         component={SelectArbolMuestra}
+        options={({ navigation }) => ({
+          headerTitle: () => (
+            <Image
+              source={require("../assets/LogoTerrarium.png")}
+              style={{ resizeMode: "contain", width: 100, height: 28 }}
+            />
+          ),
+          headerStyle: { backgroundColor: "#1E5A26" },
+          headerTintColor: "#fff",
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Profile")}
+              style={styles.BotonSesion}
+            >
+              <Text style={styles.NombreBrigadista}>{brigadista?.nombre}</Text>
+              <Image
+                source={require("../assets/IconoPerfil.png")}
+                style={{ width: 29, height: 29 }}
+              />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+
+      <Stack.Screen
+        name="registrarIndividuoBotanico"
+        component={IndividuoModal}
+        options={({ navigation }) => ({
+          headerTitle: () => (
+            <Image
+              source={require("../assets/LogoTerrarium.png")}
+              style={{ resizeMode: "contain", width: 100, height: 28 }}
+            />
+          ),
+          headerStyle: { backgroundColor: "#1E5A26" },
+          headerTintColor: "#fff",
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Profile")}
+              style={styles.BotonSesion}
+            >
+              <Text style={styles.NombreBrigadista}>{brigadista?.nombre}</Text>
+              <Image
+                source={require("../assets/IconoPerfil.png")}
+                style={{ width: 29, height: 29 }}
+              />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      
+      <Stack.Screen
+        name="registrarMuestra"
+        component={MuestraModal}
         options={({ navigation }) => ({
           headerTitle: () => (
             <Image

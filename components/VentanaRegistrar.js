@@ -12,9 +12,9 @@ import {
 const VentanaRegistrar = ({ navigation }) => {
   const handleButtonPress = (option) => {
     if (option === "tree") {
-      navigation.navigate("registrarArbol");
+      navigation.navigate("SeleccionarSubparcelaArbol");
     } else if (option === "sample") {
-      navigation.navigate("registrarMuestra");
+      navigation.navigate("SeleccionarSubparcelaMuestra");
     }
   };
 

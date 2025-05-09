@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useBrigadista } from "../context/BrigadistaContext";
-import { getArbolesBySubparcela } from "../api/index";
+import { getArbolesBySubparcela } from "../api";
 
 const SelectArbolMuestra = ({ route, navigation }) => {
   // Agregamos logs para ver los parámetros de la ruta y detectar problemas
@@ -129,16 +129,15 @@ const SelectArbolMuestra = ({ route, navigation }) => {
     (currentPage + 1) * itemsPerPage
   );
 
-  // Función para volver a la pantalla anterior
-  const handleGoBack = () => {
-    navigation.goBack();
-  };
-
   // Función para seleccionar un árbol
   const handleSelectArbol = (arbol) => {
     console.log("Árbol seleccionado:", arbol);
-    // Aquí puedes navegar a la pantalla de detalle con los datos del árbol
-    navigation.navigate("DetalleArbol", { arbol });
+    // Pasamos el subparcelaType, id del árbol y tamaño_individuo como parámetros separados
+    navigation.navigate("registrarMuestra", {
+      subparcela: subparcelaType,
+      arbol: arbol.id,
+      tamanoIndividuo: arbol.tamaño_individuo
+    });
   };
 
   // Renderizado para el estado de carga
@@ -147,21 +146,6 @@ const SelectArbolMuestra = ({ route, navigation }) => {
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2E7D32" />
         <Text>Cargando datos de la subparcela...</Text>
-      </View>
-    );
-  }
-
-  // Renderizado para el estado de error
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={loadArboles}>
-          <Text style={styles.retryButtonText}>Reintentar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-          <Text style={styles.backButtonText}>Volver</Text>
-        </TouchableOpacity>
       </View>
     );
   }
@@ -179,9 +163,10 @@ const SelectArbolMuestra = ({ route, navigation }) => {
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.tableContainer}>
           <View style={styles.tableHeader}>
-            <Text style={[styles.headerCell, styles.idCell]}>Núm.</Text>
-            <Text style={[styles.headerCell, styles.especieCell]}>Especie</Text>
-            <Text style={[styles.headerCell, styles.codigoCell]}>Código</Text>
+            <Text style={[styles.headerCell, styles.numeroCell]}>Núm.</Text>
+            <Text style={[styles.headerCell, styles.tamañoCe
+            ]}>tamaño</Text>
+            <Text style={[styles.headerCell, styles.idCell]}>id</Text>
           </View>
 
           {currentArboles.length > 0 ? (
@@ -194,14 +179,14 @@ const SelectArbolMuestra = ({ route, navigation }) => {
                 ]}
                 onPress={() => handleSelectArbol(arbol)}
               >
+                <Text style={[styles.cell, styles.numeroCell]}>
+                  {`Arbol # ${index + 1}` }
+                </Text>
+                <Text style={[styles.cell, styles.tamañoCell]}>
+                  {arbol.tamaño_individuo}
+                </Text>
                 <Text style={[styles.cell, styles.idCell]}>
-                  {arbol.numero || index + 1}
-                </Text>
-                <Text style={[styles.cell, styles.especieCell]}>
-                  {arbol.tamaño || "No especificada"}
-                </Text>
-                <Text style={[styles.cell, styles.codigoCell]}>
-                  {arbol.codigo || `A${index + 1}`}
+                  {arbol.id}
                 </Text>
               </TouchableOpacity>
             ))
@@ -313,14 +298,14 @@ const styles = StyleSheet.create({
   cell: {
     fontSize: 14,
   },
-  idCell: {
+  numeroCell: {
     flex: 1,
   },
-  especieCell: {
+  ta: {
     flex: 1,
     textAlign: "center",
   },
-  codigoCell: {
+  idCell: {
     flex: 1,
     textAlign: "right",
   },

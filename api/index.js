@@ -7,7 +7,7 @@ import { getAuth } from "firebase/auth"; // Importamos la función getAuth de Fi
 
 // Configuramos la URL base del backend
 const API_URL =
-  "http://192.168.1.7:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+  "http://192.168.1.9:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
 
 // Creamos una instancia de Axios preconfigurada con la URL base del backend
 const api = axios.create({
@@ -621,6 +621,34 @@ export const getArbolesBySubparcela = async (
     throw error; // Propagamos el error para manejarlo en el componente
   }
 };
+
+export const getUltimoIdMuestraDeBack = async () => {
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const token = user ? await user.getIdToken() : null;
+
+    if (!token) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    const response = await api.get(`/muestras/siguienteId`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data && response.data.success && response.data.ultimoId !== undefined) {
+      return response.data.ultimoId;
+    } else {
+      throw new Error("No se pudo obtener el último ID");
+    }
+  } catch (error) {
+    console.error("Error al obtener el último ID:", error);
+    throw error;
+  }
+};
+
 
 // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
 export default api;
