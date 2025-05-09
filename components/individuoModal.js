@@ -1,5 +1,5 @@
-    import React, { useState, useEffect } from "react";
-    import {
+import React, { useState, useEffect } from "react";
+import {
     Modal,
     View,
     Text,
@@ -30,6 +30,10 @@
     const [idIndividuo, setIdIndividuo] = useState("");
     const [subparcela, setSubparcela] = useState(nombreSubparcela);
     const [idAsignado, setIdAsignado] = useState("A001");
+    
+    // Estado para valores calculados (no editables por el usuario)
+    const [tamanoIndividuo, setTamanoIndividuo] = useState("0.0");
+    const [alturaTotal, setAlturaTotal] = useState("0.0");
     
     // Estados para controlar los modales de selección
     const [showDropdownModal, setShowDropdownModal] = useState(false);
@@ -84,6 +88,10 @@
         setSubparcela(nombreSubparcela);
         setIdAsignado("A001");
         
+        // Valores calculados (no editables)
+        setTamanoIndividuo("0.0");
+        setAlturaTotal("0.0");
+        
         // Cerramos el modal de dropdown si está abierto
         setShowDropdownModal(false);
         
@@ -118,6 +126,8 @@
         idIndividuo,
         subparcela,
         idAsignado,
+        tamanoIndividuo,
+        alturaTotal,
         condicion: values.condicion,
         azimut: values.azimut,
         distanciaCentro: values.distanciaCentro,
@@ -223,13 +233,17 @@
                 {/* Fila 1: Tamaño del Individuo y Condición */}
                 <View style={styles.formRow}>
                     <View style={styles.formColumn}>
-                    <Text style={styles.label}>* Tamaño del Individuo</Text>
+                    <Text style={styles.label}>Tamaño del Individuo</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
-                        style={styles.standardInput}
-                        placeholder="Tamaño"
-                        keyboardType="numeric"
+                        style={[styles.standardInput, styles.disabledInput]}
+                        value={tamanoIndividuo}
+                        placeholder="0.0"
+                        editable={false}
                         />
+                        <View style={styles.errorContainer}>
+                        {/* Espacio reservado para mantener consistencia */}
+                        </View>
                     </View>
                     </View>
                     <View style={styles.formColumn}>
@@ -242,6 +256,9 @@
                         <Text>{values.condicion}</Text>
                         <Text style={styles.dropdownArrow}>▼</Text>
                         </TouchableOpacity>
+                        <View style={styles.errorContainer}>
+                        {/* Espacio reservado para mantener consistencia */}
+                        </View>
                     </View>
                     </View>
                 </View>
@@ -252,30 +269,34 @@
                     <Text style={styles.label}>* Azimut (°)</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
-                        style={[styles.standardInput, errors.azimut && styles.inputError]}
+                        style={[styles.standardInput, errors.azimut && values.azimut && values.azimut.trim() !== '' && styles.inputError]}
                         value={values.azimut}
                         onChangeText={(text) => handleChange('azimut', text)}
                         placeholder="0.0"
                         keyboardType="numeric"
                         />
+                        <View style={styles.errorContainer}>
                         {errors.azimut && (
-                        <Text style={styles.errorText}>{errorMessages.azimut}</Text>
+                            <Text style={styles.errorText}>{errorMessages.azimut}</Text>
                         )}
+                        </View>
                     </View>
                     </View>
                     <View style={styles.formColumn}>
                     <Text style={styles.label}>* Distancia del centro (m)</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
-                        style={[styles.standardInput, errors.distanciaCentro && styles.inputError]}
+                        style={[styles.standardInput, errors.distanciaCentro && values.distanciaCentro && values.distanciaCentro.trim() !== '' && styles.inputError]}
                         value={values.distanciaCentro}
                         onChangeText={(text) => handleChange('distanciaCentro', text)}
                         placeholder="0.0"
                         keyboardType="numeric"
                         />
+                        <View style={styles.errorContainer}>
                         {errors.distanciaCentro && (
-                        <Text style={styles.errorText}>{errorMessages.distanciaCentro}</Text>
+                            <Text style={styles.errorText}>{errorMessages.distanciaCentro}</Text>
                         )}
+                        </View>
                     </View>
                     </View>
                 </View>
@@ -292,21 +313,26 @@
                         <Text>{values.tallo}</Text>
                         <Text style={styles.dropdownArrow}>▼</Text>
                         </TouchableOpacity>
+                        <View style={styles.errorContainer}>
+                        {/* Espacio reservado para mantener consistencia */}
+                        </View>
                     </View>
                     </View>
                     <View style={styles.formColumn}>
                     <Text style={styles.label}>* Diámetro</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
-                        style={[styles.standardInput, errors.diametro && styles.inputError]}
+                        style={[styles.standardInput, errors.diametro && values.diametro && values.diametro.trim() !== '' && styles.inputError]}
                         value={values.diametro}
                         onChangeText={(text) => handleChange('diametro', text)}
                         placeholder="0.0"
                         keyboardType="numeric"
                         />
+                        <View style={styles.errorContainer}>
                         {errors.diametro && (
-                        <Text style={styles.errorText}>{errorMessages.diametro}</Text>
+                            <Text style={styles.errorText}>{errorMessages.diametro}</Text>
                         )}
+                        </View>
                     </View>
                     </View>
                 </View>
@@ -317,30 +343,34 @@
                     <Text style={styles.label}>* Distancia Horizontal</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
-                        style={[styles.standardInput, errors.distanciaHorizontal && styles.inputError]}
+                        style={[styles.standardInput, errors.distanciaHorizontal && values.distanciaHorizontal && values.distanciaHorizontal.trim() !== '' && styles.inputError]}
                         value={values.distanciaHorizontal}
                         onChangeText={(text) => handleChange('distanciaHorizontal', text)}
                         placeholder="0.0"
                         keyboardType="numeric"
                         />
+                        <View style={styles.errorContainer}>
                         {errors.distanciaHorizontal && (
-                        <Text style={styles.errorText}>{errorMessages.distanciaHorizontal}</Text>
+                            <Text style={styles.errorText}>{errorMessages.distanciaHorizontal}</Text>
                         )}
+                        </View>
                     </View>
                     </View>
                     <View style={styles.formColumn}>
                     <Text style={styles.label}>* Ángulo visto hacia abajo</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
-                        style={[styles.standardInput, errors.anguloVistoBajo && styles.inputError]}
+                        style={[styles.standardInput, errors.anguloVistoBajo && values.anguloVistoBajo && values.anguloVistoBajo.trim() !== '' && styles.inputError]}
                         value={values.anguloVistoBajo}
                         onChangeText={(text) => handleChange('anguloVistoBajo', text)}
                         placeholder="0.0"
                         keyboardType="numeric"
                         />
+                        <View style={styles.errorContainer}>
                         {errors.anguloVistoBajo && (
-                        <Text style={styles.errorText}>{errorMessages.anguloVistoBajo}</Text>
+                            <Text style={styles.errorText}>{errorMessages.anguloVistoBajo}</Text>
                         )}
+                        </View>
                     </View>
                     </View>
                 </View>
@@ -351,25 +381,31 @@
                     <Text style={styles.label}>* Ángulo visto hacia arriba</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
-                        style={[styles.standardInput, errors.anguloVistoAlto && styles.inputError]}
+                        style={[styles.standardInput, errors.anguloVistoAlto && values.anguloVistoAlto && values.anguloVistoAlto.trim() !== '' && styles.inputError]}
                         value={values.anguloVistoAlto}
                         onChangeText={(text) => handleChange('anguloVistoAlto', text)}
                         placeholder="0.0"
                         keyboardType="numeric"
                         />
+                        <View style={styles.errorContainer}>
                         {errors.anguloVistoAlto && (
-                        <Text style={styles.errorText}>{errorMessages.anguloVistoAlto}</Text>
+                            <Text style={styles.errorText}>{errorMessages.anguloVistoAlto}</Text>
                         )}
+                        </View>
                     </View>
                     </View>
                     <View style={styles.formColumn}>
-                    <Text style={styles.label}>* Altura total</Text>
+                    <Text style={styles.label}>Altura total</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
-                        style={styles.standardInput}
+                        style={[styles.standardInput, styles.disabledInput]}
+                        value={alturaTotal}
                         placeholder="0.0"
-                        keyboardType="numeric"
+                        editable={false}
                         />
+                        <View style={styles.errorContainer}>
+                        {/* Espacio reservado para mantener consistencia */}
+                        </View>
                     </View>
                     </View>
                 </View>
@@ -386,6 +422,9 @@
                         <Text>{values.formaFuste}</Text>
                         <Text style={styles.dropdownArrow}>▼</Text>
                         </TouchableOpacity>
+                        <View style={styles.errorContainer}>
+                        {/* Espacio reservado para mantener consistencia */}
+                        </View>
                     </View>
                     </View>
                     <View style={styles.formColumn}>
@@ -398,6 +437,9 @@
                         <Text>{values.dano}</Text>
                         <Text style={styles.dropdownArrow}>▼</Text>
                         </TouchableOpacity>
+                        <View style={styles.errorContainer}>
+                        {/* Espacio reservado para mantener consistencia */}
+                        </View>
                     </View>
                     </View>
                 </View>
@@ -406,25 +448,27 @@
                 <View style={styles.formRow}>
                     <View style={styles.formColumn}>
                     <Text style={styles.label}>
-                        {(values.condicion === 'MP' || values.condicion === 'TM') && '* '}
+                        {(values.condicion === 'MP' || values.condicion === 'TM' || values.condicion === 'TV') && '* '}
                         Penetración (cm)
                     </Text>
                     <View style={styles.inputContainer}>
                         <TextInput
-                        style={[
-                            styles.standardInput, 
-                            errors.penetracion && styles.inputError,
-                            !(values.condicion === 'MP' || values.condicion === 'TM') && styles.disabledInput
-                        ]}
-                        value={values.penetracion}
-                        onChangeText={(text) => handleChange('penetracion', text)}
-                        placeholder="0.0"
-                        keyboardType="numeric"
-                        editable={values.condicion === 'MP' || values.condicion === 'TM'}
+                            style={[
+                                styles.standardInput, 
+                                errors.penetracion && values.penetracion && values.penetracion.trim() !== '' && styles.inputError,
+                                !(values.condicion === 'MP' || values.condicion === 'TM' || values.condicion === 'TV') && styles.disabledInput
+                            ]}
+                            value={values.penetracion}
+                            onChangeText={(text) => handleChange('penetracion', text)}
+                            placeholder="0.0"
+                            keyboardType="numeric"
+                            editable={values.condicion === 'MP' || values.condicion === 'TM' || values.condicion === 'TV'}
                         />
-                        {errors.penetracion && (values.condicion === 'MP' || values.condicion === 'TM') && (
-                        <Text style={styles.errorText}>{errorMessages.penetracion}</Text>
+                        <View style={styles.errorContainer}>
+                        {errors.penetracion && (values.condicion === 'MP' || values.condicion === 'TM' ||  values.condicion === 'TV') && (
+                            <Text style={styles.errorText}>{errorMessages.penetracion}</Text>
                         )}
+                        </View>
                     </View>
                     </View>
                     <View style={styles.formColumn}>
@@ -447,6 +491,9 @@
                             Hecho
                         </Text>
                         </TouchableOpacity>
+                        <View style={styles.errorContainer}>
+                        {/* Espacio reservado para mantener consistencia */}
+                        </View>
                     </View>
                     </View>
                 </View>
@@ -519,13 +566,13 @@
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom: 25,
         borderBottomWidth: 1,
         borderBottomColor: "#e0e0e0",
         paddingBottom: 10,
     },
     modalTitle: {
-        fontSize: 22,
+        fontSize: 23,
         fontWeight: "bold",
         marginBottom: 10,
         color: "#333",
@@ -555,7 +602,7 @@
     formRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 15,
+        marginBottom: 10, // Ajustado para tener un espacio consistente
         width: "100%",
     },
     formColumn: {
@@ -563,17 +610,21 @@
     },
     label: {
         fontSize: 12,
-        marginBottom: 5,
+        marginBottom: 10,
         color: "#333",
-        height: 20,
     },
     inputContainer: {
-        marginBottom: 5,
+        marginBottom: 0, // Eliminado el margen inferior aquí
+    },
+    errorContainer: {
+        height: 18, // Altura fija para todos los contenedores de error
+        justifyContent: 'flex-start', // Alineación superior para los mensajes
+        paddingTop: 2, // Pequeño padding para separar del input
     },
     errorText: {
         color: "red",
         fontSize: 10,
-        marginTop: 2,
+        marginTop: 0, // Eliminado margen superior aquí
     },
     standardInput: {
         borderWidth: 1,
@@ -582,7 +633,7 @@
         padding: 10,
         fontSize: 12,
         height: 45,
-        marginBottom: 2 
+        marginBottom: 0, // Eliminado el margen inferior
     },
     standardSelect: {
         borderWidth: 1,
@@ -673,4 +724,4 @@
         fontSize: 16,
         color: "#333",
     },
-    });
+});

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Checkbox } from 'react-native-paper';
+//import { Checkbox } from 'react-native-paper';
 
 const VisualizarTab = ({ onConfirm }) => {
   // Estado para los checkboxes - ninguno seleccionado por defecto

@@ -1,13 +1,14 @@
-    import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-    /**
-     * Hook personalizado para validar el formulario de registro de individuos
-     * 
-     * @param {Object} initialValues - Valores iniciales del formulario
-     * @returns {Object} - Estado, errores, validaciones y métodos para manejar el formulario
-     */
-    export const useFormArbolValidation = (initialValues = {}) => {
-    // Estado para los valores del formulario
+/**
+ * Hook personalizado mejorado para validar el formulario de registro de individuos
+ * 
+ * @param {Object} initialValues - Valores iniciales del formulario
+ * @returns {Object} - Estado, errores, validaciones y métodos para manejar el formulario
+ */
+
+export const useFormArbolValidation = (initialValues = {}) => {
+  // Estado para los valores del formulario
     const [values, setValues] = useState(initialValues);
     
     // Estado para los errores de validación
@@ -106,35 +107,26 @@
         const newErrors = { ...errors };
         const newErrorMessages = { ...errorMessages };
         
-        const validateNumericField = (value, min, max, fieldName) => {
+        const validateNumericField = (value, min, max) => {
+
+        // Si está vacío, no mostrar error (se manejará deshabilitando el botón)
         if (!value || value.trim() === '') {
-            newErrors[field] = true;
-            newErrorMessages[field] = `${fieldName} es requerido`;
+            newErrors[field] = false;
+            newErrorMessages[field] = '';
             return;
         }
         
         const num = parseFloat(value);
-        if (isNaN(num)) {
-            newErrors[field] = true;
-            newErrorMessages[field] = `${fieldName} debe ser un número`;
-            return;
-        }
         
         if (num < min) {
             newErrors[field] = true;
-            newErrorMessages[field] = `${fieldName} debe ser mayor o igual a ${min}`;
+            newErrorMessages[field] = `Debe ser mayor o igual a ${min}`;
             return;
         }
         
         if (num > max) {
             newErrors[field] = true;
-            newErrorMessages[field] = `${fieldName} debe ser menor o igual a ${max}`;
-            return;
-        }
-        
-        if (value.includes('.') && value.split('.')[1].length > 1) {
-            newErrors[field] = true;
-            newErrorMessages[field] = `${fieldName} debe tener máximo 1 decimal`;
+            newErrorMessages[field] = `Debe ser menor o igual a ${max}`;
             return;
         }
         
@@ -144,36 +136,36 @@
         
         switch (field) {
         case 'azimut':
-            validateNumericField(value, 0, 359, 'Azimut');
+            validateNumericField(value, 0, 359);
             break;
             
         case 'distanciaCentro':
-            validateNumericField(value, 0, 15, 'Distancia del centro');
+            validateNumericField(value, 0, 15);
             break;
             
         case 'diametro':
-            validateNumericField(value, 2.5, 300, 'Diámetro');
+            validateNumericField(value, 2.5, 300);
             break;
             
         case 'distanciaHorizontal':
-            validateNumericField(value, 0, 40, 'Distancia horizontal');
+            validateNumericField(value, 0, 40);
             break;
             
         case 'anguloVistoBajo':
-            validateNumericField(value, 0, 45, 'Ángulo visto hacia abajo');
+            validateNumericField(value, 0, 45);
             break;
             
         case 'anguloVistoAlto':
-            validateNumericField(value, 0, 45, 'Ángulo visto hacia arriba');
+            validateNumericField(value, 0, 45);
             break;
             
         case 'penetracion':
-            // Solo validar si la condición es MP o TM
-            if (values.condicion === 'MP' || values.condicion === 'TM') {
-            validateNumericField(value, 0.1, 20, 'Penetración');
+            // Solo validar si hay un valor ingresado
+            if (value && value.trim() !== '') {
+                validateNumericField(value, 0.1, 20);
             } else {
-            newErrors[field] = false;
-            newErrorMessages[field] = '';
+                newErrors[field] = false;
+                newErrorMessages[field] = '';
             }
             break;
             
@@ -193,178 +185,136 @@
         const newErrors = {};
         const newErrorMessages = {};
         
-        // Validar azimut (0-359, máximo 1 decimal)
+        // Validar azimut (0-359)
         if (!values.azimut || values.azimut.trim() === '') {
         newErrors.azimut = true;
-        newErrorMessages.azimut = 'Campo requerido';
+        newErrorMessages.azimut = '';
         } else {
         const num = parseFloat(values.azimut);
-        if (isNaN(num)) {
-            newErrors.azimut = true;
-            newErrorMessages.azimut = 'Debe ser un número';
-        } else if (num < 0) {
+        if (num < 0) {
             newErrors.azimut = true;
             newErrorMessages.azimut = 'Debe ser mayor o igual a 0';
         } else if (num > 359) {
             newErrors.azimut = true;
             newErrorMessages.azimut = 'Debe ser menor o igual a 359';
-        } else if (values.azimut.includes('.') && values.azimut.split('.')[1].length > 1) {
-            newErrors.azimut = true;
-            newErrorMessages.azimut = 'Debe tener máximo 1 decimal';
         } else {
             newErrors.azimut = false;
             newErrorMessages.azimut = '';
         }
-    }
+        }
         
-        
-        // Validar distancia del centro (0-15, máximo 1 decimal)
+        // Validar distancia del centro (0-15)
         if (!values.distanciaCentro || values.distanciaCentro.trim() === '') {
         newErrors.distanciaCentro = true;
-        newErrorMessages.distanciaCentro = 'Campo requerido';
+        newErrorMessages.distanciaCentro = '';
         } else {
         const num = parseFloat(values.distanciaCentro);
-        if (isNaN(num)) {
-            newErrors.distanciaCentro = true;
-            newErrorMessages.distanciaCentro = 'Debe ser un número';
-        } else if (num < 0) {
+        if (num < 0) {
             newErrors.distanciaCentro = true;
             newErrorMessages.distanciaCentro = 'Debe ser mayor o igual a 0';
         } else if (num > 15) {
             newErrors.distanciaCentro = true;
             newErrorMessages.distanciaCentro = 'Debe ser menor o igual a 15';
-        } else if (values.distanciaCentro.includes('.') && values.distanciaCentro.split('.')[1].length > 1) {
-            newErrors.distanciaCentro = true;
-            newErrorMessages.distanciaCentro = 'Debe tener máximo 1 decimal';
         } else {
             newErrors.distanciaCentro = false;
             newErrorMessages.distanciaCentro = '';
         }
         }
         
-        // Validar diámetro (2.5-300, máximo 1 decimal)
+        // Validar diámetro (2.5-300)
         if (!values.diametro || values.diametro.trim() === '') {
         newErrors.diametro = true;
-        newErrorMessages.diametro = 'Campo requerido';
+        newErrorMessages.diametro = '';
         } else {
         const num = parseFloat(values.diametro);
-        if (isNaN(num)) {
-            newErrors.diametro = true;
-            newErrorMessages.diametro = 'Debe ser un número';
-        } else if (num < 2.5) {
+        if (num < 2.5) {
             newErrors.diametro = true;
             newErrorMessages.diametro = 'Debe ser mayor o igual a 2.5';
         } else if (num > 300) {
             newErrors.diametro = true;
             newErrorMessages.diametro = 'Debe ser menor o igual a 300';
-        } else if (values.diametro.includes('.') && values.diametro.split('.')[1].length > 1) {
-            newErrors.diametro = true;
-            newErrorMessages.diametro = 'Debe tener máximo 1 decimal';
         } else {
             newErrors.diametro = false;
             newErrorMessages.diametro = '';
         }
         }
         
-        // Validar distancia horizontal (0-40, máximo 1 decimal)
+        // Validar distancia horizontal (0-40)
         if (!values.distanciaHorizontal || values.distanciaHorizontal.trim() === '') {
         newErrors.distanciaHorizontal = true;
-        newErrorMessages.distanciaHorizontal = 'Campo requerido';
+        newErrorMessages.distanciaHorizontal = '';
         } else {
         const num = parseFloat(values.distanciaHorizontal);
-        if (isNaN(num)) {
-            newErrors.distanciaHorizontal = true;
-            newErrorMessages.distanciaHorizontal = 'Debe ser un número';
-        } else if (num < 0) {
+        if (num < 0) {
             newErrors.distanciaHorizontal = true;
             newErrorMessages.distanciaHorizontal = 'Debe ser mayor o igual a 0';
         } else if (num > 40) {
             newErrors.distanciaHorizontal = true;
             newErrorMessages.distanciaHorizontal = 'Debe ser menor o igual a 40';
-        } else if (values.distanciaHorizontal.includes('.') && values.distanciaHorizontal.split('.')[1].length > 1) {
-            newErrors.distanciaHorizontal = true;
-            newErrorMessages.distanciaHorizontal = 'Debe tener máximo 1 decimal';
         } else {
             newErrors.distanciaHorizontal = false;
             newErrorMessages.distanciaHorizontal = '';
         }
         }
         
-        // Validar ángulo visto hacia abajo (0-45, máximo 1 decimal)
+        // Validar ángulo visto hacia abajo (0-45)
         if (!values.anguloVistoBajo || values.anguloVistoBajo.trim() === '') {
         newErrors.anguloVistoBajo = true;
-        newErrorMessages.anguloVistoBajo = 'Campo requerido';
+        newErrorMessages.anguloVistoBajo = '';
         } else {
         const num = parseFloat(values.anguloVistoBajo);
-        if (isNaN(num)) {
-            newErrors.anguloVistoBajo = true;
-            newErrorMessages.anguloVistoBajo = 'Debe ser un número';
-        } else if (num < 0) {
+        if (num < 0) {
             newErrors.anguloVistoBajo = true;
             newErrorMessages.anguloVistoBajo = 'Debe ser mayor o igual a 0';
         } else if (num > 45) {
             newErrors.anguloVistoBajo = true;
             newErrorMessages.anguloVistoBajo = 'Debe ser menor o igual a 45';
-        } else if (values.anguloVistoBajo.includes('.') && values.anguloVistoBajo.split('.')[1].length > 1) {
-            newErrors.anguloVistoBajo = true;
-            newErrorMessages.anguloVistoBajo = 'Debe tener máximo 1 decimal';
         } else {
             newErrors.anguloVistoBajo = false;
             newErrorMessages.anguloVistoBajo = '';
         }
         }
         
-        // Validar ángulo visto hacia arriba (0-45, máximo 1 decimal)
+        // Validar ángulo visto hacia arriba (0-45)
         if (!values.anguloVistoAlto || values.anguloVistoAlto.trim() === '') {
         newErrors.anguloVistoAlto = true;
-        newErrorMessages.anguloVistoAlto = 'Campo requerido';
+        newErrorMessages.anguloVistoAlto = '';
         } else {
         const num = parseFloat(values.anguloVistoAlto);
-        if (isNaN(num)) {
-            newErrors.anguloVistoAlto = true;
-            newErrorMessages.anguloVistoAlto = 'Debe ser un número';
-        } else if (num < 0) {
+        if (num < 0) {
             newErrors.anguloVistoAlto = true;
             newErrorMessages.anguloVistoAlto = 'Debe ser mayor o igual a 0';
         } else if (num > 45) {
             newErrors.anguloVistoAlto = true;
             newErrorMessages.anguloVistoAlto = 'Debe ser menor o igual a 45';
-        } else if (values.anguloVistoAlto.includes('.') && values.anguloVistoAlto.split('.')[1].length > 1) {
-            newErrors.anguloVistoAlto = true;
-            newErrorMessages.anguloVistoAlto = 'Debe tener máximo 1 decimal';
         } else {
             newErrors.anguloVistoAlto = false;
             newErrorMessages.anguloVistoAlto = '';
         }
         }
         
-        // Validar penetración (0.1-20, máximo 1 decimal) solo si condición es MP o TM
-        if (values.condicion === 'MP' || values.condicion === 'TM') {
-        if (!values.penetracion || values.penetracion.trim() === '') {
-            newErrors.penetracion = true;
-            newErrorMessages.penetracion = 'Campo requerido';
-        } else {
-            const num = parseFloat(values.penetracion);
-            if (isNaN(num)) {
-            newErrors.penetracion = true;
-            newErrorMessages.penetracion = 'Debe ser un número';
-            } else if (num < 0.1) {
-            newErrors.penetracion = true;
-            newErrorMessages.penetracion = 'Debe ser mayor o igual a 0.1';
-            } else if (num > 20) {
-            newErrors.penetracion = true;
-            newErrorMessages.penetracion = 'Debe ser menor o igual a 20';
-            } else if (values.penetracion.includes('.') && values.penetracion.split('.')[1].length > 1) {
-            newErrors.penetracion = true;
-            newErrorMessages.penetracion = 'Debe tener máximo 1 decimal';
+        // Validar penetración (0.1-20) solo si condición es MP o TM
+        if (values.condicion === 'MP' || values.condicion === 'TM' || values.condicion === 'TV') {
+            if (values.penetracion && values.penetracion.trim() !== '') {
+                const num = parseFloat(values.penetracion);
+                if (num < 0.1) {
+                    newErrors.penetracion = true;
+                    newErrorMessages.penetracion = 'Debe ser mayor o igual a 0.1';
+                } else if (num > 20) {
+                    newErrors.penetracion = true;
+                    newErrorMessages.penetracion = 'Debe ser menor o igual a 20';
+                } else {
+                    newErrors.penetracion = false;
+                    newErrorMessages.penetracion = '';
+                }
             } else {
+                // No marcar error si está vacío
+                newErrors.penetracion = false;
+                newErrorMessages.penetracion = '';
+            }
+        } else {
             newErrors.penetracion = false;
             newErrorMessages.penetracion = '';
-            }
-        }
-        } else {
-        newErrors.penetracion = false;
-        newErrorMessages.penetracion = '';
         }
         
         setErrors(newErrors);
@@ -380,11 +330,17 @@
     // Verificar la validez del formulario cuando cambian los valores
     const checkFormValidity = () => {
         // Verificar todos los campos requeridos
-        const requiredFields = ['azimut', 'distanciaCentro', 'diametro', 'distanciaHorizontal', 
-                            'anguloVistoBajo', 'anguloVistoAlto'];
+        const requiredFields = [
+        'azimut', 
+        'distanciaCentro', 
+        'diametro', 
+        'distanciaHorizontal',
+        'anguloVistoBajo', 
+        'anguloVistoAlto'
+        ];
         
         // Añadir penetración si la condición es MP o TM
-        if (values.condicion === 'MP' || values.condicion === 'TM') {
+        if (values.condicion === 'MP' || values.condicion === 'TM' || values.condicion === 'TV') {
         requiredFields.push('penetracion');
         }
         
@@ -398,7 +354,7 @@
         setIsValid(hasAllValues && hasNoErrors);
     };
     
-    // Efecto para validar el formulario cuando cambian los valores
+    // Efecto para validar el formulario cuando cambia la condición
     useEffect(() => {
         validateForm();
     }, [values.condicion]);
@@ -413,4 +369,4 @@
         validateField,
         setValues
     };
-    };
+};
