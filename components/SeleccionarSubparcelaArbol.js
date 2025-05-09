@@ -16,7 +16,7 @@ const RegistrarMuestraArborea = ({ navigation }) => {
   const handleOptionSelect = (option) => {
     // CORRECCIÓN: Cambiamos 'subparcelaType' por 'nombreSubparcela' para que coincida
     // con lo que espera el componente SelectArbolMuestra
-    navigation.navigate("viewScreen", { nombreSubparcela: option });
+    navigation.navigate("Selec", { nombreSubparcela: option });
     
     // Para depuración: mostramos en consola los datos que estamos pasando
     console.log("Navegando a viewScreen con nombreSubparcela:", option);
@@ -42,8 +42,8 @@ const RegistrarMuestraArborea = ({ navigation }) => {
       imageStyle={{ opacity: 0.4 }}
     >
       <View style={styles.container}>
-        <Text style={styles.titulo}>Registrar nueva</Text>
-        <Text style={styles.titulo}>muestra árborea</Text>
+        <Text style={styles.titulo}>Registrar Nuevo</Text>
+        <Text style={styles.titulo}>Individuo Botánico</Text>
 
         {/* Contenedor flexbox para la imagen y botones lado a lado */}
         <View style={styles.contentContainer}>

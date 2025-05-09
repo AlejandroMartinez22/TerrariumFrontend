@@ -6,7 +6,7 @@ import { TouchableOpacity, Image, Text, StyleSheet } from "react-native";
 // Importación de componentes y contexto
 import NavigationTabs from "./navigationTabs";
 import ProfileScreen from "./profileScreen";
-import registrarMuestra from "./registrarMuestra";
+import registrarMuestra from "./SeleccionarSubparcelaMuestra";
 import SeleccionarSubparcelaArbol from "./SeleccionarSubparcelaArbol";
 import { useBrigadista } from "../context/BrigadistaContext";
 import SelectArbolMuestra from "./SelectArbolMuestra";
@@ -53,6 +53,7 @@ export default function AppNavigator() {
         component={ProfileScreen}
         options={{ headerShown: false }}
       />
+      
       <Stack.Screen
         name="registrarMuestra"
         component={registrarMuestra}
@@ -78,7 +79,9 @@ export default function AppNavigator() {
             </TouchableOpacity>
           ),
         })}
+        
       />
+
       <Stack.Screen
         name="registrarArbol"
         component={SeleccionarSubparcelaArbol}
@@ -105,8 +108,9 @@ export default function AppNavigator() {
           ),
         })}
       />
+
       <Stack.Screen
-        name="viewScreen"
+        name="SeleccionSubparcelaMuestra"
         component={SelectArbolMuestra}
         options={({ navigation }) => ({
           headerTitle: () => (
