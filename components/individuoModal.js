@@ -4,45 +4,38 @@
     View,
     Text,
     TouchableOpacity,
-    StyleSheet,
     TextInput,
     ScrollView,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    StatusBar,
+    SafeAreaView,
+    FlatList,
+    StyleSheet
     } from "react-native";
 
-    // Función para obtener el ID del individuo (similar a la del ejemplo)
+    // Función para obtener el ID del individuo
     import { getUltimoIdIndividuoDeBack } from "../api";
+    // Importar el hook de validación
+    import { useFormArbolValidation } from "../hooks/useFormArbolValidation";
 
-    export default function IndividuoModal({
-    visible,
-    onClose,
-    onConfirmar,
-    individuoEditado = null,
+    export default function IndividuoModal({ 
+    route, 
+    navigation 
     }) {
-    // Estado para almacenar los valores del formulario
-    const [idIndividuo, setIdIndividuo] = useState("");
-    const [subparcela, setSubparcela] = useState("SPF5");
-    const [idAsignado, setIdAsignado] = useState("A001");
-    const [tamanoIndividuo, setTamanoIndividuo] = useState(""); // No editable
-    const [condicion, setCondicion] = useState("MP");
-    const [azimut, setAzimut] = useState("");
-    const [distanciaCentro, setDistanciaCentro] = useState("");
-    const [tallo, setTallo] = useState("Único");
-    const [diametro, setDiametro] = useState("");
-    const [distanciaHorizontal, setDistanciaHorizontal] = useState("");
-    const [anguloVistoBajo, setAnguloVistoBajo] = useState("");
-    const [anguloVistoAlto, setAnguloVistoAlto] = useState("");
-    const [alturaTotal, setAlturaTotal] = useState(""); // No editable
-    const [formaFuste, setFormaFuste] = useState("CIL");
-    const [dano, setDano] = useState("SD");
-    const [penetracion, setPenetracion] = useState("");
+    // Recibe el parámetro nombreSubparcela desde la pantalla anterior
+    const { nombreSubparcela } = route.params || { nombreSubparcela: "SPF5" };
 
-    // Estados para controlar los dropdowns
-    const [showCondicionDropdown, setShowCondicionDropdown] = useState(false);
-    const [showTalloDropdown, setShowTalloDropdown] = useState(false);
-    const [showFormaFusteDropdown, setShowFormaFusteDropdown] = useState(false);
-    const [showDanoDropdown, setShowDanoDropdown] = useState(false);
+    // Estado para almacenar datos que no son parte del formulario validado
+    const [idIndividuo, setIdIndividuo] = useState("");
+    const [subparcela, setSubparcela] = useState(nombreSubparcela);
+    const [idAsignado, setIdAsignado] = useState("A001");
+    
+    // Estados para controlar los modales de selección
+    const [showDropdownModal, setShowDropdownModal] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState(null);
+    const [dropdownOptions, setDropdownOptions] = useState([]);
+    const [dropdownValue, setDropdownValue] = useState(null);
 
     // Opciones para los dropdowns
     const condicionOptions = ["MP", "TM", "TV", "VC", "VP"];
@@ -50,200 +43,73 @@
     const formaFusteOptions = ["CIL", "FA", "INC", "IRR", "RT"];
     const danoOptions = ["DB", "DM", "EB", "Q", "SD"];
 
-    // Estado para manejar errores de validación
-    const [errors, setErrors] = useState({
-        azimut: false,
-        distanciaCentro: false,
-        diametro: false,
-        distanciaHorizontal: false,
-        anguloVistoBajo: false,
-        anguloVistoAlto: false,
-        penetracion: false,
-    });
+    // Valores iniciales para el formulario
+    const initialValues = {
+        condicion: "MP",
+        azimut: "",
+        distanciaCentro: "",
+        tallo: "Único",
+        diametro: "",
+        distanciaHorizontal: "",
+        anguloVistoBajo: "",
+        anguloVistoAlto: "",
+        formaFuste: "CIL",
+        dano: "SD",
+        penetracion: ""
+    };
 
-    // Calcular si el formulario es válido
-    const isFormValid = 
-        azimut && azimut.trim() !== "" &&
-        distanciaCentro && distanciaCentro.trim() !== "" &&
-        diametro && diametro.trim() !== "" &&
-        distanciaHorizontal && distanciaHorizontal.trim() !== "" &&
-        anguloVistoBajo && anguloVistoBajo.trim() !== "" &&
-        anguloVistoAlto && anguloVistoAlto.trim() !== "" &&
-        penetracion && penetracion.trim() !== "";
+    // Usar el hook de validación
+    const { 
+        values, 
+        errors, 
+        errorMessages, 
+        isValid, 
+        handleChange, 
+        validateForm,
+        setValues 
+    } = useFormArbolValidation(initialValues);
 
     useEffect(() => {
-        // Verificamos si el modal está visible
-        if (!visible) return;
-
         const inicializarDatos = async () => {
-        // Reiniciamos los errores cuando se abre el modal
-        setErrors({
-            azimut: false,
-            distanciaCentro: false,
-            diametro: false,
-            distanciaHorizontal: false,
-            anguloVistoBajo: false,
-            anguloVistoAlto: false,
-            penetracion: false,
+        // Reiniciamos los valores del formulario
+        setValues({
+            ...initialValues,
+            condicion: "MP",
+            tallo: "Único",
+            formaFuste: "CIL",
+            dano: "SD"
         });
         
-        // Ocultamos todos los dropdowns
-        setShowCondicionDropdown(false);
-        setShowTalloDropdown(false);
-        setShowFormaFusteDropdown(false);
-        setShowDanoDropdown(false);
+        // Valores que no son parte del formulario validado
+        setSubparcela(nombreSubparcela);
+        setIdAsignado("A001");
         
-        if (individuoEditado) {
-            console.log("Cargando datos del individuo existente:", individuoEditado);
-            
-            // Si estamos editando, usamos los valores del individuo editado
-            setSubparcela(individuoEditado.subparcela || "SPF5");
-            setIdAsignado(individuoEditado.idAsignado || "A001");
-            setTamanoIndividuo(individuoEditado.tamanoIndividuo || "");
-            setCondicion(individuoEditado.condicion || "MP");
-            setAzimut(individuoEditado.azimut ? String(individuoEditado.azimut) : "");
-            setDistanciaCentro(individuoEditado.distanciaCentro ? String(individuoEditado.distanciaCentro) : "");
-            setTallo(individuoEditado.tallo || "Único");
-            setDiametro(individuoEditado.diametro ? String(individuoEditado.diametro) : "");
-            setDistanciaHorizontal(individuoEditado.distanciaHorizontal ? String(individuoEditado.distanciaHorizontal) : "");
-            setAnguloVistoBajo(individuoEditado.anguloVistoBajo ? String(individuoEditado.anguloVistoBajo) : "");
-            setAnguloVistoAlto(individuoEditado.anguloVistoAlto ? String(individuoEditado.anguloVistoAlto) : "");
-            setAlturaTotal(individuoEditado.alturaTotal ? String(individuoEditado.alturaTotal) : "");
-            setFormaFuste(individuoEditado.formaFuste || "CIL");
-            setDano(individuoEditado.dano || "SD");
-            setPenetracion(individuoEditado.penetracion ? String(individuoEditado.penetracion) : "");
-            setIdIndividuo(individuoEditado.idIndividuo || individuoEditado.id || "");
-        } else {
-            // Si estamos creando uno nuevo, establecemos valores por defecto
-            setSubparcela("SPF5");
-            setIdAsignado("A001");
-            setTamanoIndividuo(""); // Calculado por la aplicación
-            setCondicion("MP");
-            setAzimut("");
-            setDistanciaCentro("");
-            setTallo("Único");
-            setDiametro("");
-            setDistanciaHorizontal("");
-            setAnguloVistoBajo("");
-            setAnguloVistoAlto("");
-            setAlturaTotal(""); // Calculado por la aplicación
-            setFormaFuste("CIL");
-            setDano("SD");
-            setPenetracion("");
-            
-            // Generamos un nuevo ID desde la base de datos
-            try {
+        // Cerramos el modal de dropdown si está abierto
+        setShowDropdownModal(false);
+        
+        // Generamos un nuevo ID desde la base de datos
+        try {
             const nuevoId = await getUltimoIdIndividuoDeBack();
             console.log("Nuevo ID generado desde el backend:", nuevoId);
             
             if (nuevoId) {
-                setIdIndividuo(nuevoId);
+            setIdIndividuo(nuevoId);
             } else {
-                setIdIndividuo("IND001");
-                console.warn("No se pudo obtener un ID de la base de datos, usando ID predeterminado");
+            setIdIndividuo("IND001");
+            console.warn("No se pudo obtener un ID de la base de datos, usando ID predeterminado");
             }
-            } catch (error) {
+        } catch (error) {
             console.error("Error al obtener el siguiente ID:", error);
             setIdIndividuo("IND001"); // ID por defecto en caso de error
-            }
         }
-
-        // Calcular altura total y tamaño del individuo (simulado)
-        calcularCamposAutomaticos();
         };
 
         inicializarDatos();
-    }, [visible, individuoEditado]);
-
-    // Función para calcular automáticamente los campos no editables
-    const calcularCamposAutomaticos = () => {
-        // Estas son simulaciones de cálculos. En una implementación real,
-        // estos valores se calcularían en base a fórmulas específicas
-        
-        // Si tenemos los valores necesarios para calcular la altura total
-        if (distanciaHorizontal && anguloVistoAlto) {
-        const distH = parseFloat(distanciaHorizontal);
-        const angulo = parseFloat(anguloVistoAlto);
-        if (!isNaN(distH) && !isNaN(angulo)) {
-            // Formula simplificada para la simulación: tan(angulo) * distancia
-            const altura = (Math.tan((angulo * Math.PI) / 180) * distH).toFixed(2);
-            setAlturaTotal(altura);
-        }
-        }
-        
-        // Cálculo simulado del tamaño del individuo
-        if (diametro) {
-        const diam = parseFloat(diametro);
-        if (!isNaN(diam)) {
-            // Fórmula simplificada: diámetro * factor_ajuste
-            const tamano = (diam * 0.8).toFixed(2);
-            setTamanoIndividuo(tamano);
-        }
-        }
-    };
-
-    // Para debugging - registrar los cambios en las variables principales
-    useEffect(() => {
-        // Calcular campos automáticos cuando cambien los valores relevantes
-        calcularCamposAutomaticos();
-        
-        console.log("Estado actual:", {
-        subparcela,
-        idAsignado,
-        tamanoIndividuo,
-        condicion,
-        azimut,
-        distanciaCentro,
-        tallo,
-        diametro,
-        distanciaHorizontal,
-        anguloVistoBajo,
-        anguloVistoAlto,
-        alturaTotal,
-        formaFuste,
-        dano,
-        penetracion,
-        idIndividuo,
-        individuoEditadoPresente: !!individuoEditado
-        });
-    }, [
-        distanciaHorizontal, 
-        anguloVistoAlto, 
-        diametro, 
-        azimut, 
-        distanciaCentro, 
-        anguloVistoBajo, 
-        penetracion
-    ]);
-
-    // Validar campos antes de guardar
-    const validateFields = () => {
-        let isValid = true;
-        const newErrors = {
-        azimut: !azimut || azimut.trim() === "",
-        distanciaCentro: !distanciaCentro || distanciaCentro.trim() === "",
-        diametro: !diametro || diametro.trim() === "",
-        distanciaHorizontal: !distanciaHorizontal || distanciaHorizontal.trim() === "",
-        anguloVistoBajo: !anguloVistoBajo || anguloVistoBajo.trim() === "",
-        anguloVistoAlto: !anguloVistoAlto || anguloVistoAlto.trim() === "",
-        penetracion: !penetracion || penetracion.trim() === "",
-        };
-
-        // Comprobar si hay algún error
-        for (const key in newErrors) {
-        if (newErrors[key]) {
-            isValid = false;
-            break;
-        }
-        }
-
-        setErrors(newErrors);
-        return isValid;
-    };
+    }, [nombreSubparcela]);
 
     // Manejar el evento de guardar
     const handleGuardar = () => {
-        if (!validateFields()) {
+        if (!validateForm()) {
         return;
         }
 
@@ -252,434 +118,406 @@
         idIndividuo,
         subparcela,
         idAsignado,
-        tamanoIndividuo,
-        condicion,
-        azimut,
-        distanciaCentro,
-        tallo,
-        diametro,
-        distanciaHorizontal,
-        anguloVistoBajo,
-        anguloVistoAlto,
-        alturaTotal,
-        formaFuste,
-        dano,
-        penetracion,
+        condicion: values.condicion,
+        azimut: values.azimut,
+        distanciaCentro: values.distanciaCentro,
+        tallo: values.tallo,
+        diametro: values.diametro,
+        distanciaHorizontal: values.distanciaHorizontal,
+        anguloVistoBajo: values.anguloVistoBajo,
+        anguloVistoAlto: values.anguloVistoAlto,
+        formaFuste: values.formaFuste,
+        dano: values.dano,
+        penetracion: values.penetracion,
         };
 
-        // Si estamos editando, pasamos el ID del individuo editado
-        const esEdicion = !!individuoEditado;
-
-        console.log("Guardando individuo:", datosIndividuo, "Es edición:", esEdicion);
-        onConfirmar(datosIndividuo, esEdicion);
+        console.log("Guardando individuo:", datosIndividuo);
+        
+        // Aquí iría la lógica para guardar el individuo en la base de datos
+        
+        // Volvemos a la pantalla anterior
+        navigation.goBack();
     };
 
-    // Funciones para manejar la selección en los dropdowns
-    const selectCondicionOption = (option) => {
-        setCondicion(option);
-        setShowCondicionDropdown(false);
+    // Función para abrir el selector como modal
+    const openDropdown = (field) => {
+        let options = [];
+        let currentValue = "";
+        
+        switch (field) {
+        case "condicion":
+            options = condicionOptions;
+            currentValue = values.condicion;
+            break;
+        case "tallo":
+            options = talloOptions;
+            currentValue = values.tallo;
+            break;
+        case "formaFuste":
+            options = formaFusteOptions;
+            currentValue = values.formaFuste;
+            break;
+        case "dano":
+            options = danoOptions;
+            currentValue = values.dano;
+            break;
+        }
+        
+        setActiveDropdown(field);
+        setDropdownOptions(options);
+        setDropdownValue(currentValue);
+        setShowDropdownModal(true);
     };
 
-    const selectTalloOption = (option) => {
-        setTallo(option);
-        setShowTalloDropdown(false);
+    // Función para seleccionar una opción y cerrar el modal
+    const selectOption = (option) => {
+        handleChange(activeDropdown, option);
+        setShowDropdownModal(false);
     };
 
-    const selectFormaFusteOption = (option) => {
-        setFormaFuste(option);
-        setShowFormaFusteDropdown(false);
+    // Función para manejar el cierre del modal
+    const handleClose = () => {
+        navigation.goBack();
     };
 
-    const selectDanoOption = (option) => {
-        setDano(option);
-        setShowDanoDropdown(false);
-    };
-
-    // Función para cerrar todos los dropdowns
-    const closeAllDropdowns = () => {
-        setShowCondicionDropdown(false);
-        setShowTalloDropdown(false);
-        setShowFormaFusteDropdown(false);
-        setShowDanoDropdown(false);
-    };
+    // Renderizar un elemento de la lista de opciones
+    const renderOptionItem = ({ item }) => (
+        <TouchableOpacity
+        style={styles.modalOptionItem}
+        onPress={() => selectOption(item)}
+        >
+        <Text style={[
+            styles.modalOptionText,
+            item === dropdownValue ? styles.selectedOptionText : null
+        ]}>
+            {item}
+        </Text>
+        </TouchableOpacity>
+    );
 
     return (
-        <Modal 
-        animationType="fade" 
-        transparent={true} 
-        visible={visible} 
-        onRequestClose={onClose}
-        >
+        <SafeAreaView style={styles.safeArea}>
+        <StatusBar backgroundColor="#1E5A26" barStyle="light-content" />
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.centeredView}
+            style={styles.fullScreen}
         >
-            <TouchableOpacity 
-            style={styles.modalOverlay} 
-            activeOpacity={1} 
-            onPress={closeAllDropdowns}
-            >
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                <View style={styles.modalView}>
+            <View style={styles.modalView}>
                 <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Registro del Individuo</Text>
-                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                    <Text style={styles.closeButtonText}>✕</Text>
-                    </TouchableOpacity>
+                <Text style={styles.modalTitle}>Registro del Individuo</Text>
                 </View>
                 
                 <View style={styles.topInfoContainer}>
-                    <View style={styles.infoItem}>
+                <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Subparcela:</Text>
                     <Text style={styles.infoValue}>{subparcela}</Text>
-                    </View>
-                    <View style={styles.infoItem}>
+                </View>
+                <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Id asignado:</Text>
                     <Text style={styles.infoValue}>{idAsignado}</Text>
-                    </View>
+                </View>
                 </View>
 
                 <View style={styles.formContainer}>
-                    {/* Fila 1 */}
-                    <View style={styles.formRow}>
+                {/* Fila 1: Tamaño del Individuo y Condición */}
+                <View style={styles.formRow}>
                     <View style={styles.formColumn}>
-                        <Text style={styles.label}>*Tamaño del Individuo</Text>
+                    <Text style={styles.label}>* Tamaño del Individuo</Text>
+                    <View style={styles.inputContainer}>
                         <TextInput
-                        style={[styles.input, styles.disabledInput]}
-                        value={tamanoIndividuo}
-                        editable={false}
-                        placeholder="Calculado automáticamente"
+                        style={styles.standardInput}
+                        placeholder="Tamaño"
+                        keyboardType="numeric"
                         />
                     </View>
+                    </View>
                     <View style={styles.formColumn}>
-                        <Text style={styles.label}>*Condición</Text>
+                    <Text style={styles.label}>* Condición</Text>
+                    <View style={styles.inputContainer}>
                         <TouchableOpacity
-                        style={styles.customSelect}
-                        onPress={() => {
-                            closeAllDropdowns();
-                            setShowCondicionDropdown(!showCondicionDropdown);
-                        }}
+                        style={styles.standardSelect}
+                        onPress={() => openDropdown("condicion")}
                         >
-                        <Text>{condicion}</Text>
+                        <Text>{values.condicion}</Text>
                         <Text style={styles.dropdownArrow}>▼</Text>
                         </TouchableOpacity>
-                        {showCondicionDropdown && (
-                        <View style={styles.dropdownMenu}>
-                            {condicionOptions.map((option) => (
-                            <TouchableOpacity
-                                key={option}
-                                style={styles.dropdownItem}
-                                onPress={() => selectCondicionOption(option)}
-                            >
-                                <Text
-                                style={[
-                                    styles.dropdownItemText,
-                                    condicion === option && styles.selectedOption,
-                                ]}
-                                >
-                                {option}
-                                </Text>
-                            </TouchableOpacity>
-                            ))}
-                        </View>
+                    </View>
+                    </View>
+                </View>
+
+                {/* Fila 2: Azimut y Distancia del centro */}
+                <View style={styles.formRow}>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>* Azimut (°)</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                        style={[styles.standardInput, errors.azimut && styles.inputError]}
+                        value={values.azimut}
+                        onChangeText={(text) => handleChange('azimut', text)}
+                        placeholder="0.0"
+                        keyboardType="numeric"
+                        />
+                        {errors.azimut && (
+                        <Text style={styles.errorText}>{errorMessages.azimut}</Text>
                         )}
                     </View>
                     </View>
-
-                    {/* Fila 2 */}
-                    <View style={styles.formRow}>
                     <View style={styles.formColumn}>
-                        <Text style={styles.label}>*Azimut (°)</Text>
+                    <Text style={styles.label}>* Distancia del centro (m)</Text>
+                    <View style={styles.inputContainer}>
                         <TextInput
-                        style={[styles.input, errors.azimut && styles.inputError]}
-                        value={azimut}
-                        onChangeText={(text) => {
-                            setAzimut(text);
-                            if (text && text.trim()) {
-                            setErrors(prev => ({...prev, azimut: false}));
-                            }
-                        }}
+                        style={[styles.standardInput, errors.distanciaCentro && styles.inputError]}
+                        value={values.distanciaCentro}
+                        onChangeText={(text) => handleChange('distanciaCentro', text)}
                         placeholder="0.0"
                         keyboardType="numeric"
                         />
-                    </View>
-                    <View style={styles.formColumn}>
-                        <Text style={styles.label}>*Distancia del centro (m)</Text>
-                        <TextInput
-                        style={[styles.input, errors.distanciaCentro && styles.inputError]}
-                        value={distanciaCentro}
-                        onChangeText={(text) => {
-                            setDistanciaCentro(text);
-                            if (text && text.trim()) {
-                            setErrors(prev => ({...prev, distanciaCentro: false}));
-                            }
-                        }}
-                        placeholder="0.0"
-                        keyboardType="numeric"
-                        />
-                    </View>
-                    </View>
-
-                    {/* Fila 3 */}
-                    <View style={styles.formRow}>
-                    <View style={styles.formColumn}>
-                        <Text style={styles.label}>*Tallo</Text>
-                        <TouchableOpacity
-                        style={styles.customSelect}
-                        onPress={() => {
-                            closeAllDropdowns();
-                            setShowTalloDropdown(!showTalloDropdown);
-                        }}
-                        >
-                        <Text>{tallo}</Text>
-                        <Text style={styles.dropdownArrow}>▼</Text>
-                        </TouchableOpacity>
-                        {showTalloDropdown && (
-                        <View style={styles.dropdownMenu}>
-                            {talloOptions.map((option) => (
-                            <TouchableOpacity
-                                key={option}
-                                style={styles.dropdownItem}
-                                onPress={() => selectTalloOption(option)}
-                            >
-                                <Text
-                                style={[
-                                    styles.dropdownItemText,
-                                    tallo === option && styles.selectedOption,
-                                ]}
-                                >
-                                {option}
-                                </Text>
-                            </TouchableOpacity>
-                            ))}
-                        </View>
-                        )}
-                    </View>
-                    <View style={styles.formColumn}>
-                        <Text style={styles.label}>*Diámetro</Text>
-                        <TextInput
-                        style={[styles.input, errors.diametro && styles.inputError]}
-                        value={diametro}
-                        onChangeText={(text) => {
-                            setDiametro(text);
-                            if (text && text.trim()) {
-                            setErrors(prev => ({...prev, diametro: false}));
-                            }
-                        }}
-                        placeholder="0.0"
-                        keyboardType="numeric"
-                        />
-                    </View>
-                    </View>
-
-                    {/* Fila 4 */}
-                    <View style={styles.formRow}>
-                    <View style={styles.formColumn}>
-                        <Text style={styles.label}>*Distancia Horizontal</Text>
-                        <TextInput
-                        style={[styles.input, errors.distanciaHorizontal && styles.inputError]}
-                        value={distanciaHorizontal}
-                        onChangeText={(text) => {
-                            setDistanciaHorizontal(text);
-                            if (text && text.trim()) {
-                            setErrors(prev => ({...prev, distanciaHorizontal: false}));
-                            }
-                        }}
-                        placeholder="0.0"
-                        keyboardType="numeric"
-                        />
-                    </View>
-                    <View style={styles.formColumn}>
-                        <Text style={styles.label}>* Ángulo visto hacia abajo</Text>
-                        <TextInput
-                        style={[styles.input, errors.anguloVistoBajo && styles.inputError]}
-                        value={anguloVistoBajo}
-                        onChangeText={(text) => {
-                            setAnguloVistoBajo(text);
-                            if (text && text.trim()) {
-                            setErrors(prev => ({...prev, anguloVistoBajo: false}));
-                            }
-                        }}
-                        placeholder="0.0"
-                        keyboardType="numeric"
-                        />
-                    </View>
-                    </View>
-
-                    {/* Fila 5 */}
-                    <View style={styles.formRow}>
-                    <View style={styles.formColumn}>
-                        <Text style={styles.label}>* Ángulo visto hacia arriba</Text>
-                        <TextInput
-                        style={[styles.input, errors.anguloVistoAlto && styles.inputError]}
-                        value={anguloVistoAlto}
-                        onChangeText={(text) => {
-                            setAnguloVistoAlto(text);
-                            if (text && text.trim()) {
-                            setErrors(prev => ({...prev, anguloVistoAlto: false}));
-                            }
-                        }}
-                        placeholder="0.0"
-                        keyboardType="numeric"
-                        />
-                    </View>
-                    <View style={styles.formColumn}>
-                        <Text style={styles.label}>* Altura total</Text>
-                        <TextInput
-                        style={[styles.input, styles.disabledInput]}
-                        value={alturaTotal}
-                        editable={false}
-                        placeholder="Calculado automáticamente"
-                        />
-                    </View>
-                    </View>
-
-                    {/* Fila 6 */}
-                    <View style={styles.formRow}>
-                    <View style={styles.formColumn}>
-                        <Text style={styles.label}>* Forma del fuste</Text>
-                        <TouchableOpacity
-                        style={styles.customSelect}
-                        onPress={() => {
-                            closeAllDropdowns();
-                            setShowFormaFusteDropdown(!showFormaFusteDropdown);
-                        }}
-                        >
-                        <Text>{formaFuste}</Text>
-                        <Text style={styles.dropdownArrow}>▼</Text>
-                        </TouchableOpacity>
-                        {showFormaFusteDropdown && (
-                        <View style={styles.dropdownMenu}>
-                            {formaFusteOptions.map((option) => (
-                            <TouchableOpacity
-                                key={option}
-                                style={styles.dropdownItem}
-                                onPress={() => selectFormaFusteOption(option)}
-                            >
-                                <Text
-                                style={[
-                                    styles.dropdownItemText,
-                                    formaFuste === option && styles.selectedOption,
-                                ]}
-                                >
-                                {option}
-                                </Text>
-                            </TouchableOpacity>
-                            ))}
-                        </View>
-                        )}
-                    </View>
-                    <View style={styles.formColumn}>
-                        <Text style={styles.label}>* Daño</Text>
-                        <TouchableOpacity
-                        style={styles.customSelect}
-                        onPress={() => {
-                            closeAllDropdowns();
-                            setShowDanoDropdown(!showDanoDropdown);
-                        }}
-                        >
-                        <Text>{dano}</Text>
-                        <Text style={styles.dropdownArrow}>▼</Text>
-                        </TouchableOpacity>
-                        {showDanoDropdown && (
-                        <View style={styles.dropdownMenu}>
-                            {danoOptions.map((option) => (
-                            <TouchableOpacity
-                                key={option}
-                                style={styles.dropdownItem}
-                                onPress={() => selectDanoOption(option)}
-                            >
-                                <Text
-                                style={[
-                                    styles.dropdownItemText,
-                                    dano === option && styles.selectedOption,
-                                ]}
-                                >
-                                {option}
-                                </Text>
-                            </TouchableOpacity>
-                            ))}
-                        </View>
+                        {errors.distanciaCentro && (
+                        <Text style={styles.errorText}>{errorMessages.distanciaCentro}</Text>
                         )}
                     </View>
                     </View>
+                </View>
 
-                    {/* Fila 7 - Solo un campo */}
-                    <View style={styles.formRowFull}>
-                    <Text style={styles.label}>Penetración (cm)</Text>
-                    <TextInput
-                        style={[styles.input, errors.penetracion && styles.inputError]}
-                        value={penetracion}
-                        onChangeText={(text) => {
-                        setPenetracion(text);
-                        if (text && text.trim()) {
-                            setErrors(prev => ({...prev, penetracion: false}));
-                        }
-                        }}
+                {/* Fila 3: Tallo y Diámetro */}
+                <View style={styles.formRow}>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>* Tallo</Text>
+                    <View style={styles.inputContainer}>
+                        <TouchableOpacity
+                        style={styles.standardSelect}
+                        onPress={() => openDropdown("tallo")}
+                        >
+                        <Text>{values.tallo}</Text>
+                        <Text style={styles.dropdownArrow}>▼</Text>
+                        </TouchableOpacity>
+                    </View>
+                    </View>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>* Diámetro</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                        style={[styles.standardInput, errors.diametro && styles.inputError]}
+                        value={values.diametro}
+                        onChangeText={(text) => handleChange('diametro', text)}
                         placeholder="0.0"
                         keyboardType="numeric"
-                    />
+                        />
+                        {errors.diametro && (
+                        <Text style={styles.errorText}>{errorMessages.diametro}</Text>
+                        )}
                     </View>
+                    </View>
+                </View>
 
-                    <View style={styles.buttonContainer}>
-                    <TouchableOpacity 
+                {/* Fila 4: Distancia Horizontal y Ángulo visto hacia abajo */}
+                <View style={styles.formRow}>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>* Distancia Horizontal</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                        style={[styles.standardInput, errors.distanciaHorizontal && styles.inputError]}
+                        value={values.distanciaHorizontal}
+                        onChangeText={(text) => handleChange('distanciaHorizontal', text)}
+                        placeholder="0.0"
+                        keyboardType="numeric"
+                        />
+                        {errors.distanciaHorizontal && (
+                        <Text style={styles.errorText}>{errorMessages.distanciaHorizontal}</Text>
+                        )}
+                    </View>
+                    </View>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>* Ángulo visto hacia abajo</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                        style={[styles.standardInput, errors.anguloVistoBajo && styles.inputError]}
+                        value={values.anguloVistoBajo}
+                        onChangeText={(text) => handleChange('anguloVistoBajo', text)}
+                        placeholder="0.0"
+                        keyboardType="numeric"
+                        />
+                        {errors.anguloVistoBajo && (
+                        <Text style={styles.errorText}>{errorMessages.anguloVistoBajo}</Text>
+                        )}
+                    </View>
+                    </View>
+                </View>
+
+                {/* Fila 5: Ángulo visto hacia arriba y Altura total */}
+                <View style={styles.formRow}>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>* Ángulo visto hacia arriba</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                        style={[styles.standardInput, errors.anguloVistoAlto && styles.inputError]}
+                        value={values.anguloVistoAlto}
+                        onChangeText={(text) => handleChange('anguloVistoAlto', text)}
+                        placeholder="0.0"
+                        keyboardType="numeric"
+                        />
+                        {errors.anguloVistoAlto && (
+                        <Text style={styles.errorText}>{errorMessages.anguloVistoAlto}</Text>
+                        )}
+                    </View>
+                    </View>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>* Altura total</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                        style={styles.standardInput}
+                        placeholder="0.0"
+                        keyboardType="numeric"
+                        />
+                    </View>
+                    </View>
+                </View>
+
+                {/* Fila 6: Forma del fuste y Daño */}
+                <View style={styles.formRow}>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>* Forma del fuste</Text>
+                    <View style={styles.inputContainer}>
+                        <TouchableOpacity
+                        style={styles.standardSelect}
+                        onPress={() => openDropdown("formaFuste")}
+                        >
+                        <Text>{values.formaFuste}</Text>
+                        <Text style={styles.dropdownArrow}>▼</Text>
+                        </TouchableOpacity>
+                    </View>
+                    </View>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>* Daño</Text>
+                    <View style={styles.inputContainer}>
+                        <TouchableOpacity
+                        style={styles.standardSelect}
+                        onPress={() => openDropdown("dano")}
+                        >
+                        <Text>{values.dano}</Text>
+                        <Text style={styles.dropdownArrow}>▼</Text>
+                        </TouchableOpacity>
+                    </View>
+                    </View>
+                </View>
+
+                {/* Fila 7: Penetración y botón de Hecho */}
+                <View style={styles.formRow}>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>
+                        {(values.condicion === 'MP' || values.condicion === 'TM') && '* '}
+                        Penetración (cm)
+                    </Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
                         style={[
-                        styles.hechoButton, 
-                        !isFormValid && styles.hechoButtonDisabled
+                            styles.standardInput, 
+                            errors.penetracion && styles.inputError,
+                            !(values.condicion === 'MP' || values.condicion === 'TM') && styles.disabledInput
+                        ]}
+                        value={values.penetracion}
+                        onChangeText={(text) => handleChange('penetracion', text)}
+                        placeholder="0.0"
+                        keyboardType="numeric"
+                        editable={values.condicion === 'MP' || values.condicion === 'TM'}
+                        />
+                        {errors.penetracion && (values.condicion === 'MP' || values.condicion === 'TM') && (
+                        <Text style={styles.errorText}>{errorMessages.penetracion}</Text>
+                        )}
+                    </View>
+                    </View>
+                    <View style={styles.formColumn}>
+                    <Text style={styles.label}>&nbsp;</Text>
+                    <View style={styles.inputContainer}>
+                        <TouchableOpacity 
+                        style={[
+                            styles.standardButton, 
+                            !isValid && styles.buttonDisabled
                         ]}
                         onPress={handleGuardar}
-                        disabled={!isFormValid}
-                    >
-                        <Text 
-                        style={[
-                            styles.hechoButtonText,
-                            !isFormValid && styles.hechoButtonTextDisabled
-                        ]}
+                        disabled={!isValid}
                         >
-                        Hecho
+                        <Text 
+                            style={[
+                            styles.buttonText,
+                            !isValid && styles.buttonTextDisabled
+                            ]}
+                        >
+                            Hecho
                         </Text>
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                    </View>
                     </View>
                 </View>
                 </View>
+            </View>
             </ScrollView>
-            </TouchableOpacity>
         </KeyboardAvoidingView>
+
+        {/* Modal para los dropdowns */}
+        <Modal
+            visible={showDropdownModal}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowDropdownModal(false)}
+        >
+            <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowDropdownModal(false)}
+            >
+            <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                    {activeDropdown === "condicion" ? "Seleccionar Condición" :
+                    activeDropdown === "tallo" ? "Seleccionar Tallo" :
+                    activeDropdown === "formaFuste" ? "Seleccionar Forma de Fuste" :
+                    "Seleccionar Daño"}
+                </Text>
+                
+                <FlatList
+                    data={dropdownOptions}
+                    renderItem={renderOptionItem}
+                    keyExtractor={(item) => item}
+                    style={styles.optionsList}
+                />
+                
+                <TouchableOpacity
+                    style={styles.modalCloseButton}
+                    onPress={() => setShowDropdownModal(false)}
+                >
+                    <Text style={styles.modalCloseButtonText}>Cerrar</Text>
+                </TouchableOpacity>
+                </View>
+            </View>
+            </TouchableOpacity>
         </Modal>
+        </SafeAreaView>
     );
     }
 
     const styles = StyleSheet.create({
-    centeredView: {
+    safeArea: {
         flex: 1,
-        justifyContent: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        backgroundColor: "#fff",
     },
-    modalOverlay: {
+    fullScreen: {
         flex: 1,
-        justifyContent: "center",
     },
     scrollViewContent: {
         flexGrow: 1,
-        justifyContent: "center",
         padding: 20,
     },
     modalView: {
+        flex: 1,
         backgroundColor: "white",
         borderRadius: 10,
         padding: 20,
-        shadowColor: "#000",
-        shadowOffset: {
-        width: 0,
-        height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
     },
     modalHeader: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
         marginBottom: 20,
         borderBottomWidth: 1,
@@ -689,20 +527,14 @@
     modalTitle: {
         fontSize: 22,
         fontWeight: "bold",
+        marginBottom: 10,
         color: "#333",
-    },
-    closeButton: {
-        padding: 5,
-    },
-    closeButtonText: {
-        fontSize: 20,
-        fontWeight: "bold",
-        color: "#666",
+        textAlign: "center",
     },
     topInfoContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 20,
+        marginBottom: 25,
     },
     infoItem: {
         flexDirection: "row",
@@ -711,35 +543,65 @@
     infoLabel: {
         fontWeight: "bold",
         marginRight: 5,
+        fontSize: 16,
     },
     infoValue: {
         fontSize: 16,
     },
     formContainer: {
         width: "100%",
+        paddingVertical: 10,
     },
     formRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         marginBottom: 15,
-    },
-    formRowFull: {
-        marginBottom: 15,
+        width: "100%",
     },
     formColumn: {
         width: "48%",
     },
     label: {
-        fontSize: 14,
+        fontSize: 12,
         marginBottom: 5,
         color: "#333",
+        height: 20,
     },
-    input: {
+    inputContainer: {
+        marginBottom: 5,
+    },
+    errorText: {
+        color: "red",
+        fontSize: 10,
+        marginTop: 2,
+    },
+    standardInput: {
         borderWidth: 1,
         borderColor: "#ccc",
         borderRadius: 5,
         padding: 10,
-        fontSize: 16,
+        fontSize: 12,
+        height: 45,
+        marginBottom: 2 
+    },
+    standardSelect: {
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 5,
+        padding: 10,
+        fontSize: 14,
+        height: 45,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    standardButton: {
+        backgroundColor: "#4285F4",
+        borderRadius: 5,
+        padding: 10,
+        alignItems: "center",
+        justifyContent: "center",
+        height: 45,
     },
     inputError: {
         borderColor: "red",
@@ -748,70 +610,67 @@
         backgroundColor: "#f0f0f0",
         color: "#666",
     },
-    customSelect: {
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 5,
-        padding: 10,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
     dropdownArrow: {
         fontSize: 12,
         color: "#666",
     },
-    dropdownMenu: {
-        position: "absolute",
-        top: 65,
-        left: 0,
-        right: 0,
-        backgroundColor: "white",
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 5,
-        zIndex: 1000,
-        elevation: 5,
-        maxHeight: 150,
-    },
-    dropdownItem: {
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: "#f0f0f0",
-    },
-    dropdownItemText: {
-        fontSize: 14,
-    },
-    selectedOption: {
-        fontWeight: "bold",
-        color: "#2196F3",
-    },
-    buttonContainer: {
-        marginTop: 20,
-        alignItems: "center",
-    },
-    hechoButton: {
-        backgroundColor: "#4285F4",
-        paddingVertical: 10,
-        paddingHorizontal: 40,
-        borderRadius: 5,
-        alignItems: "center",
-        width: "50%",
-    },
-    hechoButtonText: {
+    buttonText: {
         color: "white",
         fontSize: 16,
         fontWeight: "bold",
     },
-    hechoButtonDisabled: {
+    buttonDisabled: {
         backgroundColor: "#cccccc",
     },
-    hechoButtonTextDisabled: {
+    buttonTextDisabled: {
         color: "#888888",
     },
-    errorText: {
-        color: "red",
-        fontSize: 12,
-        marginTop: 2,
+    
+    // Estilos para el modal de dropdown
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContainer: {
+        width: "80%",
+        backgroundColor: "white",
+        borderRadius: 10,
+        padding: 0,
+        elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    modalContent: {
+        padding: 20,
+    },
+    optionsList: {
+        maxHeight: 250,
+    },
+    modalOptionItem: {
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#f0f0f0",
+    },
+    modalOptionText: {
+        fontSize: 16,
+    },
+    selectedOptionText: {
+        fontWeight: "bold",
+        color: "#4285F4",
+    },
+    modalCloseButton: {
+        marginTop: 15,
+        padding: 10,
+        backgroundColor: "#f0f0f0",
+        borderRadius: 5,
+        alignItems: "center",
+    },
+    modalCloseButtonText: {
+        fontSize: 16,
+        color: "#333",
     },
     });

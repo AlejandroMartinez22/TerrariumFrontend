@@ -164,7 +164,7 @@ export default function AppNavigator() {
           ),
         })}
       />
-      
+
       <Stack.Screen
         name="registrarMuestra"
         component={MuestraModal}
