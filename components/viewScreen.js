@@ -1,30 +1,211 @@
-// react para la interfaz de usuario
-import React from "react";
-// importar el componente View y Text de react-native
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Checkbox } from 'react-native-paper';
 
-// metodo para crear la pantalla de vista
-const ViewScreen = () => {
+const VisualizarTab = ({ onConfirm }) => {
+  // Estado para los checkboxes - ninguno seleccionado por defecto
+  const [checkedItems, setCheckedItems] = useState({
+    latizales: false,
+    brinzales: false,
+    fustales: false,
+    fustalesGrandes: false,
+  });
 
+  // Estado para la subparcela seleccionada - ninguna seleccionada por defecto
+  const [selectedSubparcela, setSelectedSubparcela] = useState(null);
+
+  // Función para manejar cambios en los checkboxes
+  const handleCheckboxChange = (key) => {
+    setCheckedItems({
+      ...checkedItems,
+      [key]: !checkedItems[key],
+    });
+  };
+
+  // Función para manejar el botón de confirmar
+  const confirmar = () => {
+    if (onConfirm) {
+      onConfirm({
+        checkedItems,
+        selectedSubparcela
+      });
+    }
+  };
+
+  // Renderiza un checkbox con su etiqueta
+  const renderCheckbox = (key, label) => (
+    <View style={styles.checkboxContainer}>
+      <Checkbox
+        status={checkedItems[key] ? 'checked' : 'unchecked'}
+        onPress={() => handleCheckboxChange(key)}
+        color="#4285F4"
+      />
+      <Text style={styles.checkboxLabel}>{label}</Text>
+    </View>
+  );
+
+  // Renderiza un botón de subparcela
+  const renderSubparcelaButton = (id) => {
+    const isSelected = selectedSubparcela === id;
     return (
-        <View style={styles.container}>
-        <Text style={styles.titulo}>En construcción</Text>
-        </View>
+      <TouchableOpacity
+        style={[
+          styles.subparcelaButton,
+          isSelected && styles.selectedSubparcelaButton,
+        ]}
+        onPress={() => setSelectedSubparcela(id)}
+      >
+        <Text
+          style={[
+            styles.subparcelaButtonText,
+            isSelected && styles.selectedSubparcelaButtonText,
+          ]}
+        >
+          {id}
+        </Text>
+      </TouchableOpacity>
     );
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Título principal */}
+      <Text style={styles.title}>Visualizar</Text>
+
+      {/* Sección de árboles en el mapa */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Árboles en el mapa</Text>
+        <View style={styles.checkboxGrid}>
+          <View style={styles.checkboxRow}>
+            {renderCheckbox('latizales', 'Latizales')}
+            {renderCheckbox('brinzales', 'Brinzales')}
+          </View>
+          <View style={styles.checkboxRow}>
+            {renderCheckbox('fustales', 'Fustales')}
+            <View style={styles.checkboxContainer}>
+              <Checkbox
+                status={checkedItems.fustalesGrandes ? 'checked' : 'unchecked'}
+                onPress={() => handleCheckboxChange('fustalesGrandes')}
+                color="#4285F4"
+              />
+              <View>
+                <Text style={styles.checkboxLabel}>Fustales</Text>
+                <Text style={styles.checkboxLabel}>Grandes</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Sección de información de subparcelas */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Información de las subparcelas</Text>
+        <View style={styles.subparcelaRows}>
+          <View style={styles.subparcelaRow}>
+            {renderSubparcelaButton('SPF-1')}
+            {renderSubparcelaButton('SPF-2')}
+            {renderSubparcelaButton('SPF-3')}
+          </View>
+          <View style={styles.subparcelaRow}>
+            {renderSubparcelaButton('SPF-4')}
+            {renderSubparcelaButton('SPF-5')}
+          </View>
+        </View>
+      </View>
+      
+      {/* Botón Aplicar */}
+      <TouchableOpacity 
+        style={styles.aplicarButton}
+        onPress={confirmar}
+      >
+        <Text style={styles.aplicarButtonText}>Aplicar</Text>
+      </TouchableOpacity>
+    </View>
+  );
 };
 
-// estilos para la pantalla de vista
 const styles = StyleSheet.create({
-container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-},
-titulo: {
+  container: {
+    padding: 16,
+    backgroundColor: 'white',
+    borderRadius: 8,
+  },
+  title: {
     fontSize: 30,
-    color: "#333",
-},
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 30,
+    marginTop: 20,
+  },
+  section: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 60,
+  },
+  sectionTitle: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  checkboxGrid: {
+    flexDirection: 'column',
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  checkboxLabel: {
+    marginLeft: 8,
+  },
+  subparcelaRows: {
+    flexDirection: 'column',
+    gap: 12,
+  },
+  subparcelaRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  subparcelaButton: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    padding: 12,
+    minWidth: 80,
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  selectedSubparcelaButton: {
+    backgroundColor: '#4285F4',
+    borderColor: '#4285F4',
+  },
+  subparcelaButtonText: {
+    fontWeight: '500',
+  },
+  selectedSubparcelaButtonText: {
+    color: 'white',
+  },
+  aplicarButton: {
+    backgroundColor: '#4285F4',
+    borderRadius: 8,
+    padding: 14,
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 5,
+  },
+  aplicarButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
 
-export default ViewScreen;
+export default VisualizarTab;
