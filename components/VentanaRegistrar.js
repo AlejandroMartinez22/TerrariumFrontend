@@ -23,7 +23,7 @@ const VentanaRegistrar = ({ navigation }) => {
       source={require("../assets/FondoProfile.png")}
       style={styles.background}
       resizeMode="cover"
-      imageStyle={{ opacity: 0.6 }} // Adjust the opacity of the background image
+      imageStyle={{ opacity: 0.3 }} // Adjust the opacity of the background image
     >
       <SafeAreaView style={styles.container}>
         <Text style={styles.titulo}>Registrar</Text>
@@ -35,7 +35,7 @@ const VentanaRegistrar = ({ navigation }) => {
           >
             <Image
               source={require("../assets/IconoArbol.png")}
-              style={{ width: 150, height: 150, marginBottom: 20 }}
+              style={{ width: 145, height: 145, marginBottom: 20 }}
             />
             <Text style={styles.buttonText}>Nuevo árbol</Text>
           </TouchableOpacity>
@@ -46,7 +46,7 @@ const VentanaRegistrar = ({ navigation }) => {
           >
             <Image
               source={require("../assets/IconoMuestra.png")}
-              style={{ width: 150, height: 150, marginBottom: 20 }}
+              style={{ width: 145, height: 145, marginBottom: 20 }}
             />
             <Text style={styles.buttonText}>Nueva muestra</Text>
           </TouchableOpacity>
@@ -72,9 +72,9 @@ const styles = StyleSheet.create({
   },
   titulo: {
     fontSize: 36,
-    marginTop: 30,
-    marginBottom: 40,
-    color: "#000",
+    marginTop: 20,
+    marginBottom: 23,
+    color: "#194D20",
     textAlign: "center",
   },
   buttonsContainer: {
@@ -83,9 +83,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   button: {
-    width: "70%",
+    width: "75%",
     padding: 15,
-    marginVertical: 10,
+    marginVertical: 14,
     borderRadius: 20,
     borderWidth: 1,
     alignItems: "center",
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "500",
     color: "black",
   },
