@@ -12,14 +12,14 @@ import {
 
 // Componente que representa la pantalla de registro de árboles
 const SeleccionarSubparcelaArbol = ({ navigation }) => {
-  // Función para navegar a SelectArbolMuestra con el tipo de subparcela seleccionado
+  
   const handleOptionSelect = (option) => {
     // CORRECCIÓN: Cambiamos 'subparcelaType' por 'nombreSubparcela' para que coincida
     // con lo que espera el componente SelectArbolMuestra
     navigation.navigate("registrarIndividuoBotanico", { nombreSubparcela: option });
     
     // Para depuración: mostramos en consola los datos que estamos pasando
-    console.log("Navegando a viewScreen con nombreSubparcela:", option);
+    console.log("Navegando a la ventana de registro del individuo:", option);
   };
   
   // Renderizado de los botones de opciones
