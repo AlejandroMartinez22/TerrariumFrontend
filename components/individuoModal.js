@@ -212,7 +212,7 @@ import {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.fullScreen}
         >
-            <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <ScrollView contentContainerStyle={[styles.scrollViewContent, { paddingBottom: 60 }]} keyboardShouldPersistTaps="handled">
             <View style={styles.modalView}>
                 <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Registro del Individuo</Text>
@@ -560,7 +560,7 @@ import {
         flex: 1,
         backgroundColor: "white",
         borderRadius: 10,
-        padding: 20,
+        padding: 17,
     },
     modalHeader: {
         flexDirection: "row",
@@ -572,7 +572,7 @@ import {
         paddingBottom: 10,
     },
     modalTitle: {
-        fontSize: 23,
+        fontSize: 24,
         fontWeight: "bold",
         marginBottom: 10,
         color: "#333",
@@ -590,14 +590,14 @@ import {
     infoLabel: {
         fontWeight: "bold",
         marginRight: 5,
-        fontSize: 16,
+        fontSize: 17,
     },
     infoValue: {
-        fontSize: 16,
+        fontSize: 17,
     },
     formContainer: {
         width: "100%",
-        paddingVertical: 10,
+        paddingVertical: 20,
     },
     formRow: {
         flexDirection: "row",
@@ -609,7 +609,7 @@ import {
         width: "48%",
     },
     label: {
-        fontSize: 12,
+        fontSize: 12.3,
         marginBottom: 10,
         color: "#333",
     },
