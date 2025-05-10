@@ -7,8 +7,8 @@ import { getAuth } from "firebase/auth"; // Importamos la función getAuth de Fi
 
 // Configuramos la URL base del backend
 const API_URL =
-  "http://192.168.1.9:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
-
+  "http://192.168.1.36:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+  
 // Creamos una instancia de Axios preconfigurada con la URL base del backend
 const api = axios.create({
   baseURL: API_URL,

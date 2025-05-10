@@ -36,18 +36,24 @@ export default function MuestraModal({ route, navigation }) {
   // Estado para manejar errores de validación
   const [errors, setErrors] = useState({
     nombreComun: false,
-    determinacionCampo: false,
     numeroColeccion: false,
+    observaciones: false,
   });
 
-  // Calcular si el formulario es válido
+  // Función para validar que las observaciones tengan al menos 4 palabras
+  const validarObservaciones = (texto) => {
+    if (!texto || texto.trim() === "") return false; // Si está vacío, no es válido (ahora es obligatorio)
+    const palabras = texto.trim().split(/\s+/);
+    return palabras.length >= 4;
+  };
+
+  // Calcular si el formulario es válido (determinacionCampo es ahora opcional)
   const isFormValid =
     nombreComun &&
     nombreComun.trim() !== "" &&
-    determinacionCampo &&
-    determinacionCampo.trim() !== "" &&
     numeroColeccion &&
-    numeroColeccion.trim() !== "";
+    numeroColeccion.trim() !== "" &&
+    validarObservaciones(observaciones);
 
   useEffect(() => {
     console.log("Parámetros recibidos en MuestraModal:", {
@@ -60,8 +66,8 @@ export default function MuestraModal({ route, navigation }) {
       // Reiniciamos los errores cuando se abre el componente
       setErrors({
         nombreComun: false,
-        determinacionCampo: false,
         numeroColeccion: false,
+        observaciones: false,
       });
 
       setNombreComun("");
@@ -120,9 +126,8 @@ export default function MuestraModal({ route, navigation }) {
     let isValid = true;
     const newErrors = {
       nombreComun: !nombreComun || nombreComun.trim() === "",
-      determinacionCampo:
-        !determinacionCampo || determinacionCampo.trim() === "",
       numeroColeccion: !numeroColeccion || numeroColeccion.trim() === "",
+      observaciones: !validarObservaciones(observaciones),
     };
 
     // Comprobar si hay algún error
@@ -242,27 +247,19 @@ export default function MuestraModal({ route, navigation }) {
                     }}
                     placeholder="Ingrese el nombre común"
                   />
+                  {errors.nombreComun && (
+                    <Text style={styles.errorText}>Este campo es obligatorio</Text>
+                  )}
                 </View>
 
-                {/* Determinación en campo */}
+                {/* Determinación en campo (ahora opcional) */}
                 <View style={styles.formRowFull}>
-                  <Text style={styles.label}>Determinación en campo</Text>
+                  <Text style={styles.label}>Determinación en campo (opcional)</Text>
                   <TextInput
-                    style={[
-                      styles.input,
-                      errors.determinacionCampo && styles.inputError,
-                    ]}
+                    style={styles.input}
                     value={determinacionCampo}
-                    onChangeText={(text) => {
-                      setDeterminacionCampo(text);
-                      if (text && text.trim()) {
-                        setErrors((prev) => ({
-                          ...prev,
-                          determinacionCampo: false,
-                        }));
-                      }
-                    }}
-                    placeholder="Ingrese la determinación en campo"
+                    onChangeText={setDeterminacionCampo}
+                    placeholder="Ingrese la determinación en campo (opcional)"
                   />
                 </View>
 
@@ -287,20 +284,34 @@ export default function MuestraModal({ route, navigation }) {
                     placeholder="Ingrese el número de colección"
                     keyboardType="numeric"
                   />
+                  {errors.numeroColeccion && (
+                    <Text style={styles.errorText}>Este campo es obligatorio</Text>
+                  )}
                 </View>
 
-                {/* Observaciones */}
+                {/* Observaciones (obligatorio con mínimo 4 palabras) */}
                 <View style={styles.formRowFull}>
-                  <Text style={styles.label}>Observaciones</Text>
+                  <Text style={styles.label}>Observaciones (Mínimo 4 palabras)</Text>
                   <TextInput
-                    style={[styles.textArea]}
+                    style={[
+                      styles.textArea,
+                      errors.observaciones && styles.inputError,
+                    ]}
                     value={observaciones}
-                    onChangeText={setObservaciones}
-                    placeholder="Ingrese las observaciones"
+                    onChangeText={(text) => {
+                      setObservaciones(text);
+                      if (validarObservaciones(text)) {
+                        setErrors((prev) => ({ ...prev, observaciones: false }));
+                      }
+                    }}
+                    placeholder="Ingrese las observaciones (mínimo 4 palabras)"
                     multiline={true}
                     numberOfLines={4}
                     textAlignVertical="top"
                   />
+                  {errors.observaciones && (
+                    <Text style={styles.errorText}>Este campo es obligatorio y debe tener al menos 4 palabras</Text>
+                  )}
                 </View>
 
                 <View style={styles.buttonContainer}>
