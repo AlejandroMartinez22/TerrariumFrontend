@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
   },
   buttonText: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: "500",
     color: "black",
     marginTop: 0,
