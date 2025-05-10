@@ -42,7 +42,7 @@ export default function MuestraModal({ route, navigation }) {
 
   // Función para validar que las observaciones tengan al menos 4 palabras
   const validarObservaciones = (texto) => {
-    if (!texto || texto.trim() === "") return false; // Si está vacío, no es válido (ahora es obligatorio)
+    if (!texto || texto.trim() === "") return false; // Si está vacío, no es válido 
     const palabras = texto.trim().split(/\s+/);
     return palabras.length >= 4;
   };
