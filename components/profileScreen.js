@@ -109,12 +109,12 @@ return (
 const styles = StyleSheet.create({
 container: {
     flex: 1,
-    padding: 20,
+    padding:20,
 },
 
 closeButton: {
     position: 'absolute',
-    top: 40,
+    top: 35,
     right: 8,
     zIndex: 10,
     padding: 5,
@@ -122,7 +122,7 @@ closeButton: {
 
 header: {
     alignItems: "center",
-    marginTop: 60,
+    marginTop: 65,
     marginBottom: 5,
 },
 

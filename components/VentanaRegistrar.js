@@ -12,18 +12,18 @@ import {
 const VentanaRegistrar = ({ navigation }) => {
   const handleButtonPress = (option) => {
     if (option === "tree") {
-      navigation.navigate("SeleccionarSubparcelaArbol");
+      navigation.navigate("SeleccionarSubparcela", {tipo: "arbol"});
     } else if (option === "sample") {
-      navigation.navigate("SeleccionarSubparcelaMuestra");
+      navigation.navigate("SeleccionarSubparcela", {tipo: "muestra"});
     }
-  };
+  };  
 
   return (
     <ImageBackground
       source={require("../assets/FondoProfile.png")}
       style={styles.background}
       resizeMode="cover"
-      imageStyle={{ opacity: 0.3 }} // Adjust the opacity of the background image
+      imageStyle={{ opacity: 0.32 }} // Adjust the opacity of the background image
     >
       <SafeAreaView style={styles.container}>
         <Text style={styles.titulo}>Registrar</Text>
@@ -35,7 +35,7 @@ const VentanaRegistrar = ({ navigation }) => {
           >
             <Image
               source={require("../assets/IconoArbol.png")}
-              style={{ width: 145, height: 145, marginBottom: 20 }}
+              style={{ width: 145, height: 145, marginBottom: 15 }}
             />
             <Text style={styles.buttonText}>Nuevo árbol</Text>
           </TouchableOpacity>
@@ -46,7 +46,7 @@ const VentanaRegistrar = ({ navigation }) => {
           >
             <Image
               source={require("../assets/IconoMuestra.png")}
-              style={{ width: 145, height: 145, marginBottom: 20 }}
+              style={{ width: 145, height: 145, marginBottom: 15 }}
             />
             <Text style={styles.buttonText}>Nueva muestra</Text>
           </TouchableOpacity>
@@ -73,9 +73,10 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 36,
     marginTop: 20,
-    marginBottom: 23,
+    marginBottom: 20,
     color: "#194D20",
     textAlign: "center",
+    fontWeight: 500
   },
   buttonsContainer: {
     width: "80%",
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
   button: {
     width: "75%",
     padding: 15,
-    marginVertical: 14,
+    marginVertical: 15,
     borderRadius: 20,
     borderWidth: 1,
     alignItems: "center",
@@ -95,8 +96,9 @@ const styles = StyleSheet.create({
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
   },
   buttonText: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: "500",
     color: "black",
+    marginTop: 0,
   },
 });
