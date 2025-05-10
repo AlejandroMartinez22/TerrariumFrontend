@@ -114,7 +114,7 @@ container: {
 
 closeButton: {
     position: 'absolute',
-    top: 10,
+    top: 35,
     right: 8,
     zIndex: 10,
     padding: 5,
@@ -122,7 +122,7 @@ closeButton: {
 
 header: {
     alignItems: "center",
-    marginTop: 35,
+    marginTop: 65,
     marginBottom: 5,
 },
 

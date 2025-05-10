@@ -14,26 +14,21 @@ import {
     StyleSheet
     } from "react-native";
 
-    // Función para obtener el ID del individuo
-    import { getUltimoIdIndividuoDeBack } from "../api";
     // Importar el hook de validación
     import { useFormArbolValidation } from "../hooks/useFormArbolValidation";
+    import { useCalculosIndividuoArboreo } from "../hooks/useCalculosIndividuoArboreo"; 
 
     export default function IndividuoModal({ 
     route, 
     navigation 
     }) {
     // Recibe el parámetro nombreSubparcela desde la pantalla anterior
-    const { nombreSubparcela } = route.params || { nombreSubparcela: "SPF5" };
+    const { nombreSubparcela } = route.params || { nombreSubparcela: "SPF1" };
 
     // Estado para almacenar datos que no son parte del formulario validado
     const [idIndividuo, setIdIndividuo] = useState("");
     const [subparcela, setSubparcela] = useState(nombreSubparcela);
     const [idAsignado, setIdAsignado] = useState("A001");
-    
-    // Estado para valores calculados (no editables por el usuario)
-    const [tamanoIndividuo, setTamanoIndividuo] = useState("0.0");
-    const [alturaTotal, setAlturaTotal] = useState("0.0");
     
     // Estados para controlar los modales de selección
     const [showDropdownModal, setShowDropdownModal] = useState(false);
@@ -73,6 +68,8 @@ import {
         setValues 
     } = useFormArbolValidation(initialValues);
 
+    const { tamanoIndividuo, alturaTotal } = useCalculosIndividuoArboreo(values); // Usar el hook de cálculos para el tamaño y altura
+
     useEffect(() => {
         const inicializarDatos = async () => {
         // Reiniciamos los valores del formulario
@@ -88,28 +85,10 @@ import {
         setSubparcela(nombreSubparcela);
         setIdAsignado("A001");
         
-        // Valores calculados (no editables)
-        setTamanoIndividuo("0.0");
-        setAlturaTotal("0.0");
-        
         // Cerramos el modal de dropdown si está abierto
         setShowDropdownModal(false);
         
         // Generamos un nuevo ID desde la base de datos
-        try {
-            const nuevoId = await getUltimoIdIndividuoDeBack();
-            console.log("Nuevo ID generado desde el backend:", nuevoId);
-            
-            if (nuevoId) {
-            setIdIndividuo(nuevoId);
-            } else {
-            setIdIndividuo("IND001");
-            console.warn("No se pudo obtener un ID de la base de datos, usando ID predeterminado");
-            }
-        } catch (error) {
-            console.error("Error al obtener el siguiente ID:", error);
-            setIdIndividuo("IND001"); // ID por defecto en caso de error
-        }
         };
 
         inicializarDatos();
@@ -238,7 +217,7 @@ import {
                         <TextInput
                         style={[styles.standardInput, styles.disabledInput]}
                         value={tamanoIndividuo}
-                        placeholder="0.0"
+                        placeholder="Por determinar"
                         editable={false}
                         />
                         <View style={styles.errorContainer}>
@@ -319,7 +298,7 @@ import {
                     </View>
                     </View>
                     <View style={styles.formColumn}>
-                    <Text style={styles.label}>* Diámetro</Text>
+                    <Text style={styles.label}>* Diámetro (cm)</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
                         style={[styles.standardInput, errors.diametro && values.diametro && values.diametro.trim() !== '' && styles.inputError]}
@@ -340,7 +319,7 @@ import {
                 {/* Fila 4: Distancia Horizontal y Ángulo visto hacia abajo */}
                 <View style={styles.formRow}>
                     <View style={styles.formColumn}>
-                    <Text style={styles.label}>* Distancia Horizontal</Text>
+                    <Text style={styles.label}>* Distancia Horizontal (m)</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
                         style={[styles.standardInput, errors.distanciaHorizontal && values.distanciaHorizontal && values.distanciaHorizontal.trim() !== '' && styles.inputError]}
@@ -395,7 +374,7 @@ import {
                     </View>
                     </View>
                     <View style={styles.formColumn}>
-                    <Text style={styles.label}>Altura total</Text>
+                    <Text style={styles.label}>Altura total (m)</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
                         style={[styles.standardInput, styles.disabledInput]}
@@ -609,7 +588,7 @@ import {
         width: "48%",
     },
     label: {
-        fontSize: 12.3,
+        fontSize: 12,
         marginBottom: 10,
         color: "#333",
     },

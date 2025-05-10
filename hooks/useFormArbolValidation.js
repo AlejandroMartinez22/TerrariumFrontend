@@ -108,7 +108,7 @@ export const useFormArbolValidation = (initialValues = {}) => {
             value = restrictNumericInput(field, rawValue, 0, 15);
             break;
         case 'diametro':
-            value = restrictNumericInput(field, rawValue, 2.5, 300);
+            value = restrictNumericInput(field, rawValue, 0.5, 300);
             break;
         case 'distanciaHorizontal':
             value = restrictNumericInput(field, rawValue, 0, 40);
@@ -174,7 +174,7 @@ export const useFormArbolValidation = (initialValues = {}) => {
             break;
                 
         case 'diametro':
-            validateNumericField(value, 2.5, 300);
+            validateNumericField(value, 0.5, 300);
             break;
                 
         case 'distanciaHorizontal':
@@ -251,15 +251,15 @@ export const useFormArbolValidation = (initialValues = {}) => {
         }
         }
             
-        // Validar diámetro (2.5-300)
+        // Validar diámetro (0.5-300)
         if (!values.diametro || values.diametro.trim() === '') {
         newErrors.diametro = true;
         newErrorMessages.diametro = '';
         } else {
         const num = parseFloat(values.diametro);
-        if (num < 2.5) {
+        if (num < 0.5) {
             newErrors.diametro = true;
-            newErrorMessages.diametro = 'Debe ser mayor o igual a 2.5';
+            newErrorMessages.diametro = 'Debe ser mayor o igual a 0.5';
         } else if (num > 300) {
             newErrors.diametro = true;
             newErrorMessages.diametro = 'Debe ser menor o igual a 300';
