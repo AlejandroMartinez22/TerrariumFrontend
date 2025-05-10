@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { Checkbox } from 'react-native-paper';
 
 const VisualizarTab = ({ onConfirm }) => {
@@ -13,6 +13,26 @@ const VisualizarTab = ({ onConfirm }) => {
 
   // Estado para la subparcela seleccionada - ninguna seleccionada por defecto
   const [selectedSubparcela, setSelectedSubparcela] = useState(null);
+  
+  // Estado para mostrar u ocultar el modal
+  const [modalVisible, setModalVisible] = useState(false);
+  
+  // Datos de ejemplo para la subparcela seleccionada
+  const subparcelaData = {
+    id: selectedSubparcela,
+    longitud: '42.194º',
+    latitud: '11.278º',
+    error: '9',
+    cobertura: [
+      { tipo: 'Arbustal', valor: '12' },
+      { tipo: 'Pastizal', valor: '0' },
+      { tipo: 'Suelo desnudo', valor: '0' }
+    ],
+    alteracion: [
+      { tipo: 'Extracción de especies leñosas', severidad: 'Mediana' },
+      { tipo: 'Deforestación', severidad: 'Mayor' }
+    ]
+  };
 
   // Función para manejar cambios en los checkboxes
   const handleCheckboxChange = (key) => {
@@ -24,12 +44,25 @@ const VisualizarTab = ({ onConfirm }) => {
 
   // Función para manejar el botón de confirmar
   const confirmar = () => {
-    if (onConfirm) {
+    // Filtra solo los checkbox marcados
+    const checkedItemsOnly = Object.keys(checkedItems).reduce((acc, key) => {
+      if (checkedItems[key]) {
+        acc[key] = true;
+      }
+      return acc;
+    }, {});
+    
+    if (onConfirm && Object.keys(checkedItemsOnly).length > 0) {
       onConfirm({
-        checkedItems,
-        selectedSubparcela
+        checkedItems: checkedItemsOnly,
       });
     }
+  };
+
+  // Función para abrir el modal de una subparcela
+  const openSubparcelaModal = (id) => {
+    setSelectedSubparcela(id);
+    setModalVisible(true);
   };
 
   // Renderiza un checkbox con su etiqueta
@@ -44,25 +77,14 @@ const VisualizarTab = ({ onConfirm }) => {
     </View>
   );
 
-  // Renderiza un botón de subparcela
+  // Renderiza un botón de subparcela (ahora todos blancos)
   const renderSubparcelaButton = (id) => {
-    const isSelected = selectedSubparcela === id;
     return (
       <TouchableOpacity
-        style={[
-          styles.subparcelaButton,
-          isSelected && styles.selectedSubparcelaButton,
-        ]}
-        onPress={() => setSelectedSubparcela(id)}
+        style={styles.subparcelaButton}
+        onPress={() => openSubparcelaModal(id)}
       >
-        <Text
-          style={[
-            styles.subparcelaButtonText,
-            isSelected && styles.selectedSubparcelaButtonText,
-          ]}
-        >
-          {id}
-        </Text>
+        <Text style={styles.subparcelaButtonText}>{id}</Text>
       </TouchableOpacity>
     );
   };
@@ -97,6 +119,14 @@ const VisualizarTab = ({ onConfirm }) => {
         </View>
       </View>
 
+      {/* Botón Aplicar (ahora entre las dos secciones) */}
+      <TouchableOpacity 
+        style={styles.aplicarButton}
+        onPress={confirmar}
+      >
+        <Text style={styles.aplicarButtonText}>Aplicar</Text>
+      </TouchableOpacity>
+
       {/* Sección de información de subparcelas */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Información de las subparcelas</Text>
@@ -113,13 +143,87 @@ const VisualizarTab = ({ onConfirm }) => {
         </View>
       </View>
       
-      {/* Botón Aplicar */}
-      <TouchableOpacity 
-        style={styles.aplicarButton}
-        onPress={confirmar}
+      {/* Modal para mostrar características de la subparcela */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
       >
-        <Text style={styles.aplicarButtonText}>Aplicar</Text>
-      </TouchableOpacity>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Características de la {selectedSubparcela}</Text>
+            
+            {/* Datos de coordenadas */}
+            <View style={styles.modalRow}>
+              <View style={styles.modalColumn}>
+                <Text style={styles.modalLabel}>ID</Text>
+                <View style={styles.modalField}>
+                  <Text>{subparcelaData.id}</Text>
+                </View>
+              </View>
+              <View style={styles.modalColumn}>
+                <Text style={styles.modalLabel}>Longitud</Text>
+                <View style={styles.modalField}>
+                  <Text>{subparcelaData.longitud}</Text>
+                </View>
+              </View>
+            </View>
+            
+            <View style={styles.modalRow}>
+              <View style={styles.modalColumn}>
+                <Text style={styles.modalLabel}>Latitud</Text>
+                <View style={styles.modalField}>
+                  <Text>{subparcelaData.latitud}</Text>
+                </View>
+              </View>
+              <View style={styles.modalColumn}>
+                <Text style={styles.modalLabel}>Error en la medición (m)</Text>
+                <View style={styles.modalField}>
+                  <Text>{subparcelaData.error}</Text>
+                </View>
+              </View>
+            </View>
+            
+            {/* Tablas de cobertura y alteración */}
+            <View style={styles.modalTableContainer}>
+              <View style={styles.modalTable}>
+                <View style={styles.modalTableHeader}>
+                  <Text style={styles.modalTableHeaderText}>Cobertura</Text>
+                  <Text style={styles.modalTableHeaderText}>%</Text>
+                </View>
+                {subparcelaData.cobertura.map((item, index) => (
+                  <View key={index} style={styles.modalTableRow}>
+                    <Text style={styles.modalTableCell}>{item.tipo}</Text>
+                    <Text style={styles.modalTableCell}>{item.valor}</Text>
+                  </View>
+                ))}
+              </View>
+              
+              <View style={styles.modalTable}>
+                <View style={styles.modalTableHeader}>
+                  <Text style={styles.modalTableHeaderText}>Alteración</Text>
+                  <Text style={styles.modalTableHeaderText}>Severidad</Text>
+                </View>
+                {subparcelaData.alteracion.map((item, index) => (
+                  <View key={index} style={styles.modalTableRow}>
+                    <Text style={[styles.modalTableCell, { fontSize: 12 }]}>{item.tipo}</Text>
+                    <Text style={styles.modalTableCell}>{item.severidad}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            
+            {/* Botón de cerrar */}
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -141,7 +245,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     borderRadius: 8,
     padding: 16,
-    marginBottom: 60,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 25,
@@ -183,28 +287,108 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
   },
-  selectedSubparcelaButton: {
-    backgroundColor: '#4285F4',
-    borderColor: '#4285F4',
-  },
   subparcelaButtonText: {
     fontWeight: '500',
-  },
-  selectedSubparcelaButtonText: {
-    color: 'white',
   },
   aplicarButton: {
     backgroundColor: '#4285F4',
     borderRadius: 8,
     padding: 14,
     alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 5,
+    marginVertical: 20,
   },
   aplicarButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  // Estilos para el modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 16,
+    width: '90%',
+    maxWidth: 500,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  modalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  modalColumn: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  modalLabel: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  modalField: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#eaeaea',
+    padding: 8,
+    borderRadius: 4,
+  },
+  modalTableContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  modalTable: {
+    flex: 1,
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  modalTableHeader: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  modalTableHeaderText: {
+    flex: 1,
+    padding: 6,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  modalTableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTableCell: {
+    flex: 1,
+    padding: 6,
+    textAlign: 'center',
+    fontSize: 13,
+  },
+  closeButton: {
+    backgroundColor: '#4285F4',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
