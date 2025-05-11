@@ -1,4 +1,4 @@
-import { fetchCaracteristicasSubparcela, getSubparcelaId } from '../api';
+import { fetchCaracteristicasSubparcela, getSubparcelaId, fetchIndividuosByConglomerado } from '../api';
 
 export const useSubparcela = () => {
   // Función para obtener el ID de la subparcela basado en su nombre y el ID del conglomerado
@@ -56,6 +56,28 @@ export const getCaracteristicasSubparcela = async (nombreSubparcela, idConglomer
     return null;
   } catch (error) {
     console.error("Error en hook getCaracteristicasSubparcela:", error);
+    throw error;
+  }
+};
+
+export const getIndividuosByConglomerado = async (idConglomerado) => {
+  console.log("ingreso al hook: ID del conglomerado:", idConglomerado);
+  try {
+    // Verificar que el ID del conglomerado esté presente
+    if (!idConglomerado) {
+      console.error("Falta el ID del conglomerado para obtener individuos.");
+      return null;
+    }
+
+    console.log(`Obteniendo individuos para conglomerado: ${idConglomerado}`);
+
+    // Llama a la función de la API que ya maneja la comunicación con el backend
+    const individuos = await fetchIndividuosByConglomerado(idConglomerado);
+    
+    console.log("Individuos recibidos:", individuos);
+    return individuos;
+  } catch (error) {
+    console.error("Error al obtener individuos por conglomerado:", error);
     throw error;
   }
 };

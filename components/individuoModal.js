@@ -19,7 +19,7 @@ import {
     import { useFormArbolValidation } from "../hooks/useFormArbolValidation";
     import { useCalculosIndividuoArboreo } from "../hooks/useCalculosIndividuoArboreo"; 
     import { useIndividuo } from "../hooks/useIndividuo";
-    import { useSubparcela } from "../hooks/useSubparcelaView";
+    import { useSubparcela } from "../hooks/useView";
     import { useBrigadista } from "../context/BrigadistaContext";
 
     export default function IndividuoModal({ 

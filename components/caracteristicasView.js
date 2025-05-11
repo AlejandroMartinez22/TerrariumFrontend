@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { useBrigadista } from "../context/BrigadistaContext";
 import { useNavigation } from "@react-navigation/native";
-import { getCaracteristicasSubparcela } from "../hooks/useSubparcelaView";
+import { getCaracteristicasSubparcela } from "../hooks/useView";
 
 export default function CaracteristicasView({ route }) {
   const { subparcelaId: nombreSubparcela } = route.params;
@@ -25,7 +31,7 @@ export default function CaracteristicasView({ route }) {
           nombreSubparcela,
           brigadista.idConglomerado
         );
-        
+
         if (resultado) {
           console.log("Datos recibidos en componente:", resultado);
           // Asignar los datos a los estados correspondientes
@@ -51,7 +57,9 @@ export default function CaracteristicasView({ route }) {
     return (
       <View style={[styles.container, styles.centeredContent]}>
         <ActivityIndicator size="large" color="#4285F4" />
-        <Text style={{ marginTop: 10 }}>Cargando datos de la subparcela...</Text>
+        <Text style={{ marginTop: 10 }}>
+          Cargando datos de la subparcela...
+        </Text>
       </View>
     );
   }
@@ -61,8 +69,8 @@ export default function CaracteristicasView({ route }) {
     return (
       <View style={[styles.container, styles.centeredContent]}>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity 
-          style={styles.closeButton} 
+        <TouchableOpacity
+          style={styles.closeButton}
           onPress={() => navigation.goBack()}
         >
           <Text style={styles.closeButtonText}>Volver</Text>
@@ -76,8 +84,8 @@ export default function CaracteristicasView({ route }) {
     return (
       <View style={[styles.container, styles.centeredContent]}>
         <Text>No se encontraron datos para esta subparcela.</Text>
-        <TouchableOpacity 
-          style={styles.closeButton} 
+        <TouchableOpacity
+          style={styles.closeButton}
           onPress={() => navigation.goBack()}
         >
           <Text style={styles.closeButtonText}>Volver</Text>
@@ -95,7 +103,7 @@ export default function CaracteristicasView({ route }) {
         </Text>
 
         {/* Datos de coordenadas */}
-        <View style={styles.infoRow}> 
+        <View style={styles.infoRow}>
           <View style={styles.infoColumn}>
             <Text style={styles.infoLabel}>ID</Text>
             <View style={styles.infoField}>
@@ -105,7 +113,9 @@ export default function CaracteristicasView({ route }) {
           <View style={styles.infoColumn}>
             <Text style={styles.infoLabel}>Longitud</Text>
             <View style={styles.infoField}>
-              <Text style={styles.infoText}>{subparcelaData.longitud || "N/A"}</Text>
+              <Text style={styles.infoText}>
+                {subparcelaData.longitud || "N/A"}
+              </Text>
             </View>
           </View>
         </View>
@@ -114,7 +124,9 @@ export default function CaracteristicasView({ route }) {
           <View style={styles.infoColumn}>
             <Text style={styles.infoLabel}>Latitud</Text>
             <View style={styles.infoField}>
-              <Text style={styles.infoText}>{subparcelaData.latitud || "N/A"}</Text>
+              <Text style={styles.infoText}>
+                {subparcelaData.latitud || "N/A"}
+              </Text>
             </View>
           </View>
           <View style={styles.infoColumn}>
@@ -135,13 +147,24 @@ export default function CaracteristicasView({ route }) {
             {coberturas && coberturas.length > 0 ? (
               coberturas.map((item, index) => (
                 <View key={index} style={styles.infoTableRow}>
-                  <Text style={[styles.infoTableCell, styles.boldText]}>{item.nombre || "N/A"}</Text>
-                  <Text style={styles.infoTableCell}>{item.porcentaje || "N/A"}</Text>
+                  <Text style={[styles.infoTableCell, styles.boldText]}>
+                    {item.nombre || "N/A"}
+                  </Text>
+                  <Text style={styles.infoTableCell}>
+                    {item.porcentaje || "N/A"}
+                  </Text>
                 </View>
               ))
             ) : (
               <View style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, { textAlign: 'center', flex: 2 }]}>No hay datos de cobertura</Text>
+                <Text
+                  style={[
+                    styles.infoTableCell,
+                    { textAlign: "center", flex: 2 },
+                  ]}
+                >
+                  No hay datos de cobertura
+                </Text>
               </View>
             )}
           </View>
@@ -157,15 +180,24 @@ export default function CaracteristicasView({ route }) {
                   <Text style={[styles.infoTableCell, styles.smallText]}>
                     {item.nombre || "N/A"}
                   </Text>
-                  <Text style={[styles.infoTableCell, styles.boldBlueText]}>{item.severidad || "N/A"}</Text>
+                  <Text style={[styles.infoTableCell, styles.boldBlueText]}>
+                    {item.severidad || "N/A"}
+                  </Text>
                 </View>
               ))
             ) : (
               <View style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, { textAlign: 'center', flex: 2 }]}>No hay datos de alteración</Text>
+                <Text
+                  style={[
+                    styles.infoTableCell,
+                    { textAlign: "center", flex: 2 },
+                  ]}
+                >
+                  No hay datos de alteración
+                </Text>
               </View>
             )}
-            
+
             {/* Filas adicionales vacías para coincidir con el mockup */}
             <View style={styles.infoTableRow}>
               <Text style={styles.infoTableCell}></Text>
@@ -193,14 +225,14 @@ export default function CaracteristicasView({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
     padding: 10,
   },
   centeredContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     backgroundColor: "white",
@@ -232,7 +264,7 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 13,
     marginBottom: 4,
-    textAlign: 'center',
+    textAlign: "center",
   },
   infoField: {
     borderWidth: 1,
@@ -241,10 +273,10 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
     height: 40,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   infoText: {
-    textAlign: 'center',
+    textAlign: "center",
   },
   infoTableContainer: {
     flexDirection: "row",
@@ -282,7 +314,7 @@ const styles = StyleSheet.create({
     padding: 6,
     textAlign: "center",
     fontSize: 13,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   closeButton: {
     backgroundColor: "#4285F4",
@@ -302,13 +334,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   boldText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   smallText: {
     fontSize: 11,
   },
   boldBlueText: {
-    fontWeight: 'bold',
-    color: '#0000FF',
-  }
+    fontWeight: "bold",
+    color: "#0000FF",
+  },
 });

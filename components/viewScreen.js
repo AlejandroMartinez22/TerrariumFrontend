@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import { Checkbox } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import { getIndividuosByConglomerado } from "../hooks/useView";
+import { useBrigadista } from "../context/BrigadistaContext";
 
 const VisualizarTab = ({}) => {
   // Acceso al objeto de navegación
@@ -21,6 +23,8 @@ const VisualizarTab = ({}) => {
   // Estado para mostrar u ocultar el modal
   const [modalVisible, setModalVisible] = useState(false);
 
+  const { brigadista } = useBrigadista();
+  const idConglomerado = brigadista?.idConglomerado; // Reemplaza con el ID real del conglomerado
   // Función para manejar cambios en los checkboxes
   const handleCheckboxChange = (key) => {
     setCheckedItems({
@@ -30,8 +34,14 @@ const VisualizarTab = ({}) => {
   };
 
   // Función para manejar el botón de confirmar
-  const confirmar = () => {
+  const confirmar = async () => {
     // Filtra solo los checkbox marcados
+
+    console.log("Presiono boton de confirmar  ", idConglomerado)
+    const individuos = await getIndividuosByConglomerado(idConglomerado); // Reemplaza con el ID real del conglomerado
+    console.log("Individuos obtenidos: ", individuos);
+
+    /*
     const checkedItemsOnly = Object.keys(checkedItems).reduce((acc, key) => {
       if (checkedItems[key]) {
         acc[key] = true;
@@ -44,6 +54,7 @@ const VisualizarTab = ({}) => {
         checkedItems: checkedItemsOnly,
       });
     }
+      */
   };
 
   // Función actualizada para navegar a la vista de características

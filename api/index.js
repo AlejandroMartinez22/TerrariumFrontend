@@ -7,7 +7,7 @@ import { getAuth } from "firebase/auth"; // Importamos la función getAuth de Fi
 
 // Configuramos la URL base del backend
 const API_URL =
-  "http://192.168.1.7:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+  "http://192.168.1.9:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
 
 // Creamos una instancia de Axios preconfigurada con la URL base del backend
 const api = axios.create({
@@ -604,7 +604,7 @@ export const getArbolesBySubparcela = async (
   try {
     const token = await getCurrentToken();
     const response = await api.get(
-      `/subparcelas/${conglomeradoId}/${nombreSubparcela}`,
+      `/subparcelas/arboles/${conglomeradoId}/${nombreSubparcela}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -754,6 +754,65 @@ export const fetchCaracteristicasSubparcela = async (
     console.error("Error al obtener características de subparcela:", error);
     handleError(error);
     return null; // Retornamos null en caso de error
+  }
+};
+
+export const getIdsSubparcelasByConglomerado = async (idConglomerado) => {
+  console.log("Ingreso al api de ids de subparcelas por conglomerado");
+  try {
+    const token = await getCurrentToken();
+    const response = await api.get(
+      `/subparcelas/idsSubparcelas/${idConglomerado}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.success) {
+      return response.data.data;
+    } else {
+      throw new Error(response.data.message || "Error al obtener IDs");
+    }
+  } catch (error) {
+    console.error("Error al obtener IDs de subparcelas:", error);
+    handleError(error);
+  }
+};
+
+export const fetchIndividuosByConglomerado = async (idConglomerado) => {
+  console.log("Ingreso al api de individuos por conglomerado");
+  try {
+    const token = await getCurrentToken();
+    const idsSubparcelas = await getIdsSubparcelasByConglomerado(idConglomerado);
+    console.log("IDs de subparcelas obtenidos:", idsSubparcelas);
+    if (!idsSubparcelas || idsSubparcelas.length === 0) {
+      throw new Error("No se encontraron subparcelas para el conglomerado");
+    }
+
+    // Modificación: Usar query parameters para enviar los IDs
+    const response = await api.get('/individuos/conglomerado', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        ids: idsSubparcelas.join(',')
+      }
+    });
+
+    if (response.data.success) {
+      console.log(
+        "Respuesta de individuos por conglomerado:",
+        response.data.data
+      );
+      return response.data.data;
+    } else {
+      throw new Error(response.data.message || "Error al obtener individuos");
+    }
+  } catch (error) {
+    console.error("Error al obtener individuos por conglomerado:", error);
+    handleError(error);
   }
 };
 
