@@ -633,7 +633,33 @@ export const getArbolesBySubparcela = async (
   }
 };
 
+// Función para obtener el ID de la subparcela por nombre y conglomerado
+export const getSubparcelaId = async (nombreSubparcela, conglomeradoId) => {
+  try {
+    const token = await getCurrentToken();
+    const response = await api.get("/subparcelas/id", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        nombreSubparcela,
+        conglomeradoId,
+      },
+    });
 
+    if (response.data.success) {
+      return response.data.id;
+    } else {
+      throw new Error(
+        response.data.error || "Error al obtener ID de subparcela"
+      );
+    }
+  } catch (error) {
+    console.error("Error al obtener ID de subparcela:", error);
+    handleError(error);
+    return null;
+  }
+};
 
 export const getUltimoIdMuestraDeBack = async () => {
   try {
@@ -654,6 +680,30 @@ export const getUltimoIdMuestraDeBack = async () => {
   } catch (error) {
     console.error("Error al obtener siguiente ID de muestra :", error);
     handleError(error);
+  }
+};
+
+// Función para obtener el siguiente ID de individuo (árbol)
+export const getUltimoIdIndividuoDeBack = async () => {
+  try {
+    const token = await getCurrentToken();
+    const response = await api.get("/individuos/siguienteId", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.success) {
+      return response.data.ultimoId;
+    } else {
+      throw new Error(
+        response.data.error || "Error al obtener ID de individuo"
+      );
+    }
+  } catch (error) {
+    console.error("Error al obtener siguiente ID de individuo:", error);
+    handleError(error);
+    return null;
   }
 };
 

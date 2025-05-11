@@ -11,12 +11,16 @@ import {
     StatusBar,
     SafeAreaView,
     FlatList,
-    StyleSheet
+    StyleSheet,
+    ActivityIndicator
     } from "react-native";
 
     // Importar el hook de validación
     import { useFormArbolValidation } from "../hooks/useFormArbolValidation";
     import { useCalculosIndividuoArboreo } from "../hooks/useCalculosIndividuoArboreo"; 
+    import { useIndividuo } from "../hooks/useIndividuo";
+    import { useSubparcela } from "../hooks/useSubparcelaView";
+    import { useBrigadista } from "../context/BrigadistaContext";
 
     export default function IndividuoModal({ 
     route, 
@@ -25,10 +29,21 @@ import {
     // Recibe el parámetro nombreSubparcela desde la pantalla anterior
     const { nombreSubparcela } = route.params || { nombreSubparcela: "SPF1" };
 
-    // Estado para almacenar datos que no son parte del formulario validado
+    // Acceder al contexto del brigadista para obtener el ID del conglomerado
+    const { brigadista } = useBrigadista();
+    const conglomeradoId = brigadista?.idConglomerado;
+
+    // Utilizar los hooks para obtener IDs
+    const { siguienteIdIndividuo } = useIndividuo();
+    const { obtenerIdSubparcela } = useSubparcela();
+
+  // Estado para almacenar datos que no son parte del formulario validado
     const [idIndividuo, setIdIndividuo] = useState("");
+    const [subparcelaId, setSubparcelaId] = useState("");
     const [subparcela, setSubparcela] = useState(nombreSubparcela);
-    const [idAsignado, setIdAsignado] = useState("A001");
+    const [idAsignado, setIdAsignado] = useState("");
+    const [loading, setLoading] = useState(true);
+    
     
     // Estados para controlar los modales de selección
     const [showDropdownModal, setShowDropdownModal] = useState(false);
@@ -72,27 +87,50 @@ import {
 
     useEffect(() => {
         const inicializarDatos = async () => {
-        // Reiniciamos los valores del formulario
-        setValues({
-            ...initialValues,
-            condicion: "MP",
-            tallo: "Único",
-            formaFuste: "CIL",
-            dano: "SD"
-        });
-        
-        // Valores que no son parte del formulario validado
-        setSubparcela(nombreSubparcela);
-        setIdAsignado("A001");
-        
-        // Cerramos el modal de dropdown si está abierto
-        setShowDropdownModal(false);
-        
-        // Generamos un nuevo ID desde la base de datos
+            setLoading(true);
+            try {
+                // Verificar que tenemos el ID del conglomerado
+                if (!conglomeradoId) {
+                    console.error("No se encontró el ID del conglomerado");
+                    return;
+                }
+
+                // Obtener el ID de la subparcela desde el backend
+                const idSubparcela = await obtenerIdSubparcela(nombreSubparcela, conglomeradoId);
+                console.log("ID de subparcela obtenido:", idSubparcela);
+                setSubparcelaId(idSubparcela);
+
+                // Obtener el siguiente ID de individuo desde el backend
+                const nextId = await siguienteIdIndividuo();
+                console.log("Siguiente ID de individuo obtenido:", nextId);
+                setIdAsignado(nextId);
+
+                // Reiniciamos los valores del formulario
+                setValues({
+                    ...initialValues,
+                    condicion: "MP",
+                    tallo: "Único",
+                    formaFuste: "CIL",
+                    dano: "SD"
+                });
+                
+                // Valores que no son parte del formulario validado
+                setSubparcela(nombreSubparcela);
+                
+                // Cerramos el modal de dropdown si está abierto
+                setShowDropdownModal(false);
+            } catch (error) {
+                console.error("Error al inicializar datos:", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
-        inicializarDatos();
-    }, [nombreSubparcela]);
+        // Solo inicializar si tenemos el nombre de la subparcela y el ID del conglomerado
+        if (nombreSubparcela && conglomeradoId) {
+            inicializarDatos();
+        }
+    }, [nombreSubparcela, conglomeradoId]);
 
     // Manejar el evento de guardar
     const handleGuardar = () => {
@@ -184,6 +222,17 @@ import {
         </TouchableOpacity>
     );
 
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <View style={[styles.fullScreen, styles.centerContent]}>
+                    <ActivityIndicator size="large" color="#1E5A26" />
+                    <Text style={styles.loadingText}>Cargando datos...</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView style={styles.safeArea}>
         <StatusBar backgroundColor="#1E5A26" barStyle="light-content" />
@@ -200,11 +249,11 @@ import {
                 <View style={styles.topInfoContainer}>
                 <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Subparcela:</Text>
-                    <Text style={styles.infoValue}>{subparcela}</Text>
+                    <Text style={styles.infoValue}>{subparcelaId || "Cargando..."}</Text>
                 </View>
                 <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Id asignado:</Text>
-                    <Text style={styles.infoValue}>{idAsignado}</Text>
+                    <Text style={styles.infoValue}>{idAsignado || "Cargando..."}</Text>
                 </View>
                 </View>
 
