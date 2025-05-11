@@ -11,6 +11,7 @@ import { useBrigadista } from "../context/BrigadistaContext";
 import SelectArbolMuestra from "./SelectArbolMuestra";
 import IndividuoModal from "./individuoModal";
 import MuestraModal from "./muestraModal";
+import caracteristicasView from "./caracteristicasView";
 
 // Creación del stack navigator para manejar la navegación entre pantallas
 const Stack = createStackNavigator();
@@ -142,6 +143,33 @@ export default function AppNavigator() {
       <Stack.Screen
         name="registrarMuestra"
         component={MuestraModal}
+        options={({ navigation }) => ({
+          headerTitle: () => (
+            <Image
+              source={require("../assets/LogoTerrarium.png")}
+              style={{ resizeMode: "contain", width: 100, height: 28 }}
+            />
+          ),
+          headerStyle: { backgroundColor: "#1E5A26" },
+          headerTintColor: "#fff",
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Profile")}
+              style={styles.BotonSesion}
+            >
+              <Text style={styles.NombreBrigadista}>{brigadista?.nombre}</Text>
+              <Image
+                source={require("../assets/IconoPerfil.png")}
+                style={{ width: 29, height: 29 }}
+              />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+
+      <Stack.Screen
+        name="CaracteristicasView"
+        component={caracteristicasView}
         options={({ navigation }) => ({
           headerTitle: () => (
             <Image

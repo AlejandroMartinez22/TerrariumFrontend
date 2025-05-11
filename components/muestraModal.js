@@ -232,7 +232,7 @@ export default function MuestraModal({ route, navigation }) {
 
                 {/* Nombre Común */}
                 <View style={styles.formRowFull}>
-                  <Text style={styles.label}>Nombre Común</Text>
+                  <Text style={styles.label}>* Nombre Común</Text>
                   <TextInput
                     style={[
                       styles.input,
@@ -265,7 +265,7 @@ export default function MuestraModal({ route, navigation }) {
 
                 {/* No. de colección */}
                 <View style={styles.formRowFull}>
-                  <Text style={styles.label}>No. de colección</Text>
+                  <Text style={styles.label}>* No. de colección</Text>
                   <TextInput
                     style={[
                       styles.input,
@@ -291,7 +291,7 @@ export default function MuestraModal({ route, navigation }) {
 
                 {/* Observaciones (obligatorio con mínimo 4 palabras) */}
                 <View style={styles.formRowFull}>
-                  <Text style={styles.label}>Observaciones (Mínimo 4 palabras)</Text>
+                  <Text style={styles.label}>* Observaciones (Mínimo 4 palabras)</Text>
                   <TextInput
                     style={[
                       styles.textArea,

@@ -7,8 +7,8 @@ import { getAuth } from "firebase/auth"; // Importamos la función getAuth de Fi
 
 // Configuramos la URL base del backend
 const API_URL =
-  "http://192.168.1.7:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
-  
+  "http://192.168.1.9:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+
 // Creamos una instancia de Axios preconfigurada con la URL base del backend
 const api = axios.create({
   baseURL: API_URL,
@@ -186,35 +186,40 @@ export const fetchSiguienteIdReferencia = async () => {
   }
 };
 
-//NUEVA FUNCION 
+//NUEVA FUNCION
 export const verificarCampamentoExistente = async () => {
   try {
     console.log("📤 Iniciando verificación de campamento...");
     const token = await getCurrentToken();
-    
+
     if (!token) {
       console.error("❌ No se pudo obtener el token de autenticación");
-      return { 
+      return {
         success: false,
         message: "No se pudo obtener el token de autenticación",
-        existeCampamento: false
+        existeCampamento: false,
       };
     }
-    
-    console.log("🔑 Token obtenido, realizando petición a /referencias/verificar-campamento");
+
+    console.log(
+      "🔑 Token obtenido, realizando petición a /referencias/verificar-campamento"
+    );
     const response = await api.get("/referencias/verificar-campamento", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
       // Aumentamos el timeout para operaciones complejas
-      timeout: 10000
+      timeout: 10000,
     });
-    
+
     console.log("✅ Respuesta recibida:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ Error en petición a: /referencias/verificar-campamento", error);
-    
+    console.error(
+      "❌ Error en petición a: /referencias/verificar-campamento",
+      error
+    );
+
     // Información de diagnóstico ampliada
     let errorDetails = {
       message: error.message || "Error desconocido",
@@ -224,15 +229,18 @@ export const verificarCampamentoExistente = async () => {
       url: error.config?.url,
       method: error.config?.method,
     };
-    
-    console.error("📋 Detalles del error:", JSON.stringify(errorDetails, null, 2));
-    
+
+    console.error(
+      "📋 Detalles del error:",
+      JSON.stringify(errorDetails, null, 2)
+    );
+
     // Manejo mejorado del error
-    return { 
+    return {
       success: false,
-      message: `Error ${error.response?.status || ''}: ${error.message}`,
+      message: `Error ${error.response?.status || ""}: ${error.message}`,
       existeCampamento: false,
-      errorDetails: errorDetails
+      errorDetails: errorDetails,
     };
   }
 };
@@ -605,7 +613,10 @@ export const getArbolesBySubparcela = async (
     );
 
     // Mostrar respuesta completa para debug
-    console.log("Respuesta completa del backend:", JSON.stringify(response.data, null, 2));
+    console.log(
+      "Respuesta completa del backend:",
+      JSON.stringify(response.data, null, 2)
+    );
 
     // Comprobamos si la respuesta tiene la estructura esperada
     if (response.data && response.data.success) {
@@ -664,6 +675,35 @@ export const guardarMuestraEnBackend = async (muestraData) => {
   }
 };
 
+export const fetchCaracteristicasSubparcela = async (
+  nombreSubparcela,
+  idConglomerado
+) => {
+  try {
+    const token = await getCurrentToken();
+    const response = await api.get(
+      `/subparcelas/caracteristicas/${idConglomerado}/${nombreSubparcela}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.success) {
+      // La respuesta contiene: subparcelaData, coberturas, alteraciones
+      return response.data.data;
+    } else {
+      throw new Error(
+        response.data.message || "Error al obtener características"
+      );
+    }
+  } catch (error) {
+    console.error("Error al obtener características de subparcela:", error);
+    handleError(error);
+    return null; // Retornamos null en caso de error
+  }
+};
 
 // Exportamos la instancia de axios configurada para usar en otros archivos si es necesario
 export default api;

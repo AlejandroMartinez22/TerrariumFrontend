@@ -287,9 +287,7 @@ export default function NavigationTabs() {
 
   // Determinar qué componentes mostrar según el rol del brigadista
   const AddScreenComponent =
-    brigadista?.rol === "Botanico"
-      ? VentanaRegistrar
-      : SeleccionarSubparcela;
+    brigadista?.rol === "Botanico" ? VentanaRegistrar : SeleccionarSubparcela;
 
   return (
     <>
@@ -352,17 +350,17 @@ export default function NavigationTabs() {
         })}
       >
         <Tab.Screen name="Map" component={MapScreen} />
-          <Tab.Screen 
-            name="Add" 
-            component={
-              brigadista?.rol === "Botanico" 
-                ? VentanaRegistrar 
-                : SeleccionarSubparcela
-            }
-            initialParams={{ 
-              tipo: brigadista?.rol === "Botanico" ? "registrar" : "arbol" 
-            }}
-          />
+        <Tab.Screen
+          name="Add"
+          component={
+            brigadista?.rol === "Botanico"
+              ? VentanaRegistrar
+              : SeleccionarSubparcela
+          }
+          initialParams={{
+            tipo: brigadista?.rol === "Botanico" ? "registrar" : "arbol",
+          }}
+        />
         <Tab.Screen name="View" component={ViewScreen} />
       </Tab.Navigator>
 
