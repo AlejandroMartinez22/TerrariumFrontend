@@ -7,7 +7,7 @@ import { getAuth } from "firebase/auth"; // Importamos la función getAuth de Fi
 
 // Configuramos la URL base del backend
 const API_URL =
-  "http://192.168.1.9:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
+  "http://192.168.1.7:5000/api"; /* Esta IP debe ser la dirección local de la computadora donde se está ejecutando el servidor Express (backend)*/
 
 // Creamos una instancia de Axios preconfigurada con la URL base del backend
 const api = axios.create({
@@ -636,6 +636,7 @@ export const getArbolesBySubparcela = async (
 // Función para obtener el ID de la subparcela por nombre y conglomerado
 export const getSubparcelaId = async (nombreSubparcela, conglomeradoId) => {
   try {
+    console.log(`Enviando petición a: /subparcelas/id con params: ${nombreSubparcela}, ${conglomeradoId}`);
     const token = await getCurrentToken();
     const response = await api.get("/subparcelas/id", {
       headers: {
@@ -648,6 +649,7 @@ export const getSubparcelaId = async (nombreSubparcela, conglomeradoId) => {
     });
 
     if (response.data.success) {
+      console.log("ID de subparcela recibido:", response.data.id);
       return response.data.id;
     } else {
       throw new Error(
@@ -657,7 +659,7 @@ export const getSubparcelaId = async (nombreSubparcela, conglomeradoId) => {
   } catch (error) {
     console.error("Error al obtener ID de subparcela:", error);
     handleError(error);
-    return null;
+    throw error; // Re-lanzar el error para manejarlo en el componente
   }
 };
 
