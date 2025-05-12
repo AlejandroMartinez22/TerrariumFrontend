@@ -729,6 +729,30 @@ export const guardarMuestraEnBackend = async (muestraData) => {
   }
 };
 
+
+//Funcion para guardar un individuo arboreo en el Backend
+
+export const guardarIndividuoEnBackend = async (individuoData) => {
+  try {
+    const token = await getCurrentToken();
+    const response = await api.post("/individuos/guardar", individuoData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.success) {
+      return response.data.id;
+    } else {
+      throw new Error(response.data.message || "Error al guardar el individuo");
+    }
+  } catch (error) {
+    console.error("Error al guardar el individuo en el backend:", error);
+    handleError(error);
+  }
+};
+
+
 export const fetchCaracteristicasSubparcela = async (
   nombreSubparcela,
   idConglomerado

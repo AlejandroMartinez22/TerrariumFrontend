@@ -12,7 +12,8 @@ import {
     SafeAreaView,
     FlatList,
     StyleSheet,
-    ActivityIndicator
+    ActivityIndicator,
+    Alert,
     } from "react-native";
 
     // Importar el hook de validación
@@ -34,14 +35,13 @@ import {
     const conglomeradoId = brigadista?.idConglomerado;
 
     // Utilizar los hooks para obtener IDs
-    const { siguienteIdIndividuo } = useIndividuo();
+    const { siguienteIdIndividuo, guardarIndividuo } = useIndividuo();
     const { obtenerIdSubparcela } = useSubparcela();
 
   // Estado para almacenar datos que no son parte del formulario validado
     const [idIndividuo, setIdIndividuo] = useState("");
     const [subparcelaId, setSubparcelaId] = useState("");
     const [subparcela, setSubparcela] = useState(nombreSubparcela);
-    const [idAsignado, setIdAsignado] = useState("");
     const [loading, setLoading] = useState(true);
     
     
@@ -103,7 +103,8 @@ import {
                 // Obtener el siguiente ID de individuo desde el backend
                 const nextId = await siguienteIdIndividuo();
                 console.log("Siguiente ID de individuo obtenido:", nextId);
-                setIdAsignado(nextId);
+                setIdIndividuo(nextId);
+
 
                 // Reiniciamos los valores del formulario
                 setValues({
@@ -133,37 +134,64 @@ import {
     }, [nombreSubparcela, conglomeradoId]);
 
     // Manejar el evento de guardar
-    const handleGuardar = () => {
+    const handleGuardar = async () => {
         if (!validateForm()) {
-        return;
+            return;
         }
-
+    
         // Si el formulario es válido, guardamos los datos
         const datosIndividuo = {
-        idIndividuo,
-        subparcela,
-        idAsignado,
-        tamanoIndividuo,
-        alturaTotal,
-        condicion: values.condicion,
-        azimut: values.azimut,
-        distanciaCentro: values.distanciaCentro,
-        tallo: values.tallo,
-        diametro: values.diametro,
-        distanciaHorizontal: values.distanciaHorizontal,
-        anguloVistoBajo: values.anguloVistoBajo,
-        anguloVistoAlto: values.anguloVistoAlto,
-        formaFuste: values.formaFuste,
-        dano: values.dano,
-        penetracion: values.penetracion,
+            idIndividuo,
+            subparcelaId,
+            tamanoIndividuo,
+            alturaTotal,
+            condicion: values.condicion,
+            azimut: values.azimut,
+            distanciaCentro: values.distanciaCentro,
+            tallo: values.tallo,
+            diametro: values.diametro,
+            distanciaHorizontal: values.distanciaHorizontal,
+            anguloVistoBajo: values.anguloVistoBajo,
+            anguloVistoAlto: values.anguloVistoAlto,
+            formaFuste: values.formaFuste,
+            dano: values.dano,
+            penetracion: values.penetracion,
         };
-
+    
         console.log("Guardando individuo:", datosIndividuo);
         
-        // Aquí iría la lógica para guardar el individuo en la base de datos
+        //lógica para guardar el individuo en la base de datos
         
-        // Volvemos a la pantalla anterior
-        navigation.goBack();
+        try {
+            setLoading(true);
+            // Guardar el individuo en la base de datos
+            const id = await guardarIndividuo(datosIndividuo);
+            if (id) {
+                console.log("Individuo guardado con éxito, ID:", id);
+                // Mostrar mensaje de éxito
+                Alert.alert(
+                    "Éxito",
+                    "El individuo se ha guardado correctamente",
+                    [{ text: "OK", onPress: () => navigation.goBack() }]
+                );
+            } else {
+                // Mostrar mensaje de error
+                Alert.alert(
+                    "Error",
+                    "No se pudo guardar el individuo. Inténtalo de nuevo.",
+                    [{ text: "OK" }]
+                );
+            }
+        } catch (error) {
+            console.error("Error al guardar individuo:", error);
+            Alert.alert(
+                "Error",
+                "Ocurrió un error al guardar el individuo: " + error.message,
+                [{ text: "OK" }]
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     // Función para abrir el selector como modal
@@ -253,7 +281,7 @@ import {
                 </View>
                 <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Id asignado:</Text>
-                    <Text style={styles.infoValue}>{idAsignado || "Cargando..."}</Text>
+                    <Text style={styles.infoValue}>{idIndividuo || "Cargando..."}</Text>
                 </View>
                 </View>
 
@@ -499,6 +527,7 @@ import {
                         </View>
                     </View>
                     </View>
+
                     <View style={styles.formColumn}>
                     <Text style={styles.label}>&nbsp;</Text>
                     <View style={styles.inputContainer}>
@@ -570,7 +599,7 @@ import {
         </Modal>
         </SafeAreaView>
     );
-    }
+}
 
     const styles = StyleSheet.create({
     safeArea: {
