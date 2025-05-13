@@ -59,12 +59,12 @@ const VisualizarTab = ({}) => {
 
   // Función actualizada para navegar a la vista de características
   const openSubparcelaView = (id) => {
-  setSelectedSubparcela(id);
-  
-  navigation.navigate('CaracteristicasView', { 
-    subparcelaId: id // Verificar que este valor esté definido
-  });
-};
+    setSelectedSubparcela(id);
+    
+    navigation.navigate('CaracteristicasView', { 
+      subparcelaId: id // Verificar que este valor esté definido
+    });
+  };
 
   // Renderiza un checkbox con su etiqueta
   const renderCheckbox = (key, label) => (
@@ -105,25 +105,17 @@ const VisualizarTab = ({}) => {
           </View>
           <View style={styles.checkboxRow}>
             {renderCheckbox("fustales", "Fustales")}
-            <View style={styles.checkboxContainer}>
-              <Checkbox
-                status={checkedItems.fustalesGrandes ? "checked" : "unchecked"}
-                onPress={() => handleCheckboxChange("fustalesGrandes")}
-                color="#4285F4"
-              />
-              <View>
-                <Text style={styles.checkboxLabel}>Fustales</Text>
-                <Text style={styles.checkboxLabel}>Grandes</Text>
-              </View>
-            </View>
+            {renderCheckbox("fustalesGrandes", "Fustales Grandes")}
           </View>
         </View>
+        
+        {/* Botón Aplicar dentro de la sección de árboles en el mapa */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.aplicarButton} onPress={confirmar}>
+            <Text style={styles.aplicarButtonText}>Aplicar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      {/* Botón Aplicar (ahora entre las dos secciones) */}
-      <TouchableOpacity style={styles.aplicarButton} onPress={confirmar}>
-        <Text style={styles.aplicarButtonText}>Aplicar</Text>
-      </TouchableOpacity>
 
       {/* Sección de información de subparcelas */}
       <View style={styles.section}>
@@ -146,6 +138,7 @@ const VisualizarTab = ({}) => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 16,
     backgroundColor: "white",
     borderRadius: 8,
@@ -156,18 +149,30 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 30,
     marginTop: 20,
+    color: "#194D20"
   },
   section: {
     backgroundColor: "#f9f9f9",
     borderRadius: 8,
     padding: 16,
     marginBottom: 20,
+    marginTop: 15,
+    borderWidth: 0.5,
+    borderColor: "#e0e0e0",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 3,
   },
   sectionTitle: {
-    fontSize: 25,
+    fontSize: 21,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: 25,
   },
   checkboxGrid: {
     flexDirection: "column",
@@ -175,7 +180,7 @@ const styles = StyleSheet.create({
   checkboxRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -184,34 +189,43 @@ const styles = StyleSheet.create({
   },
   checkboxLabel: {
     marginLeft: 8,
+    fontSize: 15, // Texto de checkboxes más grande
+    fontWeight: "500",
   },
   subparcelaRows: {
     flexDirection: "column",
-    gap: 12,
+    gap: 14,
   },
   subparcelaRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 8,
+    gap: 10,
   },
   subparcelaButton: {
     borderWidth: 1,
     borderColor: "#e0e0e0",
     borderRadius: 8,
-    padding: 12,
-    minWidth: 80,
+    padding: 14,
+    minWidth: 85,
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "white",
   },
   subparcelaButtonText: {
     fontWeight: "500",
+    fontSize: 15,
+  },
+  buttonContainer: {
+    alignItems: "center",
+    marginTop: 16,
   },
   aplicarButton: {
     backgroundColor: "#4285F4",
     borderRadius: 8,
     padding: 14,
     alignItems: "center",
-    marginVertical: 20,
+    width: "60%", // Botón menos ancho (60% del ancho del contenedor)
+    marginBottom: 10,
   },
   aplicarButtonText: {
     color: "white",
