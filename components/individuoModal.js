@@ -156,6 +156,7 @@ import {
             formaFuste: values.formaFuste,
             dano: values.dano,
             penetracion: values.penetracion,
+            cedula_brigadista: brigadista?.cedula,
         };
     
         console.log("Guardando individuo:", datosIndividuo);

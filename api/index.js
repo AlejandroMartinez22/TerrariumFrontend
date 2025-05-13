@@ -730,12 +730,23 @@ export const guardarMuestraEnBackend = async (muestraData) => {
 };
 
 
-//Funcion para guardar un individuo arboreo en el Backend
-
 export const guardarIndividuoEnBackend = async (individuoData) => {
   try {
     const token = await getCurrentToken();
-    const response = await api.post("/individuos/guardar", individuoData, {
+    
+    // Asegurarse de que todos los datos necesarios estén presentes
+    const datosCompletos = {
+      ...individuoData,
+      // Asegurarse de que estos campos estén presentes
+      distanciaHorizontal: individuoData.distanciaHorizontal || "0",
+      anguloVistoBajo: individuoData.anguloVistoBajo || "0",
+      anguloVistoAlto: individuoData.anguloVistoAlto || "0",
+      cedula_brigadista: individuoData.cedula_brigadista,
+    };
+    
+    console.log("Enviando datos al backend:", datosCompletos);
+    
+    const response = await api.post("/individuos/guardar", datosCompletos, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

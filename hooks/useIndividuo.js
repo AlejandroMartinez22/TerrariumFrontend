@@ -15,16 +15,22 @@
     // Función para guardar un individuo en el backend
     const guardarIndividuo = async (individuoData) => {
         try {
-        const id = await guardarIndividuoEnBackend(individuoData);
-        return id;
-        } catch (error) {
-        console.error("Error al guardar el individuo:", error);
-        return null;
-        }
-    };
-
-    return {
-        siguienteIdIndividuo,
-        guardarIndividuo
-    };
+          // Asegurarse de que todos los datos necesarios estén presentes
+            if (!individuoData.cedula_brigadista) {
+                console.error("Error: No se proporcionó la cédula del brigadista");
+                return null;
+            }
+            
+            const id = await guardarIndividuoEnBackend(individuoData);
+            return id;
+            } catch (error) {
+            console.error("Error al guardar el individuo:", error);
+            return null;
+            }
+        };
+        
+        return {
+            siguienteIdIndividuo,
+            guardarIndividuo
+        };
     };
