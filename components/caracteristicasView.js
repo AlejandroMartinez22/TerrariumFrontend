@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import { useBrigadista } from "../context/BrigadistaContext";
 import { useNavigation } from "@react-navigation/native";
@@ -55,48 +56,54 @@ export default function CaracteristicasView({ route }) {
   // Renderizado para estado de carga
   if (loading) {
     return (
-      <View style={[styles.container, styles.centeredContent]}>
-        <ActivityIndicator size="large" color="#4285F4" />
-        <Text style={{ marginTop: 10 }}>
-          Cargando datos de la subparcela...
-        </Text>
-      </View>
+      <SafeAreaView style={styles.fullScreenContainer}>
+        <View style={styles.centeredContent}>
+          <ActivityIndicator size="large" color="#4285F4" />
+          <Text style={{ marginTop: 10 }}>
+            Cargando datos de la subparcela...
+          </Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   // Renderizado para estado de error
   if (error) {
     return (
-      <View style={[styles.container, styles.centeredContent]}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.closeButtonText}>Volver</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={styles.fullScreenContainer}>
+        <View style={styles.centeredContent}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.closeButtonText}>Volver</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
   // Renderizado cuando no hay datos
   if (!subparcelaData) {
     return (
-      <View style={[styles.container, styles.centeredContent]}>
-        <Text>No se encontraron datos para esta subparcela.</Text>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.closeButtonText}>Volver</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={styles.fullScreenContainer}>
+        <View style={styles.centeredContent}>
+          <Text>No se encontraron datos para esta subparcela.</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.closeButtonText}>Volver</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
   // Renderizado principal con datos
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.fullScreenContainer}>
       <View style={styles.content}>
         <Text style={styles.titulo}>
           Características de la {nombreSubparcela}
@@ -218,39 +225,32 @@ export default function CaracteristicasView({ route }) {
           <Text style={styles.closeButtonText}>Cerrar</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  fullScreenContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
-    padding: 10,
+    backgroundColor: "white",
   },
   centeredContent: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   content: {
-    backgroundColor: "white",
-    borderRadius: 8,
+    flex: 1,
     padding: 16,
-    width: "100%",
-    maxWidth: 420,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+    backgroundColor: "white",
   },
   titulo: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: 20,
+    marginTop: 10,
+    color: "#194D20",
   },
   infoRow: {
     flexDirection: "row",
@@ -321,6 +321,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     alignItems: "center",
+    marginHorizontal: 20,
     marginTop: 10,
   },
   closeButtonText: {
