@@ -289,14 +289,13 @@ export default function CaracteristicasView({ route }) {
 
       {/* Sección para mostrar conteo de árboles */}
       <View style={styles.infoTableContainer}>
-  <View style={[styles.infoTable, { flex: 1 }]}>
-    <View style={styles.infoTableHeader}>
-      <Text style={styles.infoTableHeaderText}>Conteo de Árboles</Text>
-      <Text style={styles.infoTableHeaderText}>Cantidad</Text>
-    </View>
-    
-    {estadisticas.total > 0 ? (
-      <>
+      {estadisticas.total > 0 ? (
+      <View style={[styles.infoTable, { flex: 1 }]}>
+        <View style={styles.infoTableHeader}>
+          <Text style={styles.infoTableHeaderText}>Conteo de Árboles</Text>
+          <Text style={styles.infoTableHeaderText}>Cantidad</Text>
+        </View>
+        
         <View style={styles.infoTableRow}>
           <Text style={[styles.infoTableCell, styles.boldText]}>
             Total de árboles
@@ -337,9 +336,9 @@ export default function CaracteristicasView({ route }) {
             {estadisticas.porTipo["Fustal Grande"]}
           </Text>
         </View>
-      </>
+      </View>
     ) : (
-      <View style={styles.noTreesContentWrapper}>
+      <View style={[styles.emptyTreesBox, { flex: 1 }]}>
         <View style={styles.noTreesContent}>
           <Text style={styles.noTreesText}>
             No hay ningún árbol registrado de momento
@@ -352,7 +351,6 @@ export default function CaracteristicasView({ route }) {
       </View>
     )}
   </View>
-</View>
 
       {/* Botón de cerrar */}
       <TouchableOpacity
@@ -536,14 +534,23 @@ const styles = StyleSheet.create({
     color: '#666',
   },
 
+  emptyTreesBox: {
+    height: 175, // Altura total - exactamente igual a la tabla con encabezado (5 filas de 28px + encabezado)
+    borderWidth: 1,
+    borderColor: "#ccc",
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+
   imageContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
   },
   noTreesImage: {
-    width: 80, //cambiar a 50 si no
-    height: 80,
+    width: 100, //cambiar a 50 si no
+    height: 100,
     opacity: 0.6,
     resizeMode: 'contain',
 
