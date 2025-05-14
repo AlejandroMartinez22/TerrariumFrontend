@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   SafeAreaView,
+  Image,
 } from "react-native";
 import { useBrigadista } from "../context/BrigadistaContext";
 import { useNavigation } from "@react-navigation/native";
@@ -16,6 +17,9 @@ export default function CaracteristicasView({ route }) {
   const { subparcelaId: nombreSubparcela } = route.params;
   const { brigadista } = useBrigadista();
   const navigation = useNavigation();
+  
+  // Importar la imagen de árboles no encontrados
+  const iconoArbolesNoEncontrados = require('../assets/IconoArbolesNoEncontrados.png');
 
   // Estados para manejar datos y carga
   const [loading, setLoading] = useState(true);
@@ -280,11 +284,19 @@ export default function CaracteristicasView({ route }) {
               </View>
             </>
           ) : (
-            <View style={styles.infoTableRow}>
-              <Text style={[styles.infoTableCell, { textAlign: "center", flex: 2 }]}>
-                No hay ningún árbol registrado de momento
-              </Text>
-            </View>
+            <>
+              <View style={styles.infoTableRow}>
+                <Text style={[styles.infoTableCell, { textAlign: "center", flex: 2 }]}>
+                  No hay ningún árbol registrado de momento
+                </Text>
+              </View>
+              <View style={styles.imageContainer}>
+                <Image 
+                  source={iconoArbolesNoEncontrados} 
+                  style={styles.noTreesImage} 
+                />
+              </View>
+            </>
           )}
         </View>
       </View>
@@ -415,5 +427,16 @@ const styles = StyleSheet.create({
   boldBlueText: {
     fontWeight: "bold",
     color: "#0000FF",
+  },
+  imageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  noTreesImage: {
+    width: 100,
+    height: 100,
+    opacity: 0.5,
+    resizeMode: 'contain',
   },
 });
