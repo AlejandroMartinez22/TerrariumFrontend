@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchIndividuosByConglomerado } from '../api'; // Ajusta la ruta según tu estructura
 
-export const useIndividuos = (idConglomerado, subparcela) => {
+export const useConteoArbolesSubparcela = (idConglomerado, subparcela) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [individuos, setIndividuos] = useState([]);

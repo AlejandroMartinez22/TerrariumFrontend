@@ -10,6 +10,7 @@ import {
 import { useBrigadista } from "../context/BrigadistaContext";
 import { useNavigation } from "@react-navigation/native";
 import { getCaracteristicasSubparcela } from "../hooks/useView";
+import { useConteoArbolesSubparcela } from "../hooks/useConteoArbolesSubparcela";
 
 export default function CaracteristicasView({ route }) {
   const { subparcelaId: nombreSubparcela } = route.params;
@@ -22,6 +23,14 @@ export default function CaracteristicasView({ route }) {
   const [subparcelaData, setSubparcelaData] = useState(null);
   const [coberturas, setCoberturas] = useState([]);
   const [alteraciones, setAlteraciones] = useState([]);
+
+
+  const { 
+    estadisticas, 
+    loading: loadingIndividuos, 
+    error: errorIndividuos 
+  } = useConteoArbolesSubparcela(brigadista.idConglomerado, nombreSubparcela);
+
 
   // Cargar datos cuando el componente se monta
   useEffect(() => {
@@ -54,7 +63,7 @@ export default function CaracteristicasView({ route }) {
   }, [nombreSubparcela, brigadista.idConglomerado]);
 
   // Renderizado para estado de carga
-  if (loading) {
+  if (loading  || loadingIndividuos) {
     return (
       <SafeAreaView style={styles.fullScreenContainer}>
         <View style={styles.centeredContent}>
@@ -68,11 +77,11 @@ export default function CaracteristicasView({ route }) {
   }
 
   // Renderizado para estado de error
-  if (error) {
+  if (error || errorIndividuos) {
     return (
       <SafeAreaView style={styles.fullScreenContainer}>
         <View style={styles.centeredContent}>
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorText}>{error || errorIndividuos}</Text>
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => navigation.goBack()}
@@ -143,88 +152,150 @@ export default function CaracteristicasView({ route }) {
             </View>
           </View>
         </View>
+      </View>
 
-        {/* Tablas de cobertura y alteración */}
-        <View style={styles.infoTableContainer}>
-          <View style={styles.infoTable}>
-            <View style={styles.infoTableHeader}>
-              <Text style={styles.infoTableHeaderText}>Cobertura</Text>
-              <Text style={styles.infoTableHeaderText}>%</Text>
-            </View>
-            {coberturas && coberturas.length > 0 ? (
-              coberturas.map((item, index) => (
-                <View key={index} style={styles.infoTableRow}>
-                  <Text style={[styles.infoTableCell, styles.boldText]}>
-                    {item.nombre || "N/A"}
-                  </Text>
-                  <Text style={styles.infoTableCell}>
-                    {item.porcentaje || "N/A"}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <View style={styles.infoTableRow}>
-                <Text
-                  style={[
-                    styles.infoTableCell,
-                    { textAlign: "center", flex: 2 },
-                  ]}
-                >
-                  No hay datos de cobertura
+
+      {/* Tablas de cobertura y alteración */}
+      <View style={styles.infoTableContainer}>
+        <View style={styles.infoTable}>
+          <View style={styles.infoTableHeader}>
+            <Text style={styles.infoTableHeaderText}>Cobertura</Text>
+            <Text style={styles.infoTableHeaderText}>%</Text>
+          </View>
+          {coberturas && coberturas.length > 0 ? (
+            coberturas.map((item, index) => (
+              <View key={index} style={styles.infoTableRow}>
+                <Text style={[styles.infoTableCell, styles.boldText]}>
+                  {item.nombre || "N/A"}
+                </Text>
+                <Text style={styles.infoTableCell}>
+                  {item.porcentaje || "N/A"}
                 </Text>
               </View>
-            )}
-          </View>
-
-          <View style={styles.infoTable}>
-            <View style={styles.infoTableHeader}>
-              <Text style={styles.infoTableHeaderText}>Alteración</Text>
-              <Text style={styles.infoTableHeaderText}>Severidad</Text>
-            </View>
-            {alteraciones && alteraciones.length > 0 ? (
-              alteraciones.map((item, index) => (
-                <View key={index} style={styles.infoTableRow}>
-                  <Text style={[styles.infoTableCell, styles.smallText]}>
-                    {item.nombre || "N/A"}
-                  </Text>
-                  <Text style={[styles.infoTableCell, styles.boldBlueText]}>
-                    {item.severidad || "N/A"}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <View style={styles.infoTableRow}>
-                <Text
-                  style={[
-                    styles.infoTableCell,
-                    { textAlign: "center", flex: 2 },
-                  ]}
-                >
-                  No hay datos de alteración
-                </Text>
-              </View>
-            )}
-
-            {/* Filas adicionales vacías para coincidir con el mockup */}
+            ))
+          ) : (
             <View style={styles.infoTableRow}>
-              <Text style={styles.infoTableCell}></Text>
-              <Text style={styles.infoTableCell}></Text>
+              <Text
+                style={[
+                  styles.infoTableCell,
+                  { textAlign: "center", flex: 2 },
+                ]}
+              >
+                No hay datos de cobertura
+              </Text>
             </View>
-            <View style={styles.infoTableRow}>
-              <Text style={styles.infoTableCell}></Text>
-              <Text style={styles.infoTableCell}></Text>
-            </View>
-          </View>
+          )}
         </View>
 
-        {/* Botón de cerrar */}
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.closeButtonText}>Cerrar</Text>
-        </TouchableOpacity>
+        <View style={styles.infoTable}>
+          <View style={styles.infoTableHeader}>
+            <Text style={styles.infoTableHeaderText}>Alteración</Text>
+            <Text style={styles.infoTableHeaderText}>Severidad</Text>
+          </View>
+          {alteraciones && alteraciones.length > 0 ? (
+            alteraciones.map((item, index) => (
+              <View key={index} style={styles.infoTableRow}>
+                <Text style={[styles.infoTableCell, styles.smallText]}>
+                  {item.nombre || "N/A"}
+                </Text>
+                <Text style={[styles.infoTableCell, styles.boldBlueText]}>
+                  {item.severidad || "N/A"}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <View style={styles.infoTableRow}>
+              <Text
+                style={[
+                  styles.infoTableCell,
+                  { textAlign: "center", flex: 2 },
+                ]}
+              >
+                No hay datos de alteración
+              </Text>
+            </View>
+          )}
+
+          {/* Filas adicionales vacías para coincidir con el mockup */}
+          <View style={styles.infoTableRow}>
+            <Text style={styles.infoTableCell}></Text>
+            <Text style={styles.infoTableCell}></Text>
+          </View>
+          <View style={styles.infoTableRow}>
+            <Text style={styles.infoTableCell}></Text>
+            <Text style={styles.infoTableCell}></Text>
+          </View>
+        </View>
       </View>
+
+      {/* Sección para mostrar conteo de árboles */}
+      <View style={styles.infoTableContainer}>
+        <View style={[styles.infoTable, { flex: 1 }]}>
+          <View style={styles.infoTableHeader}>
+            <Text style={styles.infoTableHeaderText}>Conteo de Árboles</Text>
+            <Text style={styles.infoTableHeaderText}>Cantidad</Text>
+          </View>
+          
+          {estadisticas.total > 0 ? (
+            <>
+              <View style={styles.infoTableRow}>
+                <Text style={[styles.infoTableCell, styles.boldText]}>
+                  Total de árboles
+                </Text>
+                <Text style={styles.infoTableCell}>
+                  {estadisticas.total}
+                </Text>
+              </View>
+              <View style={styles.infoTableRow}>
+                <Text style={[styles.infoTableCell, styles.boldText]}>
+                  Brinzales
+                </Text>
+                <Text style={styles.infoTableCell}>
+                  {estadisticas.porTipo.Brinzal}
+                </Text>
+              </View>
+              <View style={styles.infoTableRow}>
+                <Text style={[styles.infoTableCell, styles.boldText]}>
+                  Latizales
+                </Text>
+                <Text style={styles.infoTableCell}>
+                  {estadisticas.porTipo.Latizal}
+                </Text>
+              </View>
+              <View style={styles.infoTableRow}>
+                <Text style={[styles.infoTableCell, styles.boldText]}>
+                  Fustales
+                </Text>
+                <Text style={styles.infoTableCell}>
+                  {estadisticas.porTipo.Fustal}
+                </Text>
+              </View>
+              <View style={styles.infoTableRow}>
+                <Text style={[styles.infoTableCell, styles.boldText]}>
+                  Fustales Grandes
+                </Text>
+                <Text style={styles.infoTableCell}>
+                  {estadisticas.porTipo["Fustal Grande"]}
+                </Text>
+              </View>
+            </>
+          ) : (
+            <View style={styles.infoTableRow}>
+              <Text style={[styles.infoTableCell, { textAlign: "center", flex: 2 }]}>
+                No hay ningún árbol registrado de momento
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Botón de cerrar */}
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.closeButtonText}>Cerrar</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -283,6 +354,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 15,
     marginBottom: 20,
+    paddingHorizontal: 16,
   },
   infoTable: {
     flex: 1,
