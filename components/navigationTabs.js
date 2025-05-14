@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image, View, TouchableWithoutFeedback, Alert } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
 import MapScreen from "./mapScreen";
 import ViewScreen from "./viewScreen";
 
 // Importar las pantallas específicas para el rol de Botánico
-import VentanaRegistrar from "./VentanaRegistrar"; // Debes crear este componente
+import VentanaRegistrar from "./VentanaRegistrar";
 import SeleccionarSubparcela from "./SeleccionarSubparcela";
 
 import TutorialOverlay from "./tutorialOverlay";
@@ -22,6 +23,20 @@ import { VerificarPuntosEnBackEnd } from "../api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createBottomTabNavigator();
+const BotanicoStack = createStackNavigator();
+
+// Componente para la navegación de botánicos que incluye VentanaRegistrar y SeleccionarSubparcela
+const BotanicoNavigator = () => {
+  return (
+    <BotanicoStack.Navigator screenOptions={{ headerShown: false }}>
+      <BotanicoStack.Screen name="VentanaRegistrar" component={VentanaRegistrar} />
+      <BotanicoStack.Screen 
+        name="SeleccionarSubparcela" 
+        component={SeleccionarSubparcela} 
+      />
+    </BotanicoStack.Navigator>
+  );
+};
 
 export default function NavigationTabs() {
   const [showTutorial, setShowTutorial] = useState(false);
@@ -286,8 +301,9 @@ export default function NavigationTabs() {
   const currentSubparcela = subparcelas[currentSubparcelaIndex] || null;
 
   // Determinar qué componentes mostrar según el rol del brigadista
-  const AddScreenComponent =
-    brigadista?.rol === "Botanico" ? VentanaRegistrar : SeleccionarSubparcela;
+  const AddScreenComponent = brigadista?.rol === "Botanico" 
+    ? BotanicoNavigator 
+    : SeleccionarSubparcela;
 
   return (
     <>
@@ -352,11 +368,7 @@ export default function NavigationTabs() {
         <Tab.Screen name="Map" component={MapScreen} />
         <Tab.Screen
           name="Add"
-          component={
-            brigadista?.rol === "Botanico"
-              ? VentanaRegistrar
-              : SeleccionarSubparcela
-          }
+          component={AddScreenComponent}
           initialParams={{
             tipo: brigadista?.rol === "Botanico" ? "registrar" : "arbol",
           }}

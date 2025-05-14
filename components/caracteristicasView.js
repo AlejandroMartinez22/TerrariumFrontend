@@ -28,13 +28,15 @@ export default function CaracteristicasView({ route }) {
   const [coberturas, setCoberturas] = useState([]);
   const [alteraciones, setAlteraciones] = useState([]);
 
+  // Verificar si brigadista existe antes de acceder a sus propiedades
+  const conglomeradoId = brigadista?.idConglomerado;
 
   const { 
     estadisticas, 
     loading: loadingIndividuos, 
     error: errorIndividuos 
   } = useConteoArbolesSubparcela(
-    brigadista.idConglomerado, 
+    conglomeradoId, 
     subparcelaData?.id // Usamos el ID de la subparcela en lugar del nombre
   );
 
@@ -43,10 +45,17 @@ export default function CaracteristicasView({ route }) {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
+        // Verificar si brigadista existe antes de continuar
+        if (!conglomeradoId) {
+          setError("No hay información del brigadista disponible");
+          setLoading(false);
+          return;
+        }
+        
         setLoading(true);
         const resultado = await getCaracteristicasSubparcela(
           nombreSubparcela,
-          brigadista.idConglomerado
+          conglomeradoId
         );
 
         if (resultado) {
@@ -67,7 +76,7 @@ export default function CaracteristicasView({ route }) {
     };
 
     cargarDatos();
-  }, [nombreSubparcela, brigadista.idConglomerado]);
+  }, [nombreSubparcela, conglomeradoId]);
 
   // Renderizado para estado de carga
   if (loading  || loadingIndividuos) {
@@ -100,12 +109,12 @@ export default function CaracteristicasView({ route }) {
     );
   }
 
-  // Renderizado cuando no hay datos
-  if (!subparcelaData) {
+  // Renderizado cuando no hay datos o brigadista
+  if (!subparcelaData || !brigadista) {
     return (
       <SafeAreaView style={styles.fullScreenContainer}>
         <View style={styles.centeredContent}>
-          <Text>No se encontraron datos para esta subparcela.</Text>
+          <Text>{!brigadista ? "Sesión no disponible" : "No se encontraron datos para esta subparcela."}</Text>
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => navigation.goBack()}

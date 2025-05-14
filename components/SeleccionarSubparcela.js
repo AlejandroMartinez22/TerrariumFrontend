@@ -8,8 +8,8 @@ import {
 } from "react-native";
 
 const SeleccionarSubparcela = ({ navigation, route }) => {
-  // Extraer el tipo de la ruta (arbol o muestra)
-  const { tipo } = route.params;
+  // Extraer el tipo de la ruta (arbol o muestra) y si viene de un botánico
+  const { tipo, fromBotanico } = route.params || {};
   
   // Determinar el título según el tipo
   const titulo = tipo === "arbol" 
@@ -18,6 +18,8 @@ const SeleccionarSubparcela = ({ navigation, route }) => {
   
   const handleOptionSelect = (option) => {
     if (tipo === "arbol") {
+      // Si viene de un botánico, usamos navigate para mantener la historia de navegación
+      // Si no, usamos el Stack Navigator directamente
       navigation.navigate("registrarIndividuoBotanico", { nombreSubparcela: option });
       console.log("Navegando a la ventana de registro del individuo:", option);
     } else {
@@ -74,10 +76,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   titulo: {
-    fontSize: 35,
-    top: 35,
+    fontSize: 32,
+    top: 25,
+    marginBottom: 20,
     color: "#000",
     textAlign: "center",
+
   },
   buttonsContainer: {
     flex: 1,
@@ -86,6 +90,7 @@ const styles = StyleSheet.create({
     width: "80%",
     marginTop: 0,
   },
+
   optionButton: {
     width: "100%",
     padding: 18,

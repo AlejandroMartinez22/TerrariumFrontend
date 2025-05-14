@@ -9,12 +9,13 @@ import {
   SafeAreaView,
 } from "react-native";
 
-const VentanaRegistrar = ({ navigation }) => {
+const VentanaRegistrar = ({ navigation, route }) => {
   const handleButtonPress = (option) => {
     if (option === "tree") {
-      navigation.navigate("SeleccionarSubparcela", {tipo: "arbol"});
+      // Pasamos un parámetro adicional para indicar que venimos de VentanaRegistrar
+      navigation.navigate("SeleccionarSubparcela", {tipo: "arbol", fromBotanico: true});
     } else if (option === "sample") {
-      navigation.navigate("SeleccionarSubparcela", {tipo: "muestra"});
+      navigation.navigate("SeleccionarSubparcela", {tipo: "muestra", fromBotanico: true});
     }
   };  
 
