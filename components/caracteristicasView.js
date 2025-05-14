@@ -33,7 +33,10 @@ export default function CaracteristicasView({ route }) {
     estadisticas, 
     loading: loadingIndividuos, 
     error: errorIndividuos 
-  } = useConteoArbolesSubparcela(brigadista.idConglomerado, nombreSubparcela);
+  } = useConteoArbolesSubparcela(
+    brigadista.idConglomerado, 
+    subparcelaData?.id // Usamos el ID de la subparcela en lugar del nombre
+  );
 
 
   // Cargar datos cuando el componente se monta
@@ -117,7 +120,7 @@ export default function CaracteristicasView({ route }) {
   // Renderizado principal con datos
   return (
     <SafeAreaView style={styles.fullScreenContainer}>
-      <View style={styles.content}>
+      <View style={styles.mainContent}>
         <Text style={styles.titulo}>
           Características de la {nombreSubparcela}
         </Text>
@@ -167,27 +170,55 @@ export default function CaracteristicasView({ route }) {
             <Text style={styles.infoTableHeaderText}>%</Text>
           </View>
           {coberturas && coberturas.length > 0 ? (
-            coberturas.map((item, index) => (
-              <View key={index} style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, styles.boldText]}>
-                  {item.nombre || "N/A"}
-                </Text>
-                <Text style={styles.infoTableCell}>
-                  {item.porcentaje || "N/A"}
+            <>
+              {/* Mostrar las coberturas existentes */}
+              {coberturas.slice(0, 4).map((item, index) => (
+                <View key={index} style={styles.infoTableRow}>
+                  <Text
+                    style={[styles.infoTableCell, styles.smallText]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {item.nombre || "N/A"}
+                  </Text>
+                  <Text
+                    style={styles.infoTableCell}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {item.porcentaje || "N/A"}
+                  </Text>
+                </View>
+              ))}
+          
+              {/* Agregar filas vacías si hay menos de 4 coberturas */}
+              {Array.from({ length: Math.max(0, 4 - coberturas.length) }).map((_, index) => (
+                <View key={`empty-${index}`} style={styles.infoTableRow}>
+                  <Text style={styles.infoTableCell}></Text>
+                  <Text style={styles.infoTableCell}></Text>
+                </View>
+              ))}
+            </>
+          ) : (
+            <>
+              <View style={styles.infoTableRow}>
+                <Text
+                  style={[
+                    styles.infoTableCell,
+                    { textAlign: "center", flex: 2 },
+                  ]}
+                >
+                  No hay datos de cobertura
                 </Text>
               </View>
-            ))
-          ) : (
-            <View style={styles.infoTableRow}>
-              <Text
-                style={[
-                  styles.infoTableCell,
-                  { textAlign: "center", flex: 2 },
-                ]}
-              >
-                No hay datos de cobertura
-              </Text>
-            </View>
+              {/* Agregar 3 filas vacías para mantener el tamaño */}
+              {Array.from({ length: 3 }).map((_, index) => (
+                <View key={`empty-${index}`} style={styles.infoTableRow}>
+                  <Text style={styles.infoTableCell}></Text>
+                  <Text style={styles.infoTableCell}></Text>
+                </View>
+              ))}
+            </>
           )}
         </View>
 
@@ -197,109 +228,131 @@ export default function CaracteristicasView({ route }) {
             <Text style={styles.infoTableHeaderText}>Severidad</Text>
           </View>
           {alteraciones && alteraciones.length > 0 ? (
-            alteraciones.map((item, index) => (
-              <View key={index} style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, styles.smallText]}>
-                  {item.nombre || "N/A"}
-                </Text>
-                <Text style={[styles.infoTableCell, styles.boldBlueText]}>
-                  {item.severidad || "N/A"}
+            <>
+              {/* Mostrar las alteraciones existentes */}
+              {alteraciones.slice(0, 4).map((item, index) => (
+                <View key={index} style={styles.infoTableRow}>
+                  <Text
+                    style={[styles.infoTableCell, styles.smallText]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {item.nombre || "N/A"}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.infoTableCell,
+                      item.severidad === "FA" ? styles.redText :
+                      item.severidad === "MA" ? styles.blueText :
+                      item.severidad === "NP" ? styles.greenText :
+                      styles.boldBlueText
+                    ]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {item.severidad || "N/A"}
+                  </Text>
+                </View>
+              ))}
+              
+              {/* Agregar filas vacías si hay menos de 4 alteraciones */}
+              {Array.from({ length: Math.max(0, 4 - alteraciones.length) }).map((_, index) => (
+                <View key={`empty-${index}`} style={styles.infoTableRow}>
+                  <Text style={styles.infoTableCell}></Text>
+                  <Text style={styles.infoTableCell}></Text>
+                </View>
+              ))}
+            </>
+          ) : (
+            <>
+              <View style={styles.infoTableRow}>
+                <Text
+                  style={[
+                    styles.infoTableCell,
+                    { textAlign: "center", flex: 2 },
+                  ]}
+                >
+                  No hay datos de alteración
                 </Text>
               </View>
-            ))
-          ) : (
-            <View style={styles.infoTableRow}>
-              <Text
-                style={[
-                  styles.infoTableCell,
-                  { textAlign: "center", flex: 2 },
-                ]}
-              >
-                No hay datos de alteración
-              </Text>
-            </View>
+              {/* Agregar 3 filas vacías para mantener el tamaño */}
+              {Array.from({ length: 3 }).map((_, index) => (
+                <View key={`empty-${index}`} style={styles.infoTableRow}>
+                  <Text style={styles.infoTableCell}></Text>
+                  <Text style={styles.infoTableCell}></Text>
+                </View>
+              ))}
+            </>
           )}
-
-          {/* Filas adicionales vacías para coincidir con el mockup */}
-          <View style={styles.infoTableRow}>
-            <Text style={styles.infoTableCell}></Text>
-            <Text style={styles.infoTableCell}></Text>
-          </View>
-          <View style={styles.infoTableRow}>
-            <Text style={styles.infoTableCell}></Text>
-            <Text style={styles.infoTableCell}></Text>
-          </View>
         </View>
       </View>
 
       {/* Sección para mostrar conteo de árboles */}
       <View style={styles.infoTableContainer}>
-        <View style={[styles.infoTable, { flex: 1 }]}>
-          <View style={styles.infoTableHeader}>
-            <Text style={styles.infoTableHeaderText}>Conteo de Árboles</Text>
-            <Text style={styles.infoTableHeaderText}>Cantidad</Text>
-          </View>
-          
-          {estadisticas.total > 0 ? (
-            <>
-              <View style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, styles.boldText]}>
-                  Total de árboles
-                </Text>
-                <Text style={styles.infoTableCell}>
-                  {estadisticas.total}
-                </Text>
-              </View>
-              <View style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, styles.boldText]}>
-                  Brinzales
-                </Text>
-                <Text style={styles.infoTableCell}>
-                  {estadisticas.porTipo.Brinzal}
-                </Text>
-              </View>
-              <View style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, styles.boldText]}>
-                  Latizales
-                </Text>
-                <Text style={styles.infoTableCell}>
-                  {estadisticas.porTipo.Latizal}
-                </Text>
-              </View>
-              <View style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, styles.boldText]}>
-                  Fustales
-                </Text>
-                <Text style={styles.infoTableCell}>
-                  {estadisticas.porTipo.Fustal}
-                </Text>
-              </View>
-              <View style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, styles.boldText]}>
-                  Fustales Grandes
-                </Text>
-                <Text style={styles.infoTableCell}>
-                  {estadisticas.porTipo["Fustal Grande"]}
-                </Text>
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={styles.infoTableRow}>
-                <Text style={[styles.infoTableCell, { textAlign: "center", flex: 2 }]}>
-                  No hay ningún árbol registrado de momento
-                </Text>
-              </View>
-              <View style={styles.imageContainer}>
-                <Image 
-                  source={iconoArbolesNoEncontrados} 
-                  style={styles.noTreesImage} 
-                />
-              </View>
-            </>
-          )}
+  <View style={[styles.infoTable, { flex: 1 }]}>
+    <View style={styles.infoTableHeader}>
+      <Text style={styles.infoTableHeaderText}>Conteo de Árboles</Text>
+      <Text style={styles.infoTableHeaderText}>Cantidad</Text>
+    </View>
+    
+    {estadisticas.total > 0 ? (
+      <>
+        <View style={styles.infoTableRow}>
+          <Text style={[styles.infoTableCell, styles.boldText]}>
+            Total de árboles
+          </Text>
+          <Text style={styles.infoTableCell}>
+            {estadisticas.total}
+          </Text>
+        </View>
+        <View style={styles.infoTableRow}>
+          <Text style={[styles.infoTableCell, styles.boldText]}>
+            Brinzales
+          </Text>
+          <Text style={styles.infoTableCell}>
+            {estadisticas.porTipo.Brinzal}
+          </Text>
+        </View>
+        <View style={styles.infoTableRow}>
+          <Text style={[styles.infoTableCell, styles.boldText]}>
+            Latizales
+          </Text>
+          <Text style={styles.infoTableCell}>
+            {estadisticas.porTipo.Latizal}
+          </Text>
+        </View>
+        <View style={styles.infoTableRow}>
+          <Text style={[styles.infoTableCell, styles.boldText]}>
+            Fustales
+          </Text>
+          <Text style={styles.infoTableCell}>
+            {estadisticas.porTipo.Fustal}
+          </Text>
+        </View>
+        <View style={styles.infoTableRow}>
+          <Text style={[styles.infoTableCell, styles.boldText]}>
+            Fustales Grandes
+          </Text>
+          <Text style={styles.infoTableCell}>
+            {estadisticas.porTipo["Fustal Grande"]}
+          </Text>
+        </View>
+      </>
+    ) : (
+      <View style={styles.noTreesContentWrapper}>
+        <View style={styles.noTreesContent}>
+          <Text style={styles.noTreesText}>
+            No hay ningún árbol registrado de momento
+          </Text>
+          <Image 
+            source={iconoArbolesNoEncontrados} 
+            style={styles.noTreesImage} 
+          />
         </View>
       </View>
+    )}
+  </View>
+</View>
 
       {/* Botón de cerrar */}
       <TouchableOpacity
@@ -317,6 +370,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
+  mainContent: {
+    padding: 16,
+    backgroundColor: "white",
+  },
   centeredContent: {
     flex: 1,
     justifyContent: "center",
@@ -331,9 +388,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 18,
     marginTop: 10,
-    color: "#194D20",
+    color: "black",
   },
   infoRow: {
     flexDirection: "row",
@@ -346,7 +403,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 13,
-    marginBottom: 4,
+    marginBottom: 10,
     textAlign: "center",
   },
   infoField: {
@@ -364,8 +421,8 @@ const styles = StyleSheet.create({
   infoTableContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 15,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 12,
     paddingHorizontal: 16,
   },
   infoTable: {
@@ -385,14 +442,23 @@ const styles = StyleSheet.create({
     padding: 8,
     textAlign: "center",
     fontWeight: "bold",
-    fontSize: 12,
+    fontSize: 12.5,
   },
   infoTableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
-    minHeight: 28, // Altura mínima para todas las filas
+    height: 28, // Altura mínima para todas las filas
   },
+
+  infoTableRowWithImage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    height: 56, // Altura para la fila con imagen (equivalente a 2 filas estándar)
+  },
+
   infoTableCell: {
     flex: 1,
     padding: 6,
@@ -400,14 +466,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     justifyContent: "center",
   },
+
   closeButton: {
     backgroundColor: "#4285F4",
     borderRadius: 8,
     padding: 12,
+    width: "75%",
+    alignSelf: "center",
     alignItems: "center",
-    marginHorizontal: 20,
-    marginTop: 10,
+    marginTop: 25, // antes era 0
+    marginHorizontal: 16, // opcional, para alinearlo con los bordes
   },
+
   closeButtonText: {
     color: "white",
     fontWeight: "bold",
@@ -415,7 +485,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#d32f2f",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 12,
     fontSize: 16,
   },
   boldText: {
@@ -424,19 +494,58 @@ const styles = StyleSheet.create({
   smallText: {
     fontSize: 11,
   },
-  boldBlueText: {
-    fontWeight: "bold",
+  redText: {
+    fontWeight: "500",
+    color: "#FF0000",
+  },
+  blueText: {
+    fontWeight: "500",
     color: "#0000FF",
   },
+  greenText: {
+    fontWeight: "500",
+    color: "#008000",
+  },
+  noTreesContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: 'white',
+    minHeight: 200,
+    marginBottom: 12,
+  },
+
+  noTreesContentWrapper: {
+    height: 140, // Exactamente igual a la altura de 5 filas de 28px
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  noTreesContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+
+  noTreesText: {
+    textAlign: 'center',
+    marginBottom: 12,
+    fontSize: 14,
+    color: '#666',
+  },
+
   imageContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
   },
   noTreesImage: {
-    width: 100,
-    height: 100,
-    opacity: 0.5,
+    width: 80, //cambiar a 50 si no
+    height: 80,
+    opacity: 0.6,
     resizeMode: 'contain',
+
   },
 });

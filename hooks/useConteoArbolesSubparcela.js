@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchIndividuosByConglomerado } from '../api'; // Ajusta la ruta según tu estructura
 
-export const useConteoArbolesSubparcela = (idConglomerado, subparcela) => {
+export const useConteoArbolesSubparcela = (idConglomerado, subparcelaId) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [individuos, setIndividuos] = useState([]);
@@ -23,9 +23,9 @@ export const useConteoArbolesSubparcela = (idConglomerado, subparcela) => {
         // Obtener todos los individuos del conglomerado
         const todosIndividuos = await fetchIndividuosByConglomerado(idConglomerado);
         
-        // Filtrar solo los de la subparcela especificada
-        const individuosFiltrados = subparcela 
-          ? todosIndividuos.filter(ind => ind.subparcela === subparcela)
+        // Filtrar solo los de la subparcela especificada por ID
+        const individuosFiltrados = subparcelaId 
+          ? todosIndividuos.filter(ind => ind.id_subparcela == subparcelaId)  // Usando == en lugar de === para manejar casos donde los tipos puedan ser diferentes (string vs number)
           : todosIndividuos;
         
         setIndividuos(individuosFiltrados);
@@ -39,8 +39,8 @@ export const useConteoArbolesSubparcela = (idConglomerado, subparcela) => {
         };
         
         individuosFiltrados.forEach(individuo => {
-          if (individuo.tamano in conteo) {
-            conteo[individuo.tamano]++;
+          if (individuo.tamaño_individuo in conteo) {
+            conteo[individuo.tamaño_individuo]++;
           }
         });
         
@@ -60,7 +60,7 @@ export const useConteoArbolesSubparcela = (idConglomerado, subparcela) => {
     if (idConglomerado) {
       cargarIndividuos();
     }
-  }, [idConglomerado, subparcela]);
+  }, [idConglomerado, subparcelaId]);
 
   return { individuos, estadisticas, loading, error };
 };
