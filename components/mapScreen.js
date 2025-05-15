@@ -635,7 +635,7 @@ export default function MapScreen() {
           {/* Componente para mostrar qué tipos de árboles están siendo mostrados */}
           {arbolesFiltrados.length > 0 && (
             <View style={styles.filtroInfo}>
-              <Text style={styles.filtroTitulo}>Árboles mostrados:</Text>
+              <Text style={styles.filtroTitulo}>Árboles mostrados</Text>
               {tiposSeleccionados.latizales && (
                 <View style={styles.filtroItem}>
                   <Image
@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
-  filtroInfo: {
+   filtroInfo: {
     position: "absolute",
     top: 10,
     right: 10,
@@ -743,11 +743,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     maxWidth: 150,
   },
+
   filtroTitulo: {
     fontWeight: "bold",
-    fontSize: 14,
+    fontSize: 11,
+    textAlign: "center",
     marginBottom: 5,
   },
+
   filtroItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -759,11 +762,12 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   filtroTexto: {
-    fontSize: 12,
+    fontSize: 10,
   },
   contadorArboles: {
     marginTop: 5,
-    fontSize: 12,
-    fontWeight: "bold",
+    fontSize: 10.5,
+    fontWeight: "500",
+    textAlign: "center",
   },
 });

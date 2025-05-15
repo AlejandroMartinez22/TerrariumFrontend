@@ -45,15 +45,6 @@ const ArbolMarker = ({ arbol, shouldShowLabels }) => {
     }
   };
 
-  // Obtener información para mostrar en etiqueta
-  const getEtiqueta = () => {
-    let etiqueta = `ID: ${arbol.id}`;
-    if (arbol.especie) {
-      etiqueta += `\n${arbol.especie}`;
-    }
-    return etiqueta;
-  };
-
   const iconSize = getIconSize(arbol.tamaño_individuo);
 
   return (
@@ -62,8 +53,6 @@ const ArbolMarker = ({ arbol, shouldShowLabels }) => {
         latitude: lat,
         longitude: lng,
       }}
-      title={`ID: ${arbol.id}`}
-      description={`Especie: ${arbol.especie || 'No disponible'}\nTipo: ${arbol.tamaño_individuo || 'No especificado'}`}
     >
       <View style={styles.markerContainer}>
         <Image
@@ -71,13 +60,6 @@ const ArbolMarker = ({ arbol, shouldShowLabels }) => {
           style={[styles.markerIcon, { width: iconSize, height: iconSize }]}
           resizeMode="contain"
         />
-        {shouldShowLabels && (
-          <View style={styles.labelContainer}>
-            <Text style={styles.labelText}>
-              {getEtiqueta()}
-            </Text>
-          </View>
-        )}
       </View>
     </Marker>
   );
