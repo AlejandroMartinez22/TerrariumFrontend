@@ -74,7 +74,6 @@ export const getIndividuosByConglomerado = async (idConglomerado) => {
     // Llama a la función de la API que ya maneja la comunicación con el backend
     const individuos = await fetchIndividuosByConglomerado(idConglomerado);
     
-    console.log("Individuos recibidos:", individuos);
     return individuos;
   } catch (error) {
     console.error("Error al obtener individuos por conglomerado:", error);

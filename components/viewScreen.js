@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator } from "react-native";
 import { Checkbox } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { getIndividuosByConglomerado } from "../hooks/useView";
 import { useBrigadista } from "../context/BrigadistaContext";
+import useIndividuoView from "../hooks/useIndividuosView";
 
-const VisualizarTab = ({}) => {
+const VisualizarTab = () => {
   // Acceso al objeto de navegación
   const navigation = useNavigation();
 
@@ -16,15 +16,58 @@ const VisualizarTab = ({}) => {
     fustales: false,
     fustalesGrandes: false,
   });
-
+  
   // Estado para la subparcela seleccionada - ninguna seleccionada por defecto
   const [selectedSubparcela, setSelectedSubparcela] = useState(null);
 
-  // Estado para mostrar u ocultar el modal
-  const [modalVisible, setModalVisible] = useState(false);
+  // Estado para almacenar los árboles filtrados que se mostrarán
+  const [arbolesFiltrados, setArbolesFiltrados] = useState([]);
+  
+  // Estado para manejar la carga local (del botón "Aplicar")
+  const [isApplying, setIsApplying] = useState(false);
+  
+  // Estado para indicar si los datos se han cargado al menos una vez
+  const [dataLoaded, setDataLoaded] = useState(false);
 
+  // Acceso al contexto del brigadista
   const { brigadista } = useBrigadista();
-  const idConglomerado = brigadista?.idConglomerado; // Reemplaza con el ID real del conglomerado
+  const idConglomerado = brigadista?.idConglomerado;
+
+  // Usar el hook useIndividuoView en el nivel superior del componente
+  const { individuosAgrupados, loading, error } = useIndividuoView(idConglomerado);
+
+  // Efecto para filtrar los árboles cuando cambian las selecciones o los datos
+  useEffect(() => {
+    if (dataLoaded && individuosAgrupados) {
+      // Filtra los árboles según los checkboxes seleccionados
+      let arbolesFiltrados = [];
+      
+      if (checkedItems.latizales && individuosAgrupados.Latizal) {
+        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados.Latizal];
+      }
+      if (checkedItems.brinzales && individuosAgrupados.Brinzal) {
+        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados.Brinzal];
+      }
+      if (checkedItems.fustales && individuosAgrupados.Fustal) {
+        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados.Fustal];
+      }
+      if (checkedItems.fustalesGrandes && individuosAgrupados["Fustal Grande"]) {
+        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados["Fustal Grande"]];
+      }
+
+      setArbolesFiltrados(arbolesFiltrados);
+      console.log("Árboles filtrados:", arbolesFiltrados);
+    }
+  }, [dataLoaded, individuosAgrupados, checkedItems]);
+
+  // Efecto para finalizar la animación de carga del botón
+  useEffect(() => {
+    if (isApplying && !loading) {
+      setIsApplying(false);
+      setDataLoaded(true);
+    }
+  }, [isApplying, loading]);
+
   // Función para manejar cambios en los checkboxes
   const handleCheckboxChange = (key) => {
     setCheckedItems({
@@ -34,27 +77,16 @@ const VisualizarTab = ({}) => {
   };
 
   // Función para manejar el botón de confirmar
-  const confirmar = async () => {
-    // Filtra solo los checkbox marcados
-
-    console.log("Presiono boton de confirmar  ", idConglomerado)
-    const individuos = await getIndividuosByConglomerado(idConglomerado); // Reemplaza con el ID real del conglomerado
-    console.log("Individuos obtenidos: ", individuos);
-
-    /*
-    const checkedItemsOnly = Object.keys(checkedItems).reduce((acc, key) => {
-      if (checkedItems[key]) {
-        acc[key] = true;
-      }
-      return acc;
-    }, {});
-
-    if (onConfirm && Object.keys(checkedItemsOnly).length > 0) {
-      onConfirm({
-        checkedItems: checkedItemsOnly,
-      });
+  const confirmar = () => {
+    setIsApplying(true);
+    
+    // Si los datos ya están cargados, solo necesitamos actualizar el filtro
+    if (!dataLoaded) {
+      setDataLoaded(true);
     }
-      */
+    
+    // El filtrado ocurrirá automáticamente en el useEffect cuando cambien
+    // dataLoaded o checkedItems
   };
 
   // Función actualizada para navegar a la vista de características
@@ -113,10 +145,35 @@ const VisualizarTab = ({}) => {
         
         {/* Botón Aplicar dentro de la sección de árboles en el mapa */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.aplicarButton} onPress={confirmar}>
-            <Text style={styles.aplicarButtonText}>Aplicar</Text>
+          <TouchableOpacity 
+            style={styles.aplicarButton} 
+            onPress={confirmar}
+            disabled={isApplying || loading}
+          >
+            {isApplying || loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+                <Text style={styles.aplicarButtonText}> Cargando...</Text>
+              </View>
+            ) : (
+              <Text style={styles.aplicarButtonText}>Aplicar</Text>
+            )}
           </TouchableOpacity>
         </View>
+        
+        {/* Mensaje de error si hay alguno */}
+        {error && (
+          <Text style={styles.errorText}>
+            Error al cargar los datos: {error}
+          </Text>
+        )}
+        
+        {/* Mostrar cantidad de árboles filtrados */}
+        {dataLoaded && !loading && !error && (
+          <Text style={styles.resultText}>
+            Se {arbolesFiltrados.length === 1 ? "encontró" : "encontraron"} {arbolesFiltrados.length} {arbolesFiltrados.length === 1 ? "árbol" : "árboles"}
+          </Text>
+        )}
       </View>
 
       {/* Sección de información de subparcelas */}
