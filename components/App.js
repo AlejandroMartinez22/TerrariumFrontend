@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BrigadistaProvider } from '../context/BrigadistaContext';
 import { SubparcelaProvider } from '../context/SubparcelaContext';
 import { ReferenciaProvider } from '../context/ReferenciaContext';
+import { ArbolesProvider } from '../context/ArbolesContext'; 
 
 // Importación de pantallas de la aplicación
 import LoginScreen from './LoginScreen';
@@ -24,6 +25,7 @@ Aquí se encapsulan los proveedores de contexto y la navegación entre pantallas
 export default function App() {
   return (
     <BrigadistaProvider>
+      <ArbolesProvider>
       <SubparcelaProvider> 
         <ReferenciaProvider>
           <SafeAreaProvider>
@@ -37,6 +39,7 @@ export default function App() {
           </SafeAreaProvider>
         </ReferenciaProvider>
       </SubparcelaProvider>
+      </ArbolesProvider>
     </BrigadistaProvider>
   );
 }

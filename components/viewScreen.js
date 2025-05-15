@@ -4,6 +4,7 @@ import { Checkbox } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { useBrigadista } from "../context/BrigadistaContext";
 import useIndividuoView from "../hooks/useIndividuosView";
+import { useArboles } from "../context/ArbolesContext";
 
 const VisualizarTab = () => {
   // Acceso al objeto de navegación
@@ -20,9 +21,6 @@ const VisualizarTab = () => {
   // Estado para la subparcela seleccionada - ninguna seleccionada por defecto
   const [selectedSubparcela, setSelectedSubparcela] = useState(null);
 
-  // Estado para almacenar los árboles filtrados que se mostrarán
-  const [arbolesFiltrados, setArbolesFiltrados] = useState([]);
-  
   // Estado para manejar la carga local (del botón "Aplicar")
   const [isApplying, setIsApplying] = useState(false);
   
@@ -33,39 +31,23 @@ const VisualizarTab = () => {
   const { brigadista } = useBrigadista();
   const idConglomerado = brigadista?.idConglomerado;
 
+  // Acceso al contexto de árboles
+  const { 
+    actualizarArbolesFiltrados, 
+    actualizarTiposSeleccionados,
+    arbolesFiltrados
+  } = useArboles();
+
   // Usar el hook useIndividuoView en el nivel superior del componente
   const { individuosAgrupados, loading, error } = useIndividuoView(idConglomerado);
-
-  // Efecto para filtrar los árboles cuando cambian las selecciones o los datos
-  useEffect(() => {
-    if (dataLoaded && individuosAgrupados) {
-      // Filtra los árboles según los checkboxes seleccionados
-      let arbolesFiltrados = [];
-      
-      if (checkedItems.latizales && individuosAgrupados.Latizal) {
-        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados.Latizal];
-      }
-      if (checkedItems.brinzales && individuosAgrupados.Brinzal) {
-        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados.Brinzal];
-      }
-      if (checkedItems.fustales && individuosAgrupados.Fustal) {
-        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados.Fustal];
-      }
-      if (checkedItems.fustalesGrandes && individuosAgrupados["Fustal Grande"]) {
-        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados["Fustal Grande"]];
-      }
-
-      setArbolesFiltrados(arbolesFiltrados);
-      console.log(`Se ${arbolesFiltrados.length === 1 ? "encontró" : "encontraron"} ${arbolesFiltrados.length} ${arbolesFiltrados.length === 1 ? "árbol" : "árboles"}`);
-      console.log("\nÁrboles filtrados:", arbolesFiltrados);
-    }
-  }, [dataLoaded, individuosAgrupados, checkedItems]);
 
   // Efecto para finalizar la animación de carga del botón
   useEffect(() => {
     if (isApplying && !loading) {
-      setIsApplying(false);
-      setDataLoaded(true);
+      setTimeout(() => {
+        setIsApplying(false);
+        setDataLoaded(true);
+      }, 500); // Pequeño retraso para mostrar el spinner
     }
   }, [isApplying, loading]);
 
@@ -81,21 +63,59 @@ const VisualizarTab = () => {
   const confirmar = () => {
     setIsApplying(true);
     
-    // Si los datos ya están cargados, solo necesitamos actualizar el filtro
-    if (!dataLoaded) {
-      setDataLoaded(true);
+    // Verificar que al menos un checkbox esté seleccionado
+    const algunoSeleccionado = Object.values(checkedItems).some(value => value === true);
+    
+    if (!algunoSeleccionado) {
+      alert("Por favor seleccione al menos un tipo de árbol");
+      setIsApplying(false);
+      return;
     }
     
-    // El filtrado ocurrirá automáticamente en el useEffect cuando cambien
-    // dataLoaded o checkedItems
+    // Actualizar el contexto con los tipos seleccionados
+    actualizarTiposSeleccionados(checkedItems);
+    
+    // Filtrar los árboles según los checkboxes seleccionados
+    if (individuosAgrupados) {
+      let arbolesFiltrados = [];
+      
+      if (checkedItems.latizales && individuosAgrupados.Latizal) {
+        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados.Latizal];
+      }
+      if (checkedItems.brinzales && individuosAgrupados.Brinzal) {
+        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados.Brinzal];
+      }
+      if (checkedItems.fustales && individuosAgrupados.Fustal) {
+        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados.Fustal];
+      }
+      if (checkedItems.fustalesGrandes && individuosAgrupados["Fustal Grande"]) {
+        arbolesFiltrados = [...arbolesFiltrados, ...individuosAgrupados["Fustal Grande"]];
+      }
+
+      // Actualizar el contexto con los árboles filtrados
+      actualizarArbolesFiltrados(arbolesFiltrados);
+      
+      console.log(`Se ${arbolesFiltrados.length === 1 ? "encontró" : "encontraron"} ${arbolesFiltrados.length} ${arbolesFiltrados.length === 1 ? "árbol" : "árboles"}`);
+      console.log("\nÁrboles filtrados:", arbolesFiltrados);
+      
+      // Si los datos ya están cargados, solo necesitamos actualizar el filtro
+      if (!dataLoaded) {
+        setDataLoaded(true);
+      }
+      
+      // Navegar al mapa para ver los árboles cuando se confirma después de un breve retraso
+      setTimeout(() => {
+        navigation.navigate('Map');
+      }, 500);
+    }
   };
 
-  // Función actualizada para navegar a la vista de características
+  // Función para navegar a la vista de características de subparcela
   const openSubparcelaView = (id) => {
     setSelectedSubparcela(id);
     
     navigation.navigate('CaracteristicasView', { 
-      subparcelaId: id // Verificar que este valor esté definido
+      subparcelaId: id
     });
   };
 
@@ -106,14 +126,14 @@ const VisualizarTab = () => {
         status={checkedItems[key] ? "checked" : "unchecked"}
         onPress={() => handleCheckboxChange(key)}
         color="#4285F4"
-        uncheckedColor="#757575" // Añadir color para estado desmarcado
-        style={styles.checkbox} // Añadir estilo específico para el checkbox
+        uncheckedColor="#757575"
+        style={styles.checkbox}
       />
       <Text style={styles.checkboxLabel}>{label}</Text>
     </View>
   );
 
-  // Renderiza un botón de subparcela (ahora todos blancos)
+  // Renderiza un botón de subparcela
   const renderSubparcelaButton = (nombreSubparcela) => {
     return (
       <TouchableOpacity
@@ -161,6 +181,13 @@ const VisualizarTab = () => {
             )}
           </TouchableOpacity>
         </View>
+        
+        {/* Si hay árboles filtrados, mostrar contador */}
+        {dataLoaded && arbolesFiltrados && arbolesFiltrados.length > 0 && (
+          <Text style={styles.countText}>
+            {`Se ${arbolesFiltrados.length === 1 ? "encontró" : "encontraron"} ${arbolesFiltrados.length} ${arbolesFiltrados.length === 1 ? "árbol" : "árboles"}`}
+          </Text>
+        )}
         
         {/* Mensaje de error si hay alguno */}
         {error && (

@@ -15,6 +15,8 @@ import { useBrigadista } from "../context/BrigadistaContext";
 import ReferenciaModal from "./puntoReferenciaModal";
 import ReferenciaMarker from "./referenciaMarker";
 import TrayectoModal from "./trayectoModal";
+import ArbolMarker from "./ArbolMarker"; // Importar el componente ArbolMarker
+import { useArboles } from "../context/ArbolesContext"; // Importar el hook del contexto de árboles
 
 // Importar los hooks personalizados
 import { useCoordenadas } from "../hooks/useCoordenadas";
@@ -63,6 +65,15 @@ export default function MapScreen() {
     isLoading: loadingPuntosReferencia,
   } = usePuntosReferencia(brigadista);
 
+   // Obtener los datos del contexto de árboles
+  const { 
+    arbolesFiltrados, 
+    actualizarArboles, 
+    confirmarActualizacion,
+    tiposSeleccionados
+  } = useArboles();
+
+
   // Estado local
   const [modalVisible, setModalVisible] = useState(false);
   const [trayectoModalVisible, setTrayectoModalVisible] = useState(false);
@@ -100,10 +111,44 @@ export default function MapScreen() {
   }, [loadingCoordenadas, loadingCentros, loadingPuntosReferencia]);
 
 
+
+
+    // Efecto para manejar la actualización de árboles cuando cambia la bandera actualizarArboles
+    useEffect(() => {
+    if (actualizarArboles) {
+      // La bandera actualizarArboles está activa, lo que significa que tenemos nuevos árboles para mostrar
+      console.log("Actualizando árboles en el mapa:", arbolesFiltrados.length);
+      
+      // Si hay árboles y tenemos un mapa de referencia, centramos el mapa en el primer árbol
+      if (arbolesFiltrados.length > 0 && mapRef.current) {
+        const firstTree = arbolesFiltrados[0];
+        const lat = typeof firstTree.latitud === 'string' ? parseFloat(firstTree.latitud) : firstTree.latitud;
+        const lng = typeof firstTree.longitud === 'string' ? parseFloat(firstTree.longitud) : firstTree.longitud;
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+          // Centrar el mapa en el primer árbol
+          mapRef.current.animateToRegion({
+            latitude: lat,
+            longitude: lng,
+            latitudeDelta: 0.005, // Zoom más cercano para ver mejor los árboles
+            longitudeDelta: 0.005,
+          }, 1000); // 1000ms de animación
+        }
+      }
+      
+      // Actualizamos la vista forzando un re-render
+      setForceUpdate(prev => prev + 1);
+      
+      // Confirmamos que hemos actualizado los árboles
+      confirmarActualizacion();
+    }
+  }, [actualizarArboles, arbolesFiltrados]);
+
+
   // para establecer correctamente el tipoPunto al editar un punto existente
   useEffect(() => {
     if (modalVisible && selectedPunto && !isNewPoint) {
-      // Si estamos editando un punto existente, cargar su tipo
+      // Si estamos editando un punto handleregion, cargar su tipo
       setTipoPunto(selectedPunto.tipo || "Referencia");
     } else if (modalVisible && isNewPoint) {
       // Si es un punto nuevo, reiniciar al valor predeterminado
@@ -175,7 +220,7 @@ export default function MapScreen() {
     setErrorMedicion(punto.errorMedicion || "");
     setPuntoId(punto.id);
     setTipoPunto(punto.tipo || "Referencia"); // Añadir esta línea
-    setIsNewPoint(false); // Es un punto existente
+    setIsNewPoint(false); // Es un punto handleregion
     setModalVisible(true);
   };
 
@@ -235,7 +280,7 @@ export default function MapScreen() {
         // Actualizar estado de campamento si es necesario
         await actualizarEstadoTipoCampamento(puntoAGuardar);
       } else {
-        console.log("🔄 Actualizando punto existente");
+        console.log("🔄 Actualizando punto handleregion");
         await actualizarPuntoReferencia(puntoAGuardar, brigadista.cedula);
   
         // Actualizar la interfaz
@@ -438,6 +483,12 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+            {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text style={styles.loadingText}>Cargando mapa...</Text>
+        </View>
+      ) : (
       <View style={styles.mapContainer}>
         <MapView
           ref={mapRef}
@@ -569,8 +620,70 @@ export default function MapScreen() {
               onPress={openModal}
             />
           ))}
-        </MapView>
-      </View>
+
+          {/* Renderizar los árboles filtrados */}
+            {arbolesFiltrados.map((arbol, index) => (
+              <ArbolMarker
+                key={`arbol-${arbol.id}-${forceUpdate}`}
+                arbol={arbol}
+                shouldShowLabels={shouldShowLabels}
+              />
+            ))}
+          </MapView>
+
+          
+          {/* Componente para mostrar qué tipos de árboles están siendo mostrados */}
+          {arbolesFiltrados.length > 0 && (
+            <View style={styles.filtroInfo}>
+              <Text style={styles.filtroTitulo}>Árboles mostrados:</Text>
+              {tiposSeleccionados.latizales && (
+                <View style={styles.filtroItem}>
+                  <Image
+                    source={require("../assets/IconoLatizal.png")}
+                    style={styles.filtroIcono}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.filtroTexto}>Latizales</Text>
+                </View>
+              )}
+              {tiposSeleccionados.brinzales && (
+                <View style={styles.filtroItem}>
+                  <Image
+                    source={require("../assets/IconoBrinzal.png")}
+                    style={styles.filtroIcono}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.filtroTexto}>Brinzales</Text>
+                </View>
+              )}
+              {tiposSeleccionados.fustales && (
+                <View style={styles.filtroItem}>
+                  <Image
+                    source={require("../assets/IconoFustal.png")}
+                    style={styles.filtroIcono}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.filtroTexto}>Fustales</Text>
+                </View>
+              )}
+              {tiposSeleccionados.fustalesGrandes && (
+                <View style={styles.filtroItem}>
+                  <Image
+                    source={require("../assets/IconoFustalGrande.png")}
+                    style={styles.filtroIcono}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.filtroTexto}>Fustales Grandes</Text>
+                </View>
+              )}
+              <Text style={styles.contadorArboles}>
+                Total: {arbolesFiltrados.length} árboles
+              </Text>
+            </View>
+          )}
+      </View>  
+    )}  
+
 
       <ReferenciaModal
         visible={modalVisible}
@@ -620,5 +733,37 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: "#333",
+  },
+  filtroInfo: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    padding: 10,
+    borderRadius: 8,
+    maxWidth: 150,
+  },
+  filtroTitulo: {
+    fontWeight: "bold",
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  filtroItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 2,
+  },
+  filtroIcono: {
+    width: 20,
+    height: 20,
+    marginRight: 5,
+  },
+  filtroTexto: {
+    fontSize: 12,
+  },
+  contadorArboles: {
+    marginTop: 5,
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
