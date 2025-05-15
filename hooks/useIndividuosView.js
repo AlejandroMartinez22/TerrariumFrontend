@@ -150,8 +150,8 @@ const useIndividuoView = (idConglomerado) => {
                     setIndividuosAgrupados(grupos);
 
                     // Log para verificar si se hizo correctamente
-                    console.log('Individuos con coordenadas calculadas:', individuosConCoordenadas);
-                    console.log('Individuos agrupados por tamaño:', grupos);
+                    console.log('\nIndividuos con coordenadas calculadas:', individuosConCoordenadas);
+                    console.log('\nIndividuos agrupados por tamaño:', grupos);
                 }
             } catch (err) {
                 console.error('Error en useIndividuoView:', err);

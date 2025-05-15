@@ -56,7 +56,8 @@ const VisualizarTab = () => {
       }
 
       setArbolesFiltrados(arbolesFiltrados);
-      console.log("Árboles filtrados:", arbolesFiltrados);
+      console.log(`Se ${arbolesFiltrados.length === 1 ? "encontró" : "encontraron"} ${arbolesFiltrados.length} ${arbolesFiltrados.length === 1 ? "árbol" : "árboles"}`);
+      console.log("\nÁrboles filtrados:", arbolesFiltrados);
     }
   }, [dataLoaded, individuosAgrupados, checkedItems]);
 
@@ -165,13 +166,6 @@ const VisualizarTab = () => {
         {error && (
           <Text style={styles.errorText}>
             Error al cargar los datos: {error}
-          </Text>
-        )}
-        
-        {/* Mostrar cantidad de árboles filtrados */}
-        {dataLoaded && !loading && !error && (
-          <Text style={styles.resultText}>
-            Se {arbolesFiltrados.length === 1 ? "encontró" : "encontraron"} {arbolesFiltrados.length} {arbolesFiltrados.length === 1 ? "árbol" : "árboles"}
           </Text>
         )}
       </View>
