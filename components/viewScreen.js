@@ -73,6 +73,8 @@ const VisualizarTab = ({}) => {
         status={checkedItems[key] ? "checked" : "unchecked"}
         onPress={() => handleCheckboxChange(key)}
         color="#4285F4"
+        uncheckedColor="#757575" // Añadir color para estado desmarcado
+        style={styles.checkbox} // Añadir estilo específico para el checkbox
       />
       <Text style={styles.checkboxLabel}>{label}</Text>
     </View>
@@ -186,10 +188,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
+    marginVertical: 4, // Añadir margen vertical
+  },
+  checkbox: {
+    borderWidth: 1,
+    borderColor: "#757575",
+    borderRadius: 2,
+    margin: 0,
+    padding: 0,
   },
   checkboxLabel: {
     marginLeft: 8,
-    fontSize: 15, // Texto de checkboxes más grande
+    fontSize: 15,
     fontWeight: "500",
   },
   subparcelaRows: {
