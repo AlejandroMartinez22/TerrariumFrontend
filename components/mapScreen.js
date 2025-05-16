@@ -42,10 +42,10 @@ export default function MapScreen() {
 
   const { centrosPoblados, fetchCentrosPoblados, isLoading: loadingCentros } = useCentrosPoblados(brigadista);
 
-  const { 
-    existeCampamento, 
-    actualizarEstadoCampamento, 
-    verificarCampamento 
+  const {
+    existeCampamento,
+    actualizarEstadoCampamento,
+    verificarCampamento
   } = useCampamentoVerificacion();
 
   const {
@@ -65,10 +65,10 @@ export default function MapScreen() {
     isLoading: loadingPuntosReferencia,
   } = usePuntosReferencia(brigadista);
 
-   // Obtener los datos del contexto de árboles
-  const { 
-    arbolesFiltrados, 
-    actualizarArboles, 
+  // Obtener los datos del contexto de árboles
+  const {
+    arbolesFiltrados,
+    actualizarArboles,
     confirmarActualizacion,
     tiposSeleccionados
   } = useArboles();
@@ -113,18 +113,18 @@ export default function MapScreen() {
 
 
 
-    // Efecto para manejar la actualización de árboles cuando cambia la bandera actualizarArboles
-    useEffect(() => {
+  // Efecto para manejar la actualización de árboles cuando cambia la bandera actualizarArboles
+  useEffect(() => {
     if (actualizarArboles) {
       // La bandera actualizarArboles está activa, lo que significa que tenemos nuevos árboles para mostrar
       console.log("Actualizando árboles en el mapa:", arbolesFiltrados.length);
-      
+
       // Si hay árboles y tenemos un mapa de referencia, centramos el mapa en el primer árbol
       if (arbolesFiltrados.length > 0 && mapRef.current) {
         const firstTree = arbolesFiltrados[0];
         const lat = typeof firstTree.latitud === 'string' ? parseFloat(firstTree.latitud) : firstTree.latitud;
         const lng = typeof firstTree.longitud === 'string' ? parseFloat(firstTree.longitud) : firstTree.longitud;
-        
+
         if (!isNaN(lat) && !isNaN(lng)) {
           // Centrar el mapa en el primer árbol
           mapRef.current.animateToRegion({
@@ -135,10 +135,10 @@ export default function MapScreen() {
           }, 1000); // 1000ms de animación
         }
       }
-      
+
       // Actualizamos la vista forzando un re-render
       setForceUpdate(prev => prev + 1);
-      
+
       // Confirmamos que hemos actualizado los árboles
       confirmarActualizacion();
     }
@@ -155,27 +155,27 @@ export default function MapScreen() {
       setTipoPunto("Referencia");
     }
   }, [modalVisible, selectedPunto, isNewPoint]);
-  
+
 
   useEffect(() => {
     verificarCampamento();
   }, []);
-  
+
   // Función para actualizar el estado del campamento después de guardar o eliminar
   const actualizarEstadoTipoCampamento = async (puntoData, esEliminacion = false) => {
     if (!puntoData) return;
-    
+
     // Si se está eliminando un campamento o cambiando su tipo desde campamento a referencia
-    if ((esEliminacion && puntoData.tipo === "Campamento") || 
-       (!esEliminacion && puntoData.tipo !== "Campamento" && selectedPunto?.tipo === "Campamento")) {
+    if ((esEliminacion && puntoData.tipo === "Campamento") ||
+      (!esEliminacion && puntoData.tipo !== "Campamento" && selectedPunto?.tipo === "Campamento")) {
       actualizarEstadoCampamento(false, null);
-    } 
+    }
     // Si se está creando un nuevo campamento o cambiando un punto a tipo campamento
     else if (!esEliminacion && puntoData.tipo === "Campamento") {
       actualizarEstadoCampamento(true, puntoData.id);
     }
   };
-  
+
 
   // Ajustar el mapa a las coordenadas si están disponibles
   useEffect(() => {
@@ -266,39 +266,39 @@ export default function MapScreen() {
   const guardarSinTrayecto = async (puntoData) => {
     // Usar el punto pasado directamente o caer en el tempPuntoData
     const puntoAGuardar = puntoData || tempPuntoData;
-  
+
     if (!puntoAGuardar) return;
-  
+
     try {
       if (isNewPoint) {
         console.log("🆕 Guardando nuevo punto sin trayecto");
         await guardarReferencia(puntoAGuardar, brigadista.cedula);
-  
+
         // Actualizar la interfaz con el nuevo punto
         setPuntosReferencia([...puntosReferencia, puntoAGuardar]);
-        
+
         // Actualizar estado de campamento si es necesario
         await actualizarEstadoTipoCampamento(puntoAGuardar);
       } else {
         console.log("🔄 Actualizando punto handleregion");
         await actualizarPuntoReferencia(puntoAGuardar, brigadista.cedula);
-  
+
         // Actualizar la interfaz
         const updatedPuntos = puntosReferencia.map((p) =>
           p.id === puntoAGuardar.id ? puntoAGuardar : p
         );
         setPuntosReferencia(updatedPuntos);
-        
+
         // Actualizar estado de campamento si es necesario
         await actualizarEstadoTipoCampamento(puntoAGuardar);
       }
-  
+
       // Refresca los puntos de la base de datos
       await refreshPuntos();
     } catch (error) {
       console.error("❌ Error al guardar punto:", error);
     }
-  
+
     setTempPuntoData(null); // Limpiamos el punto temporal
   };
 
@@ -360,7 +360,7 @@ export default function MapScreen() {
 
   const handleLongPress = async (event) => {
     const coordinate = event.nativeEvent.coordinate;
-    
+
     // Verificar si hay coordenadas del conglomerado disponibles
     if (coordenadas.length === 0 || !coordenadas[0].latitud || !coordenadas[0].longitud) {
       Alert.alert(
@@ -372,11 +372,11 @@ export default function MapScreen() {
 
     // Obtener las coordenadas del centro del conglomerado (primer elemento del array)
     const centroConglomerado = {
-      latitude: typeof coordenadas[0].latitud === "string" 
-        ? parseFloat(coordenadas[0].latitud) 
+      latitude: typeof coordenadas[0].latitud === "string"
+        ? parseFloat(coordenadas[0].latitud)
         : coordenadas[0].latitud,
-      longitude: typeof coordenadas[0].longitud === "string" 
-        ? parseFloat(coordenadas[0].longitud) 
+      longitude: typeof coordenadas[0].longitud === "string"
+        ? parseFloat(coordenadas[0].longitud)
         : coordenadas[0].longitud
     };
 
@@ -394,7 +394,7 @@ export default function MapScreen() {
         `El punto que intentas agregar está muy alejado del área del conglomerado, Este debe encontrarse dentro de un radio de 5 km. Por favor, selecciona una ubicación más cercana.`
       );
       return;
-    } 
+    }
 
     try {
       // Proceder con la creación del punto de referencia
@@ -431,20 +431,20 @@ export default function MapScreen() {
         setModalVisible(false);
         return;
       }
-      
+
       // Guardar una referencia al punto antes de eliminarlo para saber si era un campamento
       const puntoAEliminar = puntosReferencia.find(p => p.id === puntoId);
-  
+
       // Pasar la cédula del brigadista actual como segundo parámetro
       const resultado = await borrarReferencia(puntoId, brigadista.cedula);
-  
+
       if (resultado.success) {
         const nuevosPuntos = puntosReferencia.filter(
           (punto) => punto.id !== puntoId
         );
         setPuntosReferencia(nuevosPuntos);
         console.log(`Punto con ID ${puntoId} eliminado correctamente`);
-        
+
         // Actualizar estado de campamento si eliminamos un campamento
         if (puntoAEliminar && puntoAEliminar.tipo === "Campamento") {
           actualizarEstadoCampamento(false, null);
@@ -455,11 +455,11 @@ export default function MapScreen() {
     } catch (error) {
       console.error("Error al procesar la eliminación:", error);
     }
-  
+
     setModalVisible(false);
   };
 
-  
+
   const handleRegionChange = (region) => {
     const newZoom = region.latitudeDelta;
 
@@ -483,147 +483,147 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-            {isLoading ? (
+      {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
           <Text style={styles.loadingText}>Cargando mapa...</Text>
         </View>
       ) : (
-      <View style={styles.mapContainer}>
-        <MapView
-          ref={mapRef}
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          mapType="satellite"
-          initialRegion={defaultCenter}
-          onLongPress={handleLongPress}
-          onRegionChangeComplete={handleRegionChange}
-        >
-          {coordenadas.length > 0 &&
-            coordenadas[0].latitud &&
-            coordenadas[0].longitud && (
-              <Circle
-                center={{
-                  latitude:
-                    typeof coordenadas[0].latitud === "string"
-                      ? parseFloat(coordenadas[0].latitud)
-                      : coordenadas[0].latitud,
-                  longitude:
-                    typeof coordenadas[0].longitud === "string"
-                      ? parseFloat(coordenadas[0].longitud)
-                      : coordenadas[0].longitud,
-                }}
-                radius={100}
-                strokeColor="rgba(0, 122, 255, 0.8)"
-                fillColor="rgba(0, 122, 255, 0.2)"
-                zIndex={1}
-              />
-            )}
-
-          {coordenadas.map((coordenada, index) => {
-            // Omitir coordenadas inválidas
-            if (!coordenada.latitud || !coordenada.longitud) return null;
-
-            // Asegurar que las coordenadas sean números
-            const lat =
-              typeof coordenada.latitud === "string"
-                ? parseFloat(coordenada.latitud)
-                : coordenada.latitud;
-            const lng =
-              typeof coordenada.longitud === "string"
-                ? parseFloat(coordenada.longitud)
-                : coordenada.longitud;
-
-            // Omitir si son números inválidos
-            if (isNaN(lat) || isNaN(lng)) return null;
-
-            return (
-              <React.Fragment key={`coord-${index}-${forceUpdate}`}>
+        <View style={styles.mapContainer}>
+          <MapView
+            ref={mapRef}
+            provider={PROVIDER_GOOGLE}
+            style={styles.map}
+            mapType="satellite"
+            initialRegion={defaultCenter}
+            onLongPress={handleLongPress}
+            onRegionChangeComplete={handleRegionChange}
+          >
+            {coordenadas.length > 0 &&
+              coordenadas[0].latitud &&
+              coordenadas[0].longitud && (
                 <Circle
                   center={{
-                    latitude: lat,
-                    longitude: lng,
+                    latitude:
+                      typeof coordenadas[0].latitud === "string"
+                        ? parseFloat(coordenadas[0].latitud)
+                        : coordenadas[0].latitud,
+                    longitude:
+                      typeof coordenadas[0].longitud === "string"
+                        ? parseFloat(coordenadas[0].longitud)
+                        : coordenadas[0].longitud,
                   }}
-                  radius={1}
-                  strokeColor="rgba(255, 255, 255, 0.9)"
-                  fillColor="rgba(255, 255, 255, 0.5)"
+                  radius={100}
+                  strokeColor="rgba(0, 122, 255, 0.8)"
+                  fillColor="rgba(0, 122, 255, 0.2)"
+                  zIndex={1}
                 />
-                <Circle
-                  center={{
-                    latitude: lat,
-                    longitude: lng,
-                  }}
-                  radius={15}
-                  strokeColor="rgba(255, 10, 10, 0.8)"
-                  fillColor="rgba(255, 20, 20, 0.5)"
-                />
-                {shouldShowLabels && (
-                  <Marker
-                    coordinate={{
+              )}
+
+            {coordenadas.map((coordenada, index) => {
+              // Omitir coordenadas inválidas
+              if (!coordenada.latitud || !coordenada.longitud) return null;
+
+              // Asegurar que las coordenadas sean números
+              const lat =
+                typeof coordenada.latitud === "string"
+                  ? parseFloat(coordenada.latitud)
+                  : coordenada.latitud;
+              const lng =
+                typeof coordenada.longitud === "string"
+                  ? parseFloat(coordenada.longitud)
+                  : coordenada.longitud;
+
+              // Omitir si son números inválidos
+              if (isNaN(lat) || isNaN(lng)) return null;
+
+              return (
+                <React.Fragment key={`coord-${index}-${forceUpdate}`}>
+                  <Circle
+                    center={{
                       latitude: lat,
                       longitude: lng,
                     }}
-                  >
-                    <View
-                      style={{ backgroundColor: "transparent", padding: 4 }}
+                    radius={1}
+                    strokeColor="rgba(255, 255, 255, 0.9)"
+                    fillColor="rgba(255, 255, 255, 0.5)"
+                  />
+                  <Circle
+                    center={{
+                      latitude: lat,
+                      longitude: lng,
+                    }}
+                    radius={15}
+                    strokeColor="rgba(255, 10, 10, 0.8)"
+                    fillColor="rgba(255, 20, 20, 0.5)"
+                  />
+                  {shouldShowLabels && (
+                    <Marker
+                      coordinate={{
+                        latitude: lat,
+                        longitude: lng,
+                      }}
                     >
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          fontWeight: "bold",
-                          color: "white",
-                        }}
+                      <View
+                        style={{ backgroundColor: "transparent", padding: 4 }}
                       >
-                        {coordenada.nombre_subparcela}
-                      </Text>
-                    </View>
-                  </Marker>
-                )}
-              </React.Fragment>
-            );
-          })}
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            fontWeight: "bold",
+                            color: "white",
+                          }}
+                        >
+                          {coordenada.nombre_subparcela}
+                        </Text>
+                      </View>
+                    </Marker>
+                  )}
+                </React.Fragment>
+              );
+            })}
 
-          {centrosPoblados.map((centro, index) => {
-            // Omitir coordenadas inválidas
-            if (!centro.latitud || !centro.longitud) return null;
+            {centrosPoblados.map((centro, index) => {
+              // Omitir coordenadas inválidas
+              if (!centro.latitud || !centro.longitud) return null;
 
-            // Asegurar que las coordenadas sean números
-            const lat = parseFloat(centro.latitud);
-            const lng = parseFloat(centro.longitud);
+              // Asegurar que las coordenadas sean números
+              const lat = parseFloat(centro.latitud);
+              const lng = parseFloat(centro.longitud);
 
-            // Omitir si el parsing resultó en NaN
-            if (isNaN(lat) || isNaN(lng)) return null;
+              // Omitir si el parsing resultó en NaN
+              if (isNaN(lat) || isNaN(lng)) return null;
 
-            return (
-              <Marker
-                key={`centro-${index}-${forceUpdate}`}
-                coordinate={{
-                  latitude: lat,
-                  longitude: lng,
-                }}
-                title={centro.descripcion}
-              >
-                <Image
-                  source={require("../assets/IconoCentroPoblado.png")}
-                  style={{ width: 28, height: 28 }}
-                  resizeMode="contain"
-                />
-              </Marker>
-            );
-          })}
+              return (
+                <Marker
+                  key={`centro-${index}-${forceUpdate}`}
+                  coordinate={{
+                    latitude: lat,
+                    longitude: lng,
+                  }}
+                  title={centro.descripcion}
+                >
+                  <Image
+                    source={require("../assets/IconoCentroPoblado.png")}
+                    style={{ width: 28, height: 28 }}
+                    resizeMode="contain"
+                  />
+                </Marker>
+              );
+            })}
 
-          {puntosReferencia.map((punto, index) => (
-            <ReferenciaMarker
-              key={`ref-${punto.id}-${forceUpdate}`}
-              punto={punto}
-              index={index}
-              onPress={openModal}
-            />
-          ))}
+            {puntosReferencia.map((punto, index) => (
+              <ReferenciaMarker
+                key={`ref-${punto.id}-${forceUpdate}`}
+                punto={punto}
+                index={index}
+                onPress={openModal}
+              />
+            ))}
 
-          {/* Renderizar los árboles filtrados */}
+            {/* Renderizar los árboles filtrados */}
             {arbolesFiltrados.map((arbol, index) => (
-              
+
               <ArbolMarker
                 key={`arbol-${arbol.id}-${forceUpdate}`}
                 arbol={arbol}
@@ -632,7 +632,7 @@ export default function MapScreen() {
             ))}
           </MapView>
 
-          
+
           {/* Componente para mostrar qué tipos de árboles están siendo mostrados */}
           {arbolesFiltrados.length > 0 && (
             <View style={styles.filtroInfo}>
@@ -682,8 +682,8 @@ export default function MapScreen() {
               </Text>
             </View>
           )}
-      </View>  
-    )}  
+        </View>
+      )}
 
 
       <ReferenciaModal
@@ -699,8 +699,8 @@ export default function MapScreen() {
         selectedPunto={selectedPunto}
         isNewPoint={isNewPoint}
         cedulaUsuarioActual={brigadista?.cedula}
-        tipoPunto={tipoPunto}         
-        setTipoPunto={setTipoPunto}  
+        tipoPunto={tipoPunto}
+        setTipoPunto={setTipoPunto}
       />
 
       <TrayectoModal
@@ -735,7 +735,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
-   filtroInfo: {
+  filtroInfo: {
     position: "absolute",
     top: 10,
     right: 10,

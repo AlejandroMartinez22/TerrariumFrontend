@@ -205,6 +205,12 @@ const ReferenciaModal = ({
     (currentTipoPunto === "Referencia" || currentTipoPunto === "Campamento") &&
     (isNewPoint || isUserOwner); // Permitir si es nuevo punto O si el usuario es propietario
 
+  // Determinar si mostrar el mensaje sobre la existencia de un campamento
+  // Ahora solo lo mostramos si el usuario puede editar el punto (es propietario o es un punto nuevo)
+  // Y no mostramos el mensaje si estamos editando un punto que originalmente era un campamento
+  const isEditingExistingCampamento = !isNewPoint && selectedPunto?.tipo === "Campamento";
+  const shouldShowCampamentoMessage = (isNewPoint || isUserOwner) && existeCampamento && currentTipoPunto !== "Campamento" && !verificandoCampamento && !isEditingExistingCampamento;
+
   return (
     <Modal
       visible={visible}
@@ -354,7 +360,7 @@ const ReferenciaModal = ({
                   se ha deshabilitado la opción de crear un campamento nuevo.
                 </Text>
               </View>
-            ) : existeCampamento && currentTipoPunto !== "Campamento" ? (
+            ) : shouldShowCampamentoMessage ? (
               <Text style={styles.infoText}>
                 Ya existe un punto de campamento para este conglomerado.
               </Text>
