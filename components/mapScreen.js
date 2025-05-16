@@ -623,6 +623,7 @@ export default function MapScreen() {
 
           {/* Renderizar los árboles filtrados */}
             {arbolesFiltrados.map((arbol, index) => (
+              
               <ArbolMarker
                 key={`arbol-${arbol.id}-${forceUpdate}`}
                 arbol={arbol}

@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Image, StyleSheet, Text } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { Marker } from 'react-native-maps';
 
-const ArbolMarker = ({ arbol, shouldShowLabels }) => {
+const ArbolMarker = ({ arbol }) => {
   // Determinar qué icono usar según el tipo de árbol
   const getIconSource = (tipoArbol) => {
     switch (tipoArbol) {
@@ -29,24 +29,6 @@ const ArbolMarker = ({ arbol, shouldShowLabels }) => {
   // Omitir si son números inválidos
   if (isNaN(lat) || isNaN(lng)) return null;
 
-  // Determinar el tamaño del icono basado en el tipo de árbol
-  const getIconSize = (tipoArbol) => {
-    switch (tipoArbol) {
-      case 'Latizal':
-        return 20;
-      case 'Brinzal':
-        return 18;
-      case 'Fustal':
-        return 24;
-      case 'Fustal Grande':
-        return 28;
-      default:
-        return 22;
-    }
-  };
-
-  const iconSize = getIconSize(arbol.tamaño_individuo);
-
   return (
     <Marker
       coordinate={{
@@ -57,7 +39,7 @@ const ArbolMarker = ({ arbol, shouldShowLabels }) => {
       <View style={styles.markerContainer}>
         <Image
           source={getIconSource(arbol.tamaño_individuo)}
-          style={[styles.markerIcon, { width: iconSize, height: iconSize }]}
+          style={styles.markerIcon}
           resizeMode="contain"
         />
       </View>
@@ -70,21 +52,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   markerIcon: {
-    // width y height se definen dinámicamente
-  },
-  labelContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 3,
-    marginTop: 2,
-    maxWidth: 120,
-  },
-  labelText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    width: 45,
+    height: 45,
   },
 });
 

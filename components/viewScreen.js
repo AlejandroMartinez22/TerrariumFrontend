@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Linking } from "react-native";
 import { Checkbox } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { useBrigadista } from "../context/BrigadistaContext";
@@ -119,6 +119,15 @@ const VisualizarTab = () => {
     });
   };
 
+  // Función para abrir el manual de usuario
+  const openManual = () => {
+    // Aquí puedes definir la URL del manual o la acción a realizar
+    // Por ejemplo, abrir una URL externa o navegar a una pantalla de manual
+    Linking.openURL('https://ejemplo.com/manual-usuario');
+    // O alternativamente, navegar a una pantalla de manual interna:
+    // navigation.navigate('ManualUsuario');
+  };
+
   // Renderiza un checkbox con su etiqueta
   const renderCheckbox = (key, label) => (
     <View style={styles.checkboxContainer}>
@@ -182,13 +191,6 @@ const VisualizarTab = () => {
           </TouchableOpacity>
         </View>
         
-        {/* Si hay árboles filtrados, mostrar contador */}
-        {dataLoaded && arbolesFiltrados && arbolesFiltrados.length > 0 && (
-          <Text style={styles.countText}>
-            {`Se ${arbolesFiltrados.length === 1 ? "encontró" : "encontraron"} ${arbolesFiltrados.length} ${arbolesFiltrados.length === 1 ? "árbol" : "árboles"}`}
-          </Text>
-        )}
-        
         {/* Mensaje de error si hay alguno */}
         {error && (
           <Text style={styles.errorText}>
@@ -212,6 +214,11 @@ const VisualizarTab = () => {
           </View>
         </View>
       </View>
+      
+      {/* Enlace al manual de usuario */}
+      <TouchableOpacity onPress={openManual}>
+        <Text style={styles.manualLink}>Ver manual de usuario</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -227,7 +234,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 30, 
     marginTop: 20,
     color: "#194D20"
   },
@@ -320,6 +327,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  manualLink: {
+    color: '#1E88E5',
+    fontWeight: '500',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 7,
+    marginBottom: 15,
+    textDecorationLine: 'underline',
+    padding: 6,
+  }
 });
 
 export default VisualizarTab;
