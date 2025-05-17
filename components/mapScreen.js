@@ -470,6 +470,7 @@ export default function MapScreen() {
   };
 
   const shouldShowLabels = mapZoom < 0.005;
+  const shouldShowArboles = mapZoom < 0.003; 
 
   // Mostrar indicador de carga mientras se obtienen los datos
   if (isLoading || !defaultCenter) {
@@ -621,13 +622,12 @@ export default function MapScreen() {
               />
             ))}
 
-            {/* Renderizar los árboles filtrados */}
+            {/* Renderizar árboles solo si el zoom es suficiente */}
             {arbolesFiltrados.map((arbol, index) => (
-
               <ArbolMarker
-                key={`arbol-${arbol.id}-${forceUpdate}`}
-                arbol={arbol}
-                shouldShowLabels={shouldShowLabels}
+                key={`arbol-${arbol.id || index}-${forceUpdate}`} 
+                arbol={arbol} 
+                shouldShow={shouldShowArboles}
               />
             ))}
           </MapView>
