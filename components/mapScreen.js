@@ -472,6 +472,7 @@ export default function MapScreen() {
   const shouldShowLabels = mapZoom < 0.005;
   const shouldShowArboles = mapZoom < 0.003; 
 
+  
   // Mostrar indicador de carga mientras se obtienen los datos
   if (isLoading || !defaultCenter) {
     return (

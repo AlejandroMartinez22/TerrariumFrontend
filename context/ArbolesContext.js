@@ -1,11 +1,14 @@
-    import React, { createContext, useState, useContext } from 'react';
 
-    // Crear el contexto
-    const ArbolesContext = createContext();
+// 1. Primero, modificamos ArbolesContext.js para añadir la función limpiarDatos
 
-    // Proveedor del contexto
-    export const ArbolesProvider = ({ children }) => {
-    // Estado para los árboles filtrados a mostrar en el mapa
+import React, { createContext, useState, useContext } from 'react';
+
+// Crear el contexto
+const ArbolesContext = createContext();
+
+// Proveedor del contexto
+export const ArbolesProvider = ({ children }) => {
+  // Estado para los árboles filtrados a mostrar en el mapa
     const [arbolesFiltrados, setArbolesFiltrados] = useState([]);
     
     // Estado para controlar si el mapa debe actualizar los árboles
@@ -35,6 +38,18 @@
         setTiposSeleccionados(nuevosTipos);
     };
 
+    // Nueva función para limpiar los datos cuando se cierra sesión
+    const limpiarDatos = () => {
+        setArbolesFiltrados([]);
+        setActualizarArboles(false);
+        setTiposSeleccionados({
+        latizales: false,
+        brinzales: false,
+        fustales: false,
+        fustalesGrandes: false,
+        });
+    };
+
     // Valores a proporcionar en el contexto
     const value = {
         arbolesFiltrados,
@@ -42,7 +57,8 @@
         actualizarArboles,
         confirmarActualizacion,
         tiposSeleccionados,
-        actualizarTiposSeleccionados
+        actualizarTiposSeleccionados,
+        limpiarDatos // Exportamos la nueva función
     };
 
     return (
@@ -59,4 +75,4 @@
         throw new Error('useArboles debe ser usado dentro de un ArbolesProvider');
     }
     return context;
-    };
+};
