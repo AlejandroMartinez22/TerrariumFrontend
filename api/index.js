@@ -16,19 +16,12 @@ const api = axios.create({
 
 // Interceptor para registrar todas las peticiones que se hagan desde esta instancia
 api.interceptors.request.use((request) => {
-  console.log("Enviando petición a:", request.url);
   return request;
 });
 
 // Interceptor para registrar todas las respuestas (o errores) que se reciban desde el backend
 api.interceptors.response.use(
   (response) => {
-    console.log(
-      "Respuesta recibida de:",
-      response.config.url,
-      "Status:",
-      response.status
-    );
     return response;
   },
   (error) => {
@@ -61,7 +54,6 @@ const handleError = (error) => {
 
 /* Envía el token al backend para que sea verificado, y obtiene los datos del usuario desde la base de datos (Supabase).*/
 export const verifyTokenAndGetUser = async (idToken) => {
-  console.log("Enviando token para verificación...");
   try {
     const response = await api.post("/auth/verify-token", { idToken });
     return response.data;
@@ -73,7 +65,6 @@ export const verifyTokenAndGetUser = async (idToken) => {
 
 /*Consulta al backend para obtener el nombre de usuario asociado a un UID.*/
 export const getUserNameFromBackend = async (uid) => {
-  console.log(`Solicitando nombre para UID: ${uid}`);
   try {
     const response = await api.get(`/auth/username/${uid}`);
     return response.data.nombre;
@@ -189,7 +180,6 @@ export const fetchSiguienteIdReferencia = async () => {
 //NUEVA FUNCION
 export const verificarCampamentoExistente = async () => {
   try {
-    console.log("📤 Iniciando verificación de campamento...");
     const token = await getCurrentToken();
 
     if (!token) {
@@ -201,9 +191,6 @@ export const verificarCampamentoExistente = async () => {
       };
     }
 
-    console.log(
-      "🔑 Token obtenido, realizando petición a /referencias/verificar-campamento"
-    );
     const response = await api.get("/referencias/verificar-campamento", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -212,7 +199,6 @@ export const verificarCampamentoExistente = async () => {
       timeout: 10000,
     });
 
-    console.log("✅ Respuesta recibida:", response.data);
     return response.data;
   } catch (error) {
     console.error(
@@ -612,12 +598,6 @@ export const getArbolesBySubparcela = async (
       }
     );
 
-    // Mostrar respuesta completa para debug
-    console.log(
-      "Respuesta completa del backend:",
-      JSON.stringify(response.data, null, 2)
-    );
-
     // Comprobamos si la respuesta tiene la estructura esperada
     if (response.data && response.data.success) {
       // Normalizamos la estructura de los datos para trabajar con ellos
@@ -636,7 +616,6 @@ export const getArbolesBySubparcela = async (
 // Función para obtener el ID de la subparcela por nombre y conglomerado
 export const getSubparcelaId = async (nombreSubparcela, conglomeradoId) => {
   try {
-    console.log(`Enviando petición a: /subparcelas/id con params: ${nombreSubparcela}, ${conglomeradoId}`);
     const token = await getCurrentToken();
     const response = await api.get("/subparcelas/id", {
       headers: {
@@ -649,7 +628,6 @@ export const getSubparcelaId = async (nombreSubparcela, conglomeradoId) => {
     });
 
     if (response.data.success) {
-      console.log("ID de subparcela recibido:", response.data.id);
       return response.data.id;
     } else {
       throw new Error(
@@ -662,6 +640,10 @@ export const getSubparcelaId = async (nombreSubparcela, conglomeradoId) => {
     throw error; // Re-lanzar el error para manejarlo en el componente
   }
 };
+
+/*
+  Funcion para obtener el siguiente ID de muestra desde el backend.
+*/
 
 export const getUltimoIdMuestraDeBack = async () => {
   try {
@@ -730,6 +712,11 @@ export const guardarMuestraEnBackend = async (muestraData) => {
 };
 
 
+/*
+  Funcion para guardar un individuo en el backend.
+  Se espera que el backend reciba un objeto con los datos del individuo.
+*/
+
 export const guardarIndividuoEnBackend = async (individuoData) => {
   try {
     const token = await getCurrentToken();
@@ -744,7 +731,6 @@ export const guardarIndividuoEnBackend = async (individuoData) => {
       cedula_brigadista: individuoData.cedula_brigadista,
     };
     
-    console.log("Enviando datos al backend:", datosCompletos);
     
     const response = await api.post("/individuos/guardar", datosCompletos, {
       headers: {
@@ -763,7 +749,10 @@ export const guardarIndividuoEnBackend = async (individuoData) => {
   }
 };
 
-
+/*
+  Funcion para obtener las caracteristicas de una subparcela, 
+  recibe como parametros el nombre de la subparcela y el id del conglomerado.
+*/
 export const fetchCaracteristicasSubparcela = async (
   nombreSubparcela,
   idConglomerado
@@ -794,8 +783,12 @@ export const fetchCaracteristicasSubparcela = async (
   }
 };
 
+/*
+  Funcion para obtener todos los IDs de las subparcelas de un conglomerado,
+  se espera que el backend retorne un array con los IDs de las subparcelas.
+*/
+
 export const getIdsSubparcelasByConglomerado = async (idConglomerado) => {
-  console.log("Ingreso al api de ids de subparcelas por conglomerado");
   try {
     const token = await getCurrentToken();
     const response = await api.get(
@@ -818,12 +811,14 @@ export const getIdsSubparcelasByConglomerado = async (idConglomerado) => {
   }
 };
 
+/*
+  Funcion para obtener toda la informacion de los individuos de un conglomerado,
+  se espera que el backend reciba un array de IDs de subparcelas y retorne un array de individuos.
+*/
 export const fetchIndividuosByConglomerado = async (idConglomerado) => {
-  console.log("Ingreso al api de individuos por conglomerado");
   try {
     const token = await getCurrentToken();
     const idsSubparcelas = await getIdsSubparcelasByConglomerado(idConglomerado);
-    console.log("IDs de subparcelas obtenidos:", idsSubparcelas);
     if (!idsSubparcelas || idsSubparcelas.length === 0) {
       throw new Error("No se encontraron subparcelas para el conglomerado");
     }
