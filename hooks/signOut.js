@@ -3,7 +3,7 @@ import { getAuth, signOut } from "firebase/auth";
 import api from "../api"; //instancia de axios configurada
 
 // metodo para cerrar sesión
-export const handleSignOut = async (navigation, setBrigadista, setError) => {
+export const handleSignOut = async (navigation, setBrigadista, setError, limpiarDatosArboles) => {
   // Obtener la instancia de autenticación de Firebase
   const auth = getAuth();
   try {
@@ -22,6 +22,12 @@ export const handleSignOut = async (navigation, setBrigadista, setError) => {
     // 3. Limpia el estado local
     setBrigadista(null);
     setError(null);
+    
+    // 4. Limpiar los datos de árboles
+    if (limpiarDatosArboles) {
+      limpiarDatosArboles();
+      console.log("Datos de árboles limpiados correctamente");
+    }
     
     console.log("Sesión cerrada con éxito");
     navigation.replace('Login'); // Navega al login después de cerrar sesión

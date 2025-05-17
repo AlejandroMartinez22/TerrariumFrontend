@@ -15,10 +15,12 @@ ImageBackground,
 import { handleSignOut } from "../hooks/signOut";
 // importar el hook useLogin
 import { useBrigadista } from "../context/BrigadistaContext";
+import { useArboles } from '../context/ArbolesContext';
 
 export default function ProfileScreen({ navigation  }) {
 // usar el hook useLogin para manejar el inicio de sesión
     const { brigadista, loading, error, setBrigadista, setError } = useBrigadista();
+    const { limpiarDatos } = useArboles();
 
 return (
     <ImageBackground
@@ -88,7 +90,7 @@ return (
 
         <TouchableOpacity
         style={styles.signOutButton}
-        onPress={() => handleSignOut(navigation, setBrigadista, setError)} //Linea cambiada
+        onPress={() => handleSignOut(navigation, setBrigadista, setError, limpiarDatos)} //Linea cambiada
         >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={styles.signOutButtonText}>Cerrar sesión</Text>

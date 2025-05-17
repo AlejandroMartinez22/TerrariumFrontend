@@ -123,7 +123,7 @@ const VisualizarTab = () => {
   const openManual = () => {
     // Aquí puedes definir la URL del manual o la acción a realizar
     // Por ejemplo, abrir una URL externa o navegar a una pantalla de manual
-    Linking.openURL('https://ejemplo.com/manual-usuario');
+    Linking.openURL('https://visionamazonia.minambiente.gov.co/content/uploads/2023/04/Manual_IFN_Colombia_v4.pdf');
     // O alternativamente, navegar a una pantalla de manual interna:
     // navigation.navigate('ManualUsuario');
   };
@@ -217,7 +217,7 @@ const VisualizarTab = () => {
       
       {/* Enlace al manual de usuario */}
       <TouchableOpacity onPress={openManual}>
-        <Text style={styles.manualLink}>Ver manual de usuario</Text>
+        <Text style={styles.manualLink}>Consultar manual de campo</Text>
       </TouchableOpacity>
     </View>
   );
@@ -234,8 +234,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 30, 
-    marginTop: 20,
+    marginBottom: 22, 
+    marginTop: 10,
     color: "#194D20"
   },
   section: {
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 25,
+    marginBottom: 15,
   },
   checkboxGrid: {
     flexDirection: "column",
@@ -335,9 +335,9 @@ const styles = StyleSheet.create({
   manualLink: {
     color: '#1E88E5',
     fontWeight: '500',
-    fontSize: 14,
+    fontSize: 15,
     textAlign: 'center',
-    marginTop: 7,
+    marginTop: 2,
     marginBottom: 15,
     textDecorationLine: 'underline',
     padding: 6,

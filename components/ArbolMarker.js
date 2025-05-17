@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { Marker } from 'react-native-maps';
 
-const ArbolMarker = ({ arbol }) => {
+const ArbolMarker = ({ arbol, shouldShow = true }) => {
   // Determinar qué icono usar según el tipo de árbol
   const getIconSource = (tipoArbol) => {
     switch (tipoArbol) {
@@ -18,6 +18,9 @@ const ArbolMarker = ({ arbol }) => {
         return require('../assets/IconoArbol.png'); // Icono genérico
     }
   };
+
+  // Si no se debe mostrar, retornar null
+  if (!shouldShow) return null;
 
   // Verificar que las coordenadas sean válidas
   if (!arbol.latitud || !arbol.longitud) return null;
