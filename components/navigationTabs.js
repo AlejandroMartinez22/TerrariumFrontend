@@ -78,18 +78,13 @@ export default function NavigationTabs() {
   const verificarPuntosDirectamente = async () => {
     if (brigadista?.cedula) {
       try {
-        console.log("Verificando puntos directamente para:", brigadista.cedula);
         const cantidad = await VerificarPuntosEnBackEnd(brigadista.cedula);
-        console.log("Cantidad de puntos verificados en BD:", cantidad);
 
         // Asegúrate de que cantidad sea numérico
         setCantidadPuntos(Number(cantidad) || 0);
 
         // Si estamos en el paso 4 y hay suficientes puntos, avanzar
         if (tutorialStep === 4 && cantidad >= 4) {
-          console.log(
-            `Avanzando al paso 5 con ${cantidad} puntos verificados en BD`
-          );
           setTutorialStep(5);
         }
 
@@ -106,7 +101,6 @@ export default function NavigationTabs() {
   // Cargar puntos de referencia cuando el brigadista está disponible
   useEffect(() => {
     if (brigadista && brigadista.cedula) {
-      console.log("Cargando puntos para brigadista:", brigadista.cedula);
       cargarPuntosReferencia(brigadista.cedula);
       verificarPuntosDirectamente(); // Verificar cantidad directamente en BD
     }
@@ -149,15 +143,8 @@ export default function NavigationTabs() {
   // Verificar cantidad de puntos para avanzar en el tutorial
   useEffect(() => {
     if (tutorialStep === 4) {
-      console.log("Verificando puntos para tutorial:");
-      console.log("- Puntos en estado local:", puntosReferencia.length);
-      console.log("- Puntos verificados en BD:", cantidadPuntos);
-
       // Usar la cantidad verificada de la base de datos
       if (cantidadPuntos >= 4) {
-        console.log(
-          "¡Suficientes puntos verificados en BD! Avanzando al paso 5"
-        );
         setTutorialStep(5);
       }
     }
@@ -266,11 +253,6 @@ export default function NavigationTabs() {
         showNextSubparcelaModal();
       }, 500); // Pequeño retraso para mejor experiencia de usuario
     } else {
-      // Todas las subparcelas han sido procesadas
-      console.log(
-        "Todas las subparcelas han sido procesadas:",
-        nuevosSubparcelasCaracteristicas
-      );
 
       // Intentar sincronizar con la base de datos
       try {

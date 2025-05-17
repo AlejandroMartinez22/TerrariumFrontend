@@ -1,5 +1,8 @@
 import { getArbolesBySubparcela } from "../api";
 
+// Hook para obtener árboles de una subparcela
+// Este hook se encarga de obtener los árboles de una subparcela específica
+// y maneja el estado de carga y errores.
 export const getArbolesSubparcela = async (subparcelaId, idConglomerado) => {
   try {
     const arboles = await getArbolesBySubparcela(subparcelaId, idConglomerado);

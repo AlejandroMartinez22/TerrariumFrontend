@@ -46,8 +46,6 @@ const ReferenciaModal = ({
   
   // Función que maneja el cambio de tipo de punto, usando la función del padre si existe
   const handleTipoPuntoChange = (tipo) => {
-    console.log("Cambiando tipo a:", tipo);
-    
     // No permitir cambiar a Campamento si ya existe uno y este punto no es el campamento existente
     if (tipo === "Campamento" && isCampamentoDisabled()) {
       return;

@@ -21,7 +21,6 @@ const SeleccionarSubparcela = ({ navigation, route }) => {
       // Si viene de un botánico, usamos navigate para mantener la historia de navegación
       // Si no, usamos el Stack Navigator directamente
       navigation.navigate("registrarIndividuoBotanico", { nombreSubparcela: option });
-      console.log("Navegando a la ventana de registro del individuo:", option);
     } else {
       navigation.navigate("SeleccionarArbolMuestra", { subparcelaType: option });
     }

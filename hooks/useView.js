@@ -1,5 +1,7 @@
 import { fetchCaracteristicasSubparcela, getSubparcelaId, fetchIndividuosByConglomerado } from '../api';
 
+// Hook para obtener el ID de la subparcela
+// Este hook se encarga de obtener el ID de la subparcela a partir del nombre y el ID del conglomerado
 export const useSubparcela = () => {
   // Función para obtener el ID de la subparcela basado en su nombre y el ID del conglomerado
   const obtenerIdSubparcela = async (nombreSubparcela, conglomeradoId) => {
@@ -10,13 +12,10 @@ export const useSubparcela = () => {
           { nombreSubparcela, conglomeradoId });
         return null;
       }
-
-      console.log(`Obteniendo ID de subparcela para: ${nombreSubparcela} en conglomerado: ${conglomeradoId}`);
       
       // Llamar a la API con el nombre de la subparcela y el ID del conglomerado
       const idSubparcela = await getSubparcelaId(nombreSubparcela, conglomeradoId);
       
-      console.log(`ID de subparcela obtenido: ${idSubparcela}`);
       return idSubparcela;
     } catch (error) {
       console.error("Error al obtener el ID de la subparcela:", error);
@@ -39,14 +38,11 @@ export const getCaracteristicasSubparcela = async (nombreSubparcela, idConglomer
       return null;
     }
 
-    console.log(`Obteniendo características para subparcela: ${nombreSubparcela} en conglomerado: ${idConglomerado}`);
-
     // Llama a la función de la API que ya maneja la comunicación con el backend
     const caracteristicas = await fetchCaracteristicasSubparcela(nombreSubparcela, idConglomerado);
     
     // Asegurarse de que la estructura de datos coincida con lo que espera el componente
     if (caracteristicas) {
-      console.log("Características recibidas:", caracteristicas);
       return {
         subparcelaData: caracteristicas.subparcelaData || {},
         coberturas: caracteristicas.coberturas || [],
@@ -60,8 +56,9 @@ export const getCaracteristicasSubparcela = async (nombreSubparcela, idConglomer
   }
 };
 
+// Función para obtener individuos por conglomerado
+// Este hook se encarga de obtener los individuos de un conglomerado específico
 export const getIndividuosByConglomerado = async (idConglomerado) => {
-  console.log("ingreso al hook: ID del conglomerado:", idConglomerado);
   try {
     // Verificar que el ID del conglomerado esté presente
     if (!idConglomerado) {
@@ -69,7 +66,6 @@ export const getIndividuosByConglomerado = async (idConglomerado) => {
       return null;
     }
 
-    console.log(`Obteniendo individuos para conglomerado: ${idConglomerado}`);
 
     // Llama a la función de la API que ya maneja la comunicación con el backend
     const individuos = await fetchIndividuosByConglomerado(idConglomerado);

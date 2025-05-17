@@ -22,19 +22,16 @@ export function useCentrosPoblados(brigadista) {
     setError(null);
 
     if (!brigadista || !brigadista.idConglomerado) {
-      console.log("No hay brigadista o ID de conglomerado disponible");
       setCentrosPoblados([]);
       setIsLoading(false);
       return [];
     }
 
     try {
-      console.log("Solicitando centros poblados para conglomerado:", brigadista.idConglomerado);
       const data = await fetchCoordenadasCentroPoblado(brigadista.idConglomerado);
 
       // Verifica si los datos recibidos son válidos, si no, asigna un array vacío
       const centrosData = data || [];
-      console.log(`Recibidos ${centrosData.length} centros poblados`);
 
       setCentrosPoblados(centrosData);
       return centrosData;

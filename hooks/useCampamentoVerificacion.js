@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { verificarCampamentoExistente } from '../api';
 
+// Hook personalizado para verificar la existencia de un campamento
+// y manejar el estado de verificación, errores y detalles adicionales.
 export function useCampamentoVerificacion() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [existeCampamento, setExisteCampamento] = useState(false);
@@ -8,15 +10,14 @@ export function useCampamentoVerificacion() {
   const [error, setError] = useState(null);
   const [errorDetails, setErrorDetails] = useState(null);
 
+  // Efecto para verificar el campamento al cargar el componente
   const verificarCampamento = async () => {
-    console.log("🔍 Hook: Iniciando verificación de campamento");
     setIsVerifying(true);
     setError(null);
     setErrorDetails(null);
     
     try {
       const resultado = await verificarCampamentoExistente();
-      console.log("🔍 Hook: Resultado recibido", resultado);
       
       // Mejoramos la validación para manejar respuestas inesperadas
       if (resultado && typeof resultado === 'object') {
@@ -40,7 +41,6 @@ export function useCampamentoVerificacion() {
       setError(err.message || 'Error al verificar campamento');
     } finally {
       setIsVerifying(false);
-      console.log("🔍 Hook: Verificación finalizada. Existe campamento:", existeCampamento);
     }
   };
 

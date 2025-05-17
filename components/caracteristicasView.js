@@ -14,44 +14,44 @@ import { getCaracteristicasSubparcela } from "../hooks/useView";
 import { useConteoArbolesSubparcela } from "../hooks/useConteoArbolesSubparcela";
 
 export default function CaracteristicasView({ route }) {
+  // Extraemos el nombre de la subparcela desde los parámetros de navegación
   const { subparcelaId: nombreSubparcela } = route.params;
   const { brigadista } = useBrigadista();
   const navigation = useNavigation();
-  
-  // Importar la imagen de árboles no encontrados
+
+  // Imagen que se muestra si no hay árboles registrados
   const iconoArbolesNoEncontrados = require('../assets/IconoArbolesNoEncontrados.png');
 
-  // Estados para manejar datos y carga
+  // Estados locales para controlar datos, errores y carga
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [subparcelaData, setSubparcelaData] = useState(null);
   const [coberturas, setCoberturas] = useState([]);
   const [alteraciones, setAlteraciones] = useState([]);
 
-  // Verificar si brigadista existe antes de acceder a sus propiedades
+  // Extraemos el ID del conglomerado del brigadista (si está disponible)
   const conglomeradoId = brigadista?.idConglomerado;
 
-  const { 
-    estadisticas, 
-    loading: loadingIndividuos, 
-    error: errorIndividuos 
+  // Hook para obtener conteo de árboles
+  const {
+    estadisticas,
+    loading: loadingIndividuos,
+    error: errorIndividuos
   } = useConteoArbolesSubparcela(
-    conglomeradoId, 
-    subparcelaData?.id // Usamos el ID de la subparcela en lugar del nombre
+    conglomeradoId,
+    subparcelaData?.id
   );
 
-
-  // Cargar datos cuando el componente se monta
+  // useEffect para cargar datos de la subparcela al montar el componente
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        // Verificar si brigadista existe antes de continuar
         if (!conglomeradoId) {
           setError("No hay información del brigadista disponible");
           setLoading(false);
           return;
         }
-        
+
         setLoading(true);
         const resultado = await getCaracteristicasSubparcela(
           nombreSubparcela,
@@ -59,8 +59,6 @@ export default function CaracteristicasView({ route }) {
         );
 
         if (resultado) {
-          console.log("Datos recibidos en componente:", resultado);
-          // Asignar los datos a los estados correspondientes
           setSubparcelaData(resultado.subparcelaData);
           setCoberturas(resultado.coberturas || []);
           setAlteraciones(resultado.alteraciones || []);
@@ -78,8 +76,8 @@ export default function CaracteristicasView({ route }) {
     cargarDatos();
   }, [nombreSubparcela, conglomeradoId]);
 
-  // Renderizado para estado de carga
-  if (loading  || loadingIndividuos) {
+  // Si está cargando, mostrar indicador de actividad
+  if (loading || loadingIndividuos) {
     return (
       <SafeAreaView style={styles.fullScreenContainer}>
         <View style={styles.centeredContent}>
@@ -92,7 +90,7 @@ export default function CaracteristicasView({ route }) {
     );
   }
 
-  // Renderizado para estado de error
+  // Si hay error, mostrar mensaje de error
   if (error || errorIndividuos) {
     return (
       <SafeAreaView style={styles.fullScreenContainer}>
@@ -109,7 +107,7 @@ export default function CaracteristicasView({ route }) {
     );
   }
 
-  // Renderizado cuando no hay datos o brigadista
+  // Si no hay datos o brigadista, mostrar mensaje adecuado
   if (!subparcelaData || !brigadista) {
     return (
       <SafeAreaView style={styles.fullScreenContainer}>
@@ -126,7 +124,7 @@ export default function CaracteristicasView({ route }) {
     );
   }
 
-  // Renderizado principal con datos
+  // Render principal con los datos de la subparcela
   return (
     <SafeAreaView style={styles.fullScreenContainer}>
       <View style={styles.mainContent}>
@@ -134,7 +132,7 @@ export default function CaracteristicasView({ route }) {
           Características de la {nombreSubparcela}
         </Text>
 
-        {/* Datos de coordenadas */}
+        {/* Información general: ID, coordenadas */}
         <View style={styles.infoRow}>
           <View style={styles.infoColumn}>
             <Text style={styles.infoLabel}>ID</Text>
@@ -170,17 +168,16 @@ export default function CaracteristicasView({ route }) {
         </View>
       </View>
 
-
-      {/* Tablas de cobertura y alteración */}
+      {/* Tabla de coberturas y alteraciones */}
       <View style={styles.infoTableContainer}>
+        {/* Tabla de cobertura */}
         <View style={styles.infoTable}>
           <View style={styles.infoTableHeader}>
             <Text style={styles.infoTableHeaderText}>Cobertura</Text>
             <Text style={styles.infoTableHeaderText}>%</Text>
           </View>
-          {coberturas && coberturas.length > 0 ? (
+          {coberturas.length > 0 ? (
             <>
-              {/* Mostrar las coberturas existentes */}
               {coberturas.slice(0, 4).map((item, index) => (
                 <View key={index} style={styles.infoTableRow}>
                   <Text
@@ -190,17 +187,12 @@ export default function CaracteristicasView({ route }) {
                   >
                     {item.nombre || "N/A"}
                   </Text>
-                  <Text
-                    style={styles.infoTableCell}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
+                  <Text style={styles.infoTableCell}>
                     {item.porcentaje || "N/A"}
                   </Text>
                 </View>
               ))}
-          
-              {/* Agregar filas vacías si hay menos de 4 coberturas */}
+              {/* Rellenar filas vacías si hay menos de 4 */}
               {Array.from({ length: Math.max(0, 4 - coberturas.length) }).map((_, index) => (
                 <View key={`empty-${index}`} style={styles.infoTableRow}>
                   <Text style={styles.infoTableCell}></Text>
@@ -212,15 +204,11 @@ export default function CaracteristicasView({ route }) {
             <>
               <View style={styles.infoTableRow}>
                 <Text
-                  style={[
-                    styles.infoTableCell,
-                    { textAlign: "center", flex: 2 },
-                  ]}
+                  style={[styles.infoTableCell, { textAlign: "center", flex: 2 }]}
                 >
                   No hay datos de cobertura
                 </Text>
               </View>
-              {/* Agregar 3 filas vacías para mantener el tamaño */}
               {Array.from({ length: 3 }).map((_, index) => (
                 <View key={`empty-${index}`} style={styles.infoTableRow}>
                   <Text style={styles.infoTableCell}></Text>
@@ -231,40 +219,36 @@ export default function CaracteristicasView({ route }) {
           )}
         </View>
 
+        {/* Tabla de alteraciones */}
         <View style={styles.infoTable}>
           <View style={styles.infoTableHeader}>
             <Text style={styles.infoTableHeaderText}>Alteración</Text>
             <Text style={styles.infoTableHeaderText}>Severidad</Text>
           </View>
-          {alteraciones && alteraciones.length > 0 ? (
+          {alteraciones.length > 0 ? (
             <>
-              {/* Mostrar las alteraciones existentes */}
               {alteraciones.slice(0, 4).map((item, index) => (
                 <View key={index} style={styles.infoTableRow}>
-                  <Text
-                    style={[styles.infoTableCell, styles.smallText]}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
+                  <Text style={[styles.infoTableCell, styles.smallText]}>
                     {item.nombre || "N/A"}
                   </Text>
                   <Text
                     style={[
                       styles.infoTableCell,
-                      item.severidad === "FA" ? styles.redText :
-                      item.severidad === "MA" ? styles.blueText :
-                      item.severidad === "NP" ? styles.greenText :
-                      styles.boldBlueText
+                      item.severidad === "FA"
+                        ? styles.redText
+                        : item.severidad === "MA"
+                          ? styles.blueText
+                          : item.severidad === "NP"
+                            ? styles.greenText
+                            : styles.boldBlueText,
                     ]}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
                   >
                     {item.severidad || "N/A"}
                   </Text>
                 </View>
               ))}
-              
-              {/* Agregar filas vacías si hay menos de 4 alteraciones */}
+              {/* Rellenar filas vacías si hay menos de 4 */}
               {Array.from({ length: Math.max(0, 4 - alteraciones.length) }).map((_, index) => (
                 <View key={`empty-${index}`} style={styles.infoTableRow}>
                   <Text style={styles.infoTableCell}></Text>
@@ -276,15 +260,11 @@ export default function CaracteristicasView({ route }) {
             <>
               <View style={styles.infoTableRow}>
                 <Text
-                  style={[
-                    styles.infoTableCell,
-                    { textAlign: "center", flex: 2 },
-                  ]}
+                  style={[styles.infoTableCell, { textAlign: "center", flex: 2 }]}
                 >
                   No hay datos de alteración
                 </Text>
               </View>
-              {/* Agregar 3 filas vacías para mantener el tamaño */}
               {Array.from({ length: 3 }).map((_, index) => (
                 <View key={`empty-${index}`} style={styles.infoTableRow}>
                   <Text style={styles.infoTableCell}></Text>
@@ -296,72 +276,45 @@ export default function CaracteristicasView({ route }) {
         </View>
       </View>
 
-      {/* Sección para mostrar conteo de árboles */}
+      {/* Tabla de conteo de árboles */}
       <View style={styles.infoTableContainer}>
-      {estadisticas.total > 0 ? (
-      <View style={[styles.infoTable, { flex: 1 }]}>
-        <View style={styles.infoTableHeader}>
-          <Text style={styles.infoTableHeaderText}>Conteo de Árboles</Text>
-          <Text style={styles.infoTableHeaderText}>Cantidad</Text>
-        </View>
-        
-        <View style={styles.infoTableRow}>
-          <Text style={[styles.infoTableCell, styles.boldText]}>
-            Total de árboles
-          </Text>
-          <Text style={styles.infoTableCell}>
-            {estadisticas.total}
-          </Text>
-        </View>
-        <View style={styles.infoTableRow}>
-          <Text style={[styles.infoTableCell, styles.boldText]}>
-            Brinzales
-          </Text>
-          <Text style={styles.infoTableCell}>
-            {estadisticas.porTipo.Brinzal}
-          </Text>
-        </View>
-        <View style={styles.infoTableRow}>
-          <Text style={[styles.infoTableCell, styles.boldText]}>
-            Latizales
-          </Text>
-          <Text style={styles.infoTableCell}>
-            {estadisticas.porTipo.Latizal}
-          </Text>
-        </View>
-        <View style={styles.infoTableRow}>
-          <Text style={[styles.infoTableCell, styles.boldText]}>
-            Fustales
-          </Text>
-          <Text style={styles.infoTableCell}>
-            {estadisticas.porTipo.Fustal}
-          </Text>
-        </View>
-        <View style={styles.infoTableRow}>
-          <Text style={[styles.infoTableCell, styles.boldText]}>
-            Fustales Grandes
-          </Text>
-          <Text style={styles.infoTableCell}>
-            {estadisticas.porTipo["Fustal Grande"]}
-          </Text>
-        </View>
-      </View>
-    ) : (
-      <View style={[styles.emptyTreesBox, { flex: 1 }]}>
-        <View style={styles.noTreesContent}>
-          <Text style={styles.noTreesText}>
-            No hay ningún árbol registrado de momento
-          </Text>
-          <Image 
-            source={iconoArbolesNoEncontrados} 
-            style={styles.noTreesImage} 
-          />
-        </View>
-      </View>
-    )}
-  </View>
+        {estadisticas.total > 0 ? (
+          <View style={[styles.infoTable, { flex: 1 }]}>
+            <View style={styles.infoTableHeader}>
+              <Text style={styles.infoTableHeaderText}>Conteo de Árboles</Text>
+              <Text style={styles.infoTableHeaderText}>Cantidad</Text>
+            </View>
 
-      {/* Botón de cerrar */}
+            {["Brinzal", "Latizal", "Fustal", "Fustal Grande"].map((tipo, idx) => (
+              <View key={idx} style={styles.infoTableRow}>
+                <Text style={[styles.infoTableCell, styles.boldText]}>{tipo}</Text>
+                <Text style={styles.infoTableCell}>
+                  {estadisticas.porTipo[tipo] ?? 0}
+                </Text>
+              </View>
+            ))}
+
+            <View style={styles.infoTableRow}>
+              <Text style={[styles.infoTableCell, styles.boldText]}>Total de árboles</Text>
+              <Text style={styles.infoTableCell}>{estadisticas.total}</Text>
+            </View>
+          </View>
+        ) : (
+          <View style={[styles.emptyTreesBox, { flex: 1 }]}>
+            <View style={styles.noTreesContent}>
+              <Text style={styles.noTreesText}>
+                No hay ningún árbol registrado de momento
+              </Text>
+              <Image
+                source={iconoArbolesNoEncontrados}
+                style={styles.noTreesImage}
+              />
+            </View>
+          </View>
+        )}
+      </View>
+
+      {/* Botón para cerrar y volver */}
       <TouchableOpacity
         style={styles.closeButton}
         onPress={() => navigation.goBack()}
@@ -372,6 +325,7 @@ export default function CaracteristicasView({ route }) {
   );
 }
 
+// Estilos para el componente
 const styles = StyleSheet.create({
   fullScreenContainer: {
     flex: 1,

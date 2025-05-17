@@ -56,12 +56,6 @@ export default function MuestraModal({ route, navigation }) {
     validarObservaciones(observaciones);
 
   useEffect(() => {
-    console.log("Parámetros recibidos en MuestraModal:", {
-      subparcela,
-      arbol,
-      tamanoIndividuo,
-    });
-
     const inicializarDatos = async () => {
       // Reiniciamos los errores cuando se abre el componente
       setErrors({
@@ -78,7 +72,6 @@ export default function MuestraModal({ route, navigation }) {
       // Generamos un nuevo ID desde la base de datos para la muestra
       try {
         const nuevoId = await siguienteIdMuestra();
-        console.log("Nuevo ID generado desde el backend:", nuevoId);
 
         if (nuevoId) {
           setIdMuestra(nuevoId);
@@ -100,21 +93,6 @@ export default function MuestraModal({ route, navigation }) {
 
     inicializarDatos();
   }, []);
-
-  // Para debugging - registrar los cambios en las variables principales
-  useEffect(() => {
-    console.log("Estado actual:", {
-      idAsignado,
-      subparcela,
-      arbol,
-      tamanoIndividuo,
-      nombreComun,
-      determinacionCampo,
-      numeroColeccion,
-      observaciones,
-      idMuestra,
-    });
-  }, [nombreComun, determinacionCampo, numeroColeccion, observaciones]);
 
   // Cerrar el modal y volver a la pantalla anterior
   const handleClose = () => {
@@ -150,7 +128,6 @@ export default function MuestraModal({ route, navigation }) {
 
     setCedulaBrigadista(brigadista.cedula_brigadista);
 
-    console.log("brigadista actual:", brigadista);
     // Si el formulario es válido, guardamos los datos
     const muestraData = {
       idMuestra,
@@ -163,10 +140,8 @@ export default function MuestraModal({ route, navigation }) {
       cedula_brigadista: brigadista.brigadista.cedula,
     };
 
-    console.log("Guardando muestra:", muestraData);
     const id = await guardarMuestra(muestraData);
-    console.log("ID de muestra guardada:", id);
-    
+
     navigation.goBack();
   };
 
@@ -184,7 +159,7 @@ export default function MuestraModal({ route, navigation }) {
         <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
-          onPress={() => {}}
+          onPress={() => { }}
         >
           <ScrollView contentContainerStyle={styles.scrollViewContent}>
             <View style={styles.modalView}>

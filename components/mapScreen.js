@@ -117,7 +117,6 @@ export default function MapScreen() {
   useEffect(() => {
     if (actualizarArboles) {
       // La bandera actualizarArboles está activa, lo que significa que tenemos nuevos árboles para mostrar
-      console.log("Actualizando árboles en el mapa:", arbolesFiltrados.length);
 
       // Si hay árboles y tenemos un mapa de referencia, centramos el mapa en el primer árbol
       if (arbolesFiltrados.length > 0 && mapRef.current) {
@@ -271,7 +270,6 @@ export default function MapScreen() {
 
     try {
       if (isNewPoint) {
-        console.log("🆕 Guardando nuevo punto sin trayecto");
         await guardarReferencia(puntoAGuardar, brigadista.cedula);
 
         // Actualizar la interfaz con el nuevo punto
@@ -280,7 +278,6 @@ export default function MapScreen() {
         // Actualizar estado de campamento si es necesario
         await actualizarEstadoTipoCampamento(puntoAGuardar);
       } else {
-        console.log("🔄 Actualizando punto handleregion");
         await actualizarPuntoReferencia(puntoAGuardar, brigadista.cedula);
 
         // Actualizar la interfaz
@@ -313,7 +310,6 @@ export default function MapScreen() {
 
     try {
       if (isNewPoint) {
-        console.log("🆕 Guardando nuevo punto y trayecto");
         const puntoId = await guardarReferencia(
           puntoConTrayecto,
           brigadista.cedula
@@ -322,7 +318,6 @@ export default function MapScreen() {
         if (puntoId) {
           // Aseguramos que el trayecto se guarde con el ID correcto
           await guardarTrayecto(datosTrayecto, puntoId, brigadista.cedula);
-          console.log("✅ Punto y trayecto nuevos guardados");
 
           // Añadir el ID correcto al punto para la interfaz
           const puntoCompleto = { ...puntoConTrayecto, id: puntoId };
@@ -331,14 +326,12 @@ export default function MapScreen() {
           setPuntosReferencia([...puntosReferencia, puntoCompleto]);
         }
       } else {
-        console.log("🔄 Actualizando punto y trayecto existentes");
         await actualizarPuntoReferencia(puntoConTrayecto, brigadista.cedula);
         await actualizarDatosTrayecto(
           datosTrayecto,
           puntoBase.id,
           brigadista.cedula
         );
-        console.log("✏️ Punto y trayecto actualizados correctamente");
 
         // Actualizar la interfaz
         const updatedPuntos = puntosReferencia.map((p) =>
@@ -443,7 +436,6 @@ export default function MapScreen() {
           (punto) => punto.id !== puntoId
         );
         setPuntosReferencia(nuevosPuntos);
-        console.log(`Punto con ID ${puntoId} eliminado correctamente`);
 
         // Actualizar estado de campamento si eliminamos un campamento
         if (puntoAEliminar && puntoAEliminar.tipo === "Campamento") {

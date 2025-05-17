@@ -30,8 +30,6 @@ export const login = async (email, password) => {
     //Verificar token en backend y obtener datos adicionales
     const userData = await verifyTokenAndGetUser(idToken);
     
-    console.log("Datos completos del usuario:", userData);
-    
     // Combinar datos de Firebase y del backend
     // Retornamos un objeto con la información del usuario y el nombre obtenido del backend
     return {

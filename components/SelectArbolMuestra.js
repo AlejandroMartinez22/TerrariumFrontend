@@ -13,13 +13,8 @@ import { useBrigadista } from "../context/BrigadistaContext";
 import { getArbolesSubparcela } from "../hooks/useArbolesSubparcelas";
 
 const SelectArbolMuestra = ({ route, navigation }) => {
-  // Agregamos logs para ver los parámetros de la ruta y detectar problemas
-  console.log("SelectArbolMuestra - route params:", route?.params);
-
   // Obtenemos el subparcelaType de los parámetros
   const subparcelaType = route?.params?.subparcelaType;
-
-  console.log("SelectArbolMuestra - subparcelaType:", subparcelaType);
 
   // Accedemos al contexto del brigadista
   const { brigadista } = useBrigadista();
@@ -41,18 +36,11 @@ const SelectArbolMuestra = ({ route, navigation }) => {
       setLoading(false);
       console.error("Error: subparcelaType es undefined");
     } else if (!brigadista?.idConglomerado) {
-      console.log(brigadista);
       setError("No se encontró el ID del conglomerado del brigadista.");
       setLoading(false);
       console.error("Error: brigadista.idConglomerado es undefined");
     } else {
       // Si tenemos los datos, cargamos los árboles
-      console.log(
-        "Cargando árboles para subparcela:",
-        subparcelaType,
-        "conglomerado:",
-        brigadista.idConglomerado
-      );
       loadArboles();
     }
   }, [subparcelaType, brigadista?.idConglomerado]);
@@ -73,20 +61,14 @@ const SelectArbolMuestra = ({ route, navigation }) => {
         brigadista.idConglomerado
       );
 
-      console.log("Respuesta completa:", response);
-
       // Comprobamos si la respuesta tiene la estructura esperada
       if (response && response.data && response.success) {
-        console.log("Datos de árboles recibidos:", response.data.arboles);
-        
         // Actualizamos el estado con los datos obtenidos
         setArboles(response.data.arboles || []);
         setSubparcelaId(response.data.subparcelaId);
         setLoading(false);
       } else if (response && response.arboles) {
         // Estructura alternativa si getArbolesBySubparcela ya extrajo los datos
-        console.log("Datos de árboles (formato alternativo):", response.arboles);
-        
         setArboles(response.arboles || []);
         setSubparcelaId(response.subparcelaId);
         setLoading(false);
@@ -131,7 +113,6 @@ const SelectArbolMuestra = ({ route, navigation }) => {
 
   // Función para seleccionar un árbol
   const handleSelectArbol = (arbol) => {
-    console.log("Árbol seleccionado:", arbol);
     // Pasamos el subparcelaType, id del árbol y tamaño_individuo como parámetros separados
     navigation.navigate("registrarMuestra", {
       subparcela: subparcelaType,

@@ -95,9 +95,6 @@ const VisualizarTab = () => {
       // Actualizar el contexto con los árboles filtrados
       actualizarArbolesFiltrados(arbolesFiltrados);
       
-      console.log(`Se ${arbolesFiltrados.length === 1 ? "encontró" : "encontraron"} ${arbolesFiltrados.length} ${arbolesFiltrados.length === 1 ? "árbol" : "árboles"}`);
-      console.log("\nÁrboles filtrados:", arbolesFiltrados);
-      
       // Si los datos ya están cargados, solo necesitamos actualizar el filtro
       if (!dataLoaded) {
         setDataLoaded(true);

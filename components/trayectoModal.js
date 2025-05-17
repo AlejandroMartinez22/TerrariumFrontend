@@ -62,8 +62,6 @@ export default function TrayectoModal({
       setShowDropdown(false);
       
       if (trayectoEditado) {
-        console.log("Cargando datos del trayecto existente:", trayectoEditado);
-        
         // Si estamos editando, usamos los valores del trayecto editado
         setMedioTransporte(trayectoEditado.medioTransporte || "Terrestre");
         
@@ -80,7 +78,6 @@ export default function TrayectoModal({
         try {
           // Utilizamos la función importada para obtener el ID del backend
           const nuevoId = await getUltimoIdTrayectoDeBack();
-          console.log("Nuevo ID generado desde el backend:", nuevoId);
           
           if (nuevoId) {
             setIdTrayecto(nuevoId);
@@ -103,18 +100,6 @@ export default function TrayectoModal({
 
     inicializarDatos();
   }, [visible, trayectoEditado]);
-
-  // Para debugging - registrar los cambios en las variables principales
-  useEffect(() => { 
-    console.log("Estado actual:", {
-      medioTransporte,
-      duracion,
-      distancia,
-      idTrayecto,
-      isDuracionValid,
-      trayectoEditadoPresente: !!trayectoEditado
-    });
-  }, [medioTransporte, duracion, distancia, idTrayecto, isDuracionValid, trayectoEditado]);
 
   // Validar campos antes de guardar
   const validateFields = () => {
@@ -161,7 +146,6 @@ export default function TrayectoModal({
     // Si estamos editando, pasamos el ID del trayecto editado
     const esEdicion = !!trayectoEditado;
 
-    console.log("Guardando trayecto:", datosTrayecto, "Es edición:", esEdicion);
     onConfirmar(datosTrayecto, esEdicion);
   };
 

@@ -39,10 +39,6 @@ export const ReferenciaProvider = ({ children }) => {
       // Obtener los puntos de referencia usando la función importada
       const puntos = await getPuntosReferenciaByConglomerado(cedulaBrigadista);
       
-      // Depuración - verificar lo que se está obteniendo
-      console.log("Puntos cargados de la BD:", puntos);
-      console.log("Cantidad de puntos cargados:", puntos.length);
-      
       // Actualizar el estado con los puntos recuperados
       setPuntosReferencia(puntos);
       
@@ -60,7 +56,6 @@ export const ReferenciaProvider = ({ children }) => {
   const agregarPuntoReferencia = (nuevoPunto) => {
     setPuntosReferencia(prevPuntos => {
       const puntosActualizados = [...prevPuntos, nuevoPunto];
-      console.log("Punto agregado. Total puntos:", puntosActualizados.length);
       return puntosActualizados;
     });
   };
@@ -68,7 +63,6 @@ export const ReferenciaProvider = ({ children }) => {
   // Función para verificar si hay al menos 4 puntos de referencia
   const tieneSuficientesPuntos = () => {
     const cantidad = puntosReferencia.length;
-    console.log("Verificando cantidad de puntos:", cantidad);
     return cantidad >= 4;
   };
 

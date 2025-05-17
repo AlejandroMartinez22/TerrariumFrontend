@@ -7,29 +7,29 @@ const ArbolMarker = ({ arbol, shouldShow = true }) => {
   const getIconSource = (tipoArbol) => {
     switch (tipoArbol) {
       case 'Latizal':
-        return require('../assets/IconoLatizal.png');
+        return require('../assets/IconoLatizal.png'); // Ícono para Latizal
       case 'Brinzal':
-        return require('../assets/IconoBrinzal.png');
+        return require('../assets/IconoBrinzal.png'); // Ícono para Brinzal
       case 'Fustal':
-        return require('../assets/IconoFustal.png');
+        return require('../assets/IconoFustal.png'); // Ícono para Fustal
       case 'Fustal Grande':
-        return require('../assets/IconoFustalGrande.png');
+        return require('../assets/IconoFustalGrande.png'); // Ícono para Fustal Grande
       default:
-        return require('../assets/IconoArbol.png'); // Icono genérico
+        return require('../assets/IconoArbol.png'); // Ícono genérico en caso de tipo desconocido
     }
   };
 
-  // Si no se debe mostrar, retornar null
+  // Si no se debe mostrar el marcador, retornar null
   if (!shouldShow) return null;
 
   // Verificar que las coordenadas sean válidas
   if (!arbol.latitud || !arbol.longitud) return null;
 
-  // Asegurar que las coordenadas sean números
+  // Convertir coordenadas a número en caso de que sean cadenas de texto
   const lat = typeof arbol.latitud === 'string' ? parseFloat(arbol.latitud) : arbol.latitud;
   const lng = typeof arbol.longitud === 'string' ? parseFloat(arbol.longitud) : arbol.longitud;
 
-  // Omitir si son números inválidos
+  // Omitir el marcador si las coordenadas son inválidas
   if (isNaN(lat) || isNaN(lng)) return null;
 
   return (
@@ -40,6 +40,7 @@ const ArbolMarker = ({ arbol, shouldShow = true }) => {
       }}
     >
       <View style={styles.markerContainer}>
+        {/* Mostrar el ícono correspondiente al tipo de árbol */}
         <Image
           source={getIconSource(arbol.tamaño_individuo)}
           style={styles.markerIcon}
@@ -50,13 +51,14 @@ const ArbolMarker = ({ arbol, shouldShow = true }) => {
   );
 };
 
+// Definir estilos para el contenedor e ícono del marcador
 const styles = StyleSheet.create({
   markerContainer: {
-    alignItems: 'center',
+    alignItems: 'center', // Centrar el contenido dentro del marcador
   },
   markerIcon: {
-    width: 45,
-    height: 45,
+    width: 45, // Ancho del ícono del marcador
+    height: 45, // Alto del ícono del marcador
   },
 });
 
