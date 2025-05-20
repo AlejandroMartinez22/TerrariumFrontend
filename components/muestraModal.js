@@ -1,6 +1,5 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
@@ -9,20 +8,20 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
+  StatusBar,
+  Alert
 } from "react-native";
 
 // Función para obtener el ID
 import { siguienteIdMuestra, guardarMuestra } from "../hooks/useMuestra";
 import { useBrigadista } from "../context/BrigadistaContext";
 
-// Modificamos MuestraModal para recibir parámetros de la ruta
+// Modificamos MuestraModal para que sea una pantalla completa en lugar de modal
 export default function MuestraModal({ route, navigation }) {
   // Extraemos los parámetros de la ruta
   const { subparcela, arbol, tamanoIndividuo } = route.params || {};
   const brigadista = useBrigadista();
-
-  // Estados para controlar la visibilidad del modal
-  const [visible, setVisible] = useState(true);
 
   // Estados para almacenar los valores del formulario
   const [idMuestra, setIdMuestra] = useState("");
@@ -94,7 +93,7 @@ export default function MuestraModal({ route, navigation }) {
     inicializarDatos();
   }, []);
 
-  // Cerrar el modal y volver a la pantalla anterior
+  // Cerrar la pantalla y volver a la pantalla anterior
   const handleClose = () => {
     navigation.goBack();
   };
@@ -140,210 +139,212 @@ export default function MuestraModal({ route, navigation }) {
       cedula_brigadista: brigadista.brigadista.cedula,
     };
 
-    const id = await guardarMuestra(muestraData);
-
-    navigation.goBack();
+    try {
+      const id = await guardarMuestra(muestraData);
+      
+      if (id) {
+        Alert.alert(
+          "Éxito",
+          "La muestra se ha guardado correctamente",
+          [{ text: "OK", onPress: () => navigation.goBack() }]
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          "No se pudo guardar la muestra. Inténtalo de nuevo.",
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      console.error("Error al guardar muestra:", error);
+      Alert.alert(
+        "Error",
+        "Ocurrió un error al guardar la muestra: " + error.message,
+        [{ text: "OK" }]
+      );
+    }
   };
 
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={handleClose}
-    >
+    <SafeAreaView style={styles.safeArea}>
+      {/* Cambia el color de la barra de estado y el estilo del texto */}
+      <StatusBar backgroundColor="#1E5A26" barStyle="light-content" />
+
+      {/* Ajusta la vista para evitar que el teclado tape los inputs */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.centeredView}
+        style={styles.fullScreen}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => { }}
-        >
-          <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            <View style={styles.modalView}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Registro de la Muestra</Text>
-                <TouchableOpacity
-                  onPress={handleClose}
-                  style={styles.closeButton}
-                >
-                  <Text style={styles.closeButtonText}>✕</Text>
-                </TouchableOpacity>
-              </View>
+        {/* Scroll para contenido que sobrepasa la pantalla */}
+        <ScrollView contentContainerStyle={styles.scrollViewContent} keyboardShouldPersistTaps="handled">
+          <View style={styles.modalView}>
+            {/* Encabezado del formulario con título */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Registro de la Muestra</Text>
+            </View>
 
-              <View style={styles.topInfoContainer}>
-                <View style={styles.infoItem}>
-                  <Text style={styles.infoLabel}>ID ASIGNADO:</Text>
-                  <Text style={styles.infoValue}>{idAsignado}</Text>
-                </View>
-              </View>
-
-              <View style={styles.formContainer}>
-                {/* Fila para Subparcela y Árbol */}
-                <View style={styles.formRow}>
-                  <View style={styles.formColumn}>
-                    <Text style={styles.label}>SUBPARCELA</Text>
-                    <View style={styles.valueBox}>
-                      <Text style={styles.valueText}>{subparcela}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.formColumn}>
-                    <Text style={styles.label}>ÁRBOL</Text>
-                    <View style={styles.valueBox}>
-                      <Text style={styles.valueText}>{arbol}</Text>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Tamaño del individuo */}
-                <View style={styles.formRowFull}>
-                  <Text style={styles.label}>Tamaño del individuo</Text>
-                  <View style={styles.valueBox}>
-                    <Text style={styles.valueText}>{tamanoIndividuo}</Text>
-                  </View>
-                </View>
-
-                {/* Nombre Común */}
-                <View style={styles.formRowFull}>
-                  <Text style={styles.label}>* Nombre Común</Text>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      errors.nombreComun && styles.inputError,
-                    ]}
-                    value={nombreComun}
-                    onChangeText={(text) => {
-                      setNombreComun(text);
-                      if (text && text.trim()) {
-                        setErrors((prev) => ({ ...prev, nombreComun: false }));
-                      }
-                    }}
-                    placeholder="Ingrese el nombre común"
-                  />
-                  {errors.nombreComun && (
-                    <Text style={styles.errorText}>Este campo es obligatorio</Text>
-                  )}
-                </View>
-
-                {/* Determinación en campo (ahora opcional) */}
-                <View style={styles.formRowFull}>
-                  <Text style={styles.label}>Determinación en campo (opcional)</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={determinacionCampo}
-                    onChangeText={setDeterminacionCampo}
-                    placeholder="Ingrese la determinación en campo (opcional)"
-                  />
-                </View>
-
-                {/* No. de colección */}
-                <View style={styles.formRowFull}>
-                  <Text style={styles.label}>* No. de colección</Text>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      errors.numeroColeccion && styles.inputError,
-                    ]}
-                    value={numeroColeccion}
-                    onChangeText={(text) => {
-                      setNumeroColeccion(text);
-                      if (text && text.trim()) {
-                        setErrors((prev) => ({
-                          ...prev,
-                          numeroColeccion: false,
-                        }));
-                      }
-                    }}
-                    placeholder="Ingrese el número de colección"
-                    keyboardType="numeric"
-                  />
-                  {errors.numeroColeccion && (
-                    <Text style={styles.errorText}>Este campo es obligatorio</Text>
-                  )}
-                </View>
-
-                {/* Observaciones (obligatorio con mínimo 4 palabras) */}
-                <View style={styles.formRowFull}>
-                  <Text style={styles.label}>* Observaciones (Mínimo 4 palabras)</Text>
-                  <TextInput
-                    style={[
-                      styles.textArea,
-                      errors.observaciones && styles.inputError,
-                    ]}
-                    value={observaciones}
-                    onChangeText={(text) => {
-                      setObservaciones(text);
-                      if (validarObservaciones(text)) {
-                        setErrors((prev) => ({ ...prev, observaciones: false }));
-                      }
-                    }}
-                    placeholder="Ingrese las observaciones (mínimo 4 palabras)"
-                    multiline={true}
-                    numberOfLines={4}
-                    textAlignVertical="top"
-                  />
-                  {errors.observaciones && (
-                    <Text style={styles.errorText}>Este campo es obligatorio y debe tener al menos 4 palabras</Text>
-                  )}
-                </View>
-
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={[
-                      styles.hechoButton,
-                      !isFormValid && styles.hechoButtonDisabled,
-                    ]}
-                    onPress={handleGuardar}
-                    disabled={!isFormValid}
-                  >
-                    <Text
-                      style={[
-                        styles.hechoButtonText,
-                        !isFormValid && styles.hechoButtonTextDisabled,
-                      ]}
-                    >
-                      Hecho
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+            <View style={styles.topInfoContainer}>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>ID ASIGNADO:</Text>
+                <Text style={styles.infoValue}>{idAsignado}</Text>
               </View>
             </View>
-          </ScrollView>
-        </TouchableOpacity>
+
+            <View style={styles.formContainer}>
+              {/* Fila para Subparcela y Árbol */}
+              <View style={styles.formRow}>
+                <View style={styles.formColumn}>
+                  <Text style={styles.label}>Subparcela</Text>
+                  <View style={styles.valueBox}>
+                    <Text style={styles.valueText}>{subparcela}</Text>
+                  </View>
+                </View>
+                <View style={styles.formColumn}>
+                  <Text style={styles.label}>Id del árbol</Text>
+                  <View style={styles.valueBox}>
+                    <Text style={styles.valueText}>{arbol}</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Tamaño del individuo */}
+              <View style={styles.formRowFull}>
+                <Text style={styles.label}>Tamaño del individuo</Text>
+                <View style={styles.valueBox}>
+                  <Text style={styles.valueText}>{tamanoIndividuo}</Text>
+                </View>
+              </View>
+
+              {/* Nombre Común */}
+              <View style={styles.formRowFull}>
+                <Text style={styles.label}>* Nombre Común</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    errors.nombreComun && styles.inputError,
+                  ]}
+                  value={nombreComun}
+                  onChangeText={(text) => {
+                    setNombreComun(text);
+                    if (text && text.trim()) {
+                      setErrors((prev) => ({ ...prev, nombreComun: false }));
+                    }
+                  }}
+                />
+                {errors.nombreComun && (
+                  <Text style={styles.errorText}>Este campo es obligatorio</Text>
+                )}
+              </View>
+
+              {/* Determinación en campo (ahora opcional) */}
+              <View style={styles.formRowFull}>
+                <Text style={styles.label}>Determinación en campo</Text>
+                <TextInput
+                  style={styles.input}
+                  value={determinacionCampo}
+                  onChangeText={setDeterminacionCampo}
+                  placeholder="Ej: Quercus"
+                />
+              </View>
+
+              {/* No. de colección */}
+              <View style={styles.formRowFull}>
+                <Text style={styles.label}>* No. de colección</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    errors.numeroColeccion && styles.inputError,
+                  ]}
+                  value={numeroColeccion}
+                  onChangeText={(text) => {
+                    const filteredText = text.replace(/[^a-zA-Z0-9]/g, "");
+                    setNumeroColeccion(filteredText);
+                    if (filteredText.trim()) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        numeroColeccion: false,
+                      }));
+                    }
+                  }}
+                  placeholder="Ej: GD001"
+                />
+                {errors.numeroColeccion && (
+                  <Text style={styles.errorText}>Este campo es obligatorio</Text>
+                )}
+              </View>
+
+              {/* Observaciones (obligatorio con mínimo 4 palabras) */}
+              <View style={styles.formRowFull}>
+                <Text style={styles.label}>* Observaciones</Text>
+                <TextInput
+                  style={[
+                    styles.textArea,
+                    errors.observaciones && styles.inputError,
+                  ]}
+                  value={observaciones}
+                  onChangeText={(text) => {
+                    setObservaciones(text);
+                    if (validarObservaciones(text)) {
+                      setErrors((prev) => ({ ...prev, observaciones: false }));
+                    }
+                  }}
+                  placeholder="Mínimo 4 palabras"
+                  multiline={true}
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+                {errors.observaciones && (
+                  <Text style={styles.errorText}>Este campo es obligatorio y debe tener al menos 4 palabras</Text>
+                )}
+              </View>
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.hechoButton,
+                    !isFormValid && styles.hechoButtonDisabled,
+                  ]}
+                  onPress={handleGuardar}
+                  disabled={!isFormValid}
+                >
+                  <Text
+                    style={[
+                      styles.hechoButtonText,
+                      !isFormValid && styles.hechoButtonTextDisabled,
+                    ]}
+                  >
+                    Hecho
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
-    </Modal>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  centeredView: {
+  safeArea: {
     flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "#FFFFFF",
   },
-  modalOverlay: {
+  fullScreen: {
     flex: 1,
-    justifyContent: "center",
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollViewContent: {
     flexGrow: 1,
-    justifyContent: "center",
     padding: 20,
   },
   modalView: {
     backgroundColor: "white",
-    borderRadius: 10,
+    borderRadius: 10, 
     padding: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
   modalHeader: {
     flexDirection: "row",
@@ -355,21 +356,12 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 25,
+    marginBottom: 5,
     fontWeight: "bold",
     color: "#333",
     textAlign: "center",
     flex: 1,
-  },
-  closeButton: {
-    padding: 5,
-    position: "absolute",
-    right: 0,
-  },
-  closeButtonText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#666",
   },
   topInfoContainer: {
     flexDirection: "row",
@@ -381,12 +373,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   infoLabel: {
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "500",
     marginRight: 5,
+    marginTop: 6,
+    marginBottom: 20,
   },
   infoValue: {
-    fontSize: 16,
-    fontWeight: "bold",
+    marginTop: 6,
+    marginBottom: 20,
+    fontSize: 17,
+    fontWeight: "500",
   },
   formContainer: {
     width: "100%",
@@ -394,16 +391,16 @@ const styles = StyleSheet.create({
   formRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 15,
+    marginBottom: 22,
   },
   formRowFull: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   formColumn: {
     width: "48%",
   },
   label: {
-    fontSize: 14,
+    fontSize: 14.5,
     marginBottom: 5,
     color: "#333",
     fontWeight: "500",
@@ -413,7 +410,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
-    fontSize: 16,
+    fontSize: 14,
   },
   valueBox: {
     borderWidth: 1,
@@ -423,7 +420,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   valueText: {
-    fontSize: 16,
+    fontSize: 14,
   },
   inputError: {
     borderColor: "red",
@@ -433,17 +430,17 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
-    fontSize: 16,
+    fontSize: 14,
     height: 100,
   },
   buttonContainer: {
     marginTop: 20,
-    alignItems: "flex-end",
+    alignItems: "center",
   },
   hechoButton: {
     backgroundColor: "#4285F4",
     paddingVertical: 10,
-    paddingHorizontal: 30,
+    paddingHorizontal: "25%",
     borderRadius: 5,
     alignItems: "center",
   },
@@ -463,4 +460,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#1E5A26"
+  }
 });
