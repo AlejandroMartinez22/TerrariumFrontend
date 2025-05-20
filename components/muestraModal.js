@@ -265,7 +265,7 @@ export default function MuestraModal({ route, navigation }) {
                         numeroColeccion: false,
                       }));
                     }
-                  }}
+                  }}  
                   placeholder="Ej: GD001"
                 />
                 {errors.numeroColeccion && (
