@@ -144,10 +144,9 @@ const SelectArbolMuestra = ({ route, navigation }) => {
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.tableContainer}>
           <View style={styles.tableHeader}>
-            <Text style={[styles.headerCell, styles.numeroCell]}>Núm.</Text>
-            <Text style={[styles.headerCell, styles.tamañoCe
-            ]}>tamaño</Text>
-            <Text style={[styles.headerCell, styles.idCell]}>id</Text>
+            <Text style={[styles.headerCell, styles.numeroCell]}>Número</Text>
+            <Text style={[styles.headerCell, styles.tamañoCell]}>Tamaño</Text>
+            <Text style={[styles.headerCell, styles.idCell]}>Id</Text>
           </View>
 
           {currentArboles.length > 0 ? (
@@ -161,7 +160,7 @@ const SelectArbolMuestra = ({ route, navigation }) => {
                 onPress={() => handleSelectArbol(arbol)}
               >
                 <Text style={[styles.cell, styles.numeroCell]}>
-                  {`Arbol # ${index + 1}` }
+                  {`Arbol #${index + 1}` }
                 </Text>
                 <Text style={[styles.cell, styles.tamañoCell]}>
                   {arbol.tamaño_individuo}
@@ -203,7 +202,7 @@ const SelectArbolMuestra = ({ route, navigation }) => {
           </TouchableOpacity>
 
           <View style={styles.pageIndicator}>
-            <Text>
+            <Text style={styles.pageIndicatorText}>
               {currentPage + 1} / {totalPages || 1}
             </Text>
           </View>
@@ -234,19 +233,21 @@ const styles = StyleSheet.create({
     marginBottom: 60, // Espacio para el footer
   },
   headerContainer: {
-    backgroundColor: "#2E7D32",
-    padding: 16,
+    padding: 20,
     alignItems: "center",
+    backgroundColor: "#f5f5f5", // Eliminado el fondo verde
   },
   title: {
-    fontSize: 18,
+    marginTop: 20,
+    fontSize: 26, // Aumentado el tamaño de la fuente
     fontWeight: "bold",
-    color: "white",
+    color: "#333", // Cambiado a color oscuro
   },
   subtitle: {
-    fontSize: 14,
-    color: "white",
+    fontSize: 20, // Aumentado el tamaño de la fuente
+    color: "#555", // Cambiado a color oscuro
     marginTop: 4,
+    marginBottom: 15,
   },
   tableContainer: {
     margin: 16,
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#E0E0E0",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
     padding: 12,
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   highlightedRow: {
-    backgroundColor: "#e6f0ff",
+    backgroundColor: "#F5F5F5", 
   },
   headerCell: {
     fontWeight: "bold",
@@ -282,7 +283,7 @@ const styles = StyleSheet.create({
   numeroCell: {
     flex: 1,
   },
-  ta: {
+  tamañoCell: {
     flex: 1,
     textAlign: "center",
   },
@@ -310,7 +311,7 @@ const styles = StyleSheet.create({
     marginBottom: 76, // Espacio para que no se solape con el footer
   },
   paginationButton: {
-    backgroundColor: "#2E7D32",
+    backgroundColor: "#1976D2", // Cambiado a color azul
     borderRadius: 20,
     width: 40,
     height: 40,
@@ -318,11 +319,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   disabledButton: {
-    backgroundColor: "#a5d6a7",
+    backgroundColor: "#BBDEFB", // Cambiado el color para botones deshabilitados
   },
   paginationButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: "bold",
+    lineHeight: 22, // Centrado vertical de la flecha
+    textAlign: "center",
+    paddingBottom: 2, // Ajuste fino para centrar visualmente
   },
   pageIndicator: {
     marginHorizontal: 16,
@@ -388,6 +393,9 @@ const styles = StyleSheet.create({
   noDataText: {
     color: "#757575",
     fontSize: 16,
+  },
+  pageIndicatorText: {
+    fontSize: 18,  // Tamaño de fuente más grande
   },
 });
 
