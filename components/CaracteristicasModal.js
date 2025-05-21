@@ -298,13 +298,13 @@ const CaracteristicasModal = ({
               {/* Separador */}
               <View style={styles.divider} />
 
-              {/* Sección de Afectaciones */}
+              {/* Sección de Alteraciones */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Afectaciones</Text>
+                <Text style={styles.sectionTitle}>Alteraciones</Text>
                 
                 <View style={styles.rowContainer}>
                   <View style={styles.columnLeft}>
-                    <Text style={styles.labelSecundario}>Tipo de afectación</Text>
+                    <Text style={styles.labelSecundario}>Tipo de alteración</Text>
                     <View style={styles.pickerContainer}>
                       <Picker
                         selectedValue={selectedAfectacion}
