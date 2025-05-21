@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { 
   guardarTrayectoEnBackend, 
-  actualizarTrayectoEnBackend,
   obtenerReferenciaPorIdDesdeBackend 
 } from "../api";
 import { useBrigadista } from "../context/BrigadistaContext";
@@ -39,28 +38,5 @@ export function useTrayectos() {
     }
   };
 
-  // Actualiza un trayecto existente en el backend
-  const actualizarDatosTrayecto = async (datosTrayecto, puntoId, cedulaBrigadista = cedula) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const cedulaAUsar = cedulaBrigadista || cedula; // Define la cédula a usar
-
-      const datosCompletos = {
-        ...datosTrayecto,
-        cedula_brigadista: cedulaAUsar,
-      };
-
-      const result = await actualizarTrayectoEnBackend(datosCompletos, puntoId);
-      return result;
-    } catch (err) {
-      setError(err);
-      console.error("Error al actualizar trayecto:", err);
-      return { success: false, error: err.message };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return { guardarTrayecto, actualizarDatosTrayecto, isLoading, error };
+  return { guardarTrayecto, isLoading, error };
 }

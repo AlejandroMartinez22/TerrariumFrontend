@@ -55,7 +55,7 @@ export default function MapScreen() {
     borrarReferencia,
   } = useReferencias();
 
-  const { guardarTrayecto, actualizarDatosTrayecto } = useTrayectos();
+  const { guardarTrayecto} = useTrayectos();
 
   // Usar el hook para gestionar puntos de referencia desde la base de datos
   const {
@@ -327,12 +327,7 @@ export default function MapScreen() {
         }
       } else {
         await actualizarPuntoReferencia(puntoConTrayecto, brigadista.cedula);
-        await actualizarDatosTrayecto(
-          datosTrayecto,
-          puntoBase.id,
-          brigadista.cedula
-        );
-
+    
         // Actualizar la interfaz
         const updatedPuntos = puntosReferencia.map((p) =>
           p.id === puntoConTrayecto.id ? puntoConTrayecto : p

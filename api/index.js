@@ -449,42 +449,6 @@ export const guardarTrayectoEnBackend = async (
   }
 };
 
-// Función para actualizar un trayecto en el backend
-export const actualizarTrayectoEnBackend = async (datosTrayecto, puntoId) => {
-  try {
-    // Obtenemos el token de autenticación del usuario actual
-    const auth = getAuth();
-    // Verificamos que el usuario esté autenticado
-    const user = auth.currentUser;
-    // Si el usuario no está autenticado, lanzamos un error
-    const token = user ? await user.getIdToken() : null;
-
-    if (!token) {
-      throw new Error("Usuario no autenticado");
-    }
-
-    // Llamamos al endpoint del backend para actualizar el trayecto
-    const response = await api.put(
-      `/trayectos/${puntoId}`,
-      {
-        datosTrayecto,
-        puntoId,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    // Verificamos si la respuesta es exitosa
-    return response.data;
-  } catch (error) {
-    console.error("Error al actualizar trayecto en el backend:", error);
-    throw error;
-  }
-};
-
 // Funcion para obtener el siguiente ID de trayecto desde el backend
 export const getUltimoIdTrayectoDeBack = async () => {
   try {
