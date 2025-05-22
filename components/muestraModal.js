@@ -10,18 +10,16 @@ import {
   Platform,
   SafeAreaView,
   StatusBar,
-  Alert
+  Alert,
 } from "react-native";
 
 // Función para obtener el ID
 import { siguienteIdMuestra, guardarMuestra } from "../hooks/useMuestra";
-import { useBrigadista } from "../context/BrigadistaContext";
 
 // Modificamos MuestraModal para que sea una pantalla completa en lugar de modal
 export default function MuestraModal({ route, navigation }) {
   // Extraemos los parámetros de la ruta
   const { subparcela, arbol, tamanoIndividuo } = route.params || {};
-  const brigadista = useBrigadista();
 
   // Estados para almacenar los valores del formulario
   const [idMuestra, setIdMuestra] = useState("");
@@ -30,7 +28,6 @@ export default function MuestraModal({ route, navigation }) {
   const [determinacionCampo, setDeterminacionCampo] = useState("");
   const [numeroColeccion, setNumeroColeccion] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [cedula_brigadista, setCedulaBrigadista] = useState("");
 
   // Estado para manejar errores de validación
   const [errors, setErrors] = useState({
@@ -41,7 +38,7 @@ export default function MuestraModal({ route, navigation }) {
 
   // Función para validar que las observaciones tengan al menos 4 palabras
   const validarObservaciones = (texto) => {
-    if (!texto || texto.trim() === "") return false; // Si está vacío, no es válido 
+    if (!texto || texto.trim() === "") return false; // Si está vacío, no es válido
     const palabras = texto.trim().split(/\s+/);
     return palabras.length >= 4;
   };
@@ -125,29 +122,23 @@ export default function MuestraModal({ route, navigation }) {
       return;
     }
 
-    setCedulaBrigadista(brigadista.cedula_brigadista);
-
     // Si el formulario es válido, guardamos los datos
     const muestraData = {
       idMuestra,
-      tamanoIndividuo,
       nombreComun,
       determinacionCampo,
       observaciones,
       numeroColeccion,
       arbol,
-      cedula_brigadista: brigadista.brigadista.cedula,
     };
 
     try {
       const id = await guardarMuestra(muestraData);
-      
+
       if (id) {
-        Alert.alert(
-          "Éxito",
-          "La muestra se ha guardado correctamente",
-          [{ text: "OK", onPress: () => navigation.goBack() }]
-        );
+        Alert.alert("Éxito", "La muestra se ha guardado correctamente", [
+          { text: "OK", onPress: () => navigation.goBack() },
+        ]);
       } else {
         Alert.alert(
           "Error",
@@ -176,7 +167,10 @@ export default function MuestraModal({ route, navigation }) {
         style={styles.fullScreen}
       >
         {/* Scroll para contenido que sobrepasa la pantalla */}
-        <ScrollView contentContainerStyle={styles.scrollViewContent} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContent}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.modalView}>
             {/* Encabezado del formulario con título */}
             <View style={styles.modalHeader}>
@@ -232,7 +226,9 @@ export default function MuestraModal({ route, navigation }) {
                   }}
                 />
                 {errors.nombreComun && (
-                  <Text style={styles.errorText}>Este campo es obligatorio</Text>
+                  <Text style={styles.errorText}>
+                    Este campo es obligatorio
+                  </Text>
                 )}
               </View>
 
@@ -265,11 +261,13 @@ export default function MuestraModal({ route, navigation }) {
                         numeroColeccion: false,
                       }));
                     }
-                  }}  
+                  }}
                   placeholder="Ej: GD001"
                 />
                 {errors.numeroColeccion && (
-                  <Text style={styles.errorText}>Este campo es obligatorio</Text>
+                  <Text style={styles.errorText}>
+                    Este campo es obligatorio
+                  </Text>
                 )}
               </View>
 
@@ -294,7 +292,9 @@ export default function MuestraModal({ route, navigation }) {
                   textAlignVertical="top"
                 />
                 {errors.observaciones && (
-                  <Text style={styles.errorText}>Este campo es obligatorio y debe tener al menos 4 palabras</Text>
+                  <Text style={styles.errorText}>
+                    Este campo es obligatorio y debe tener al menos 4 palabras
+                  </Text>
                 )}
               </View>
 
@@ -334,8 +334,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   scrollViewContent: {
     flexGrow: 1,
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     backgroundColor: "white",
-    borderRadius: 10, 
+    borderRadius: 10,
     padding: 20,
   },
   modalHeader: {
@@ -463,6 +463,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#1E5A26"
-  }
+    color: "#1E5A26",
+  },
 });
